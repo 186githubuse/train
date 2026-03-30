@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(textutil -convert txt -stdout '/Users/mac/Documents/写作demo/资料/作文课程逻辑提炼 - DeepSeek最新版001.docx')",
+      "Bash(textutil -convert txt -output \"/tmp/course_doc_full.txt\" \"/Users/mac/Documents/写作demo/资料/作文课程逻辑提炼 - DeepSeek最新版001.docx\")",
+      "Bash(grep:*)"
+    ]
+  }
+}

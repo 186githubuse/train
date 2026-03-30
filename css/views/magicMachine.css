@@ -1,0 +1,172 @@
+/* ═══════════════════════════════════════════════════════
+   views/magicMachine.css — 魔法机器视图样式
+   ═══════════════════════════════════════════════════════ */
+
+.mm-page { padding: 0 16px 16px; width: 100%; }
+.mm-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 12px; }
+.mm-title  { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
+
+/* ── Hero 卡片 ── */
+.mm-hero-card {
+  text-align: center; padding: 28px 20px 24px; margin-bottom: 14px;
+  background: linear-gradient(140deg, #C4B4FF 0%, #9B86FF 60%, #7B62FF 100%);
+  border-radius: 24px; box-shadow: 0 6px 24px rgba(155,134,255,0.35);
+}
+.mm-hero-icon  { font-size: 50px; margin-bottom: 10px; }
+.mm-hero-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.mm-hero-desc  { font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.7; }
+
+/* ── 通用卡片 ── */
+.mm-card {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px; border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  padding: 16px; margin-bottom: 12px;
+}
+.mm-card-label { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 10px; }
+
+/* ── 题目输入 ── */
+.mm-topic-input {
+  width: 100%; padding: 12px 14px; border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.9);
+  font-size: 14px; color: #333; font-family: inherit;
+  outline: none; box-sizing: border-box; margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.mm-topic-input:focus { border-color: #C4B4FF; }
+.mm-topic-input::placeholder { color: #ccc; }
+
+/* ── 主按钮 ── */
+.mm-primary-btn {
+  width: 100%; padding: 14px; border-radius: 16px; border: none;
+  background: linear-gradient(140deg, #C4B4FF, #9B86FF);
+  color: #fff; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(155,134,255,0.4);
+  transition: transform 0.15s;
+}
+.mm-primary-btn:active { transform: scale(0.97); }
+
+/* ── 拍照区 ── */
+.mm-photo-title    { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 4px; }
+.mm-photo-subtitle { font-size: 12px; color: #999; margin-bottom: 12px; }
+.mm-photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mm-photo-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 12px; border-radius: 16px;
+  border: 2px dashed rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.5);
+  cursor: pointer; font-size: 13px; font-weight: 600; color: #666;
+  font-family: inherit; transition: all 0.15s;
+}
+.mm-photo-btn span:first-child { font-size: 26px; }
+.mm-photo-btn:active { border-color: #C4B4FF; background: rgba(196,180,255,0.1); }
+
+/* ── 引导页顶部 ── */
+.mm-guide-title-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.mm-guide-topic      { font-size: 14px; font-weight: 700; color: #444; }
+.mm-progress-bar-wrap { width: 120px; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden; }
+.mm-progress-bar     { height: 100%; background: linear-gradient(90deg, #C4B4FF, #9B86FF); border-radius: 3px; transition: width 0.4s ease; }
+.mm-guide-step-txt   { font-size: 11px; color: #bbb; }
+
+/* ── 已收集答案 ── */
+.mm-answered-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.mm-answered-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: rgba(255,255,255,0.7);
+  border-radius: 12px; border: 1px solid rgba(196,180,255,0.3);
+  animation: mmSlideIn 0.25s ease both;
+}
+@keyframes mmSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.mm-answered-sense { font-size: 12px; font-weight: 700; color: #9B86FF; flex-shrink: 0; min-width: 56px; }
+.mm-answered-val   { font-size: 12px; color: #555; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 问题卡片 ── */
+.mm-question-card {
+  background: linear-gradient(140deg, #EDE8FF, #DDD4FF);
+  border-radius: 24px; padding: 24px 20px; margin-bottom: 14px;
+  text-align: center; box-shadow: 0 4px 20px rgba(155,134,255,0.2);
+}
+.mm-question-emoji { font-size: 44px; margin-bottom: 12px; }
+.mm-question-text  { font-size: 17px; font-weight: 700; color: #444; margin-bottom: 8px; line-height: 1.5; }
+.mm-question-tip   { font-size: 12px; color: #9B86FF; font-weight: 600; }
+
+/* ── Loading ── */
+.mm-options-loading { display: flex; flex-direction: column; align-items: center; padding: 32px 20px; gap: 12px; }
+.mm-loading-txt { font-size: 13px; color: #aaa; }
+.mm-typing-dots { display: flex; gap: 6px; }
+.mm-typing-dots span {
+  width: 8px; height: 8px; background: #C4B4FF; border-radius: 50%;
+  animation: mmDot 1.2s infinite ease-in-out;
+}
+.mm-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.mm-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes mmDot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+  40%          { transform: scale(1.0); opacity: 1; }
+}
+
+/* ── 选项按钮 ── */
+.mm-options-list { display: flex; flex-direction: column; gap: 10px; }
+.mm-option-btn {
+  width: 100%; padding: 15px 18px; border-radius: 18px;
+  border: 2px solid rgba(196,180,255,0.35);
+  background: rgba(255,255,255,0.85);
+  font-size: 15px; font-weight: 600; color: #444;
+  cursor: pointer; font-family: inherit; text-align: left;
+  transition: all 0.15s ease;
+  animation: mmFadeUp 0.3s ease both;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  line-height: 1.5;
+}
+@keyframes mmFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mm-option-btn:active,
+.mm-option-btn.mm-option-selected {
+  background: linear-gradient(140deg, #EDE8FF, #C4B4FF);
+  border-color: #9B86FF; color: #5B3FC2; transform: scale(0.98);
+}
+
+/* ── 作文页 ── */
+.mm-sense-summary  { margin-bottom: 12px; }
+.mm-summary-title  { font-size: 13px; font-weight: 700; color: #777; margin-bottom: 10px; }
+.mm-summary-list   { display: flex; flex-direction: column; gap: 5px; }
+.mm-summary-item   { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.mm-summary-emoji  { font-size: 14px; }
+.mm-summary-sense  { color: #9B86FF; font-weight: 700; }
+.mm-summary-val    { color: #555; flex: 1; }
+.mm-essay-generating { display: flex; flex-direction: column; align-items: center; padding: 48px 20px; gap: 14px; margin-bottom: 12px; }
+.mm-essay-card     { margin-bottom: 16px; }
+.mm-essay-content  { font-size: 15px; color: #444; line-height: 1.9; }
+.mm-essay-actions  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mm-essay-btn { padding: 14px; border-radius: 16px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: inherit; transition: transform 0.15s; }
+.mm-essay-btn:active { transform: scale(0.96); }
+.mm-essay-copy { background: linear-gradient(140deg, #E8F5E9, #A8D8A8); color: #2E7D32; }
+.mm-essay-redo { background: linear-gradient(140deg, #EDE8FF, #C4B4FF); color: #5B3FC2; }
+
+/* ── 图片灵感弹层 ── */
+.mm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+  display: flex; align-items: flex-end; padding: 16px; box-sizing: border-box;
+}
+.mm-overlay-card {
+  background: #fff; border-radius: 24px 24px 20px 20px;
+  padding: 20px; width: 100%; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+}
+.mm-overlay-img     { width: 100%; border-radius: 16px; margin-bottom: 14px; max-height: 200px; object-fit: cover; }
+.mm-overlay-title   { font-size: 16px; font-weight: 800; color: #333; margin-bottom: 10px; }
+.mm-overlay-content { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 16px; }
+.mm-overlay-actions { display: flex; flex-direction: column; gap: 10px; }
+.mm-overlay-close {
+  width: 100%; padding: 12px; border-radius: 14px; border: none;
+  background: rgba(0,0,0,0.06); color: #888;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+}

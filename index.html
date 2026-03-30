@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>感觉训练系统</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script>
+    // 扩展 Tailwind 配置，必须在 CDN 加载前定义
+    window.tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderRadius: {
+            '4xl': '2rem',
+            '5xl': '2.5rem',
+          },
+          backdropBlur: {
+            xs: '2px',
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 自定义样式 -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <!-- 视图样式 -->
+  <link rel="stylesheet" href="css/views/mistakeBook.css" />
+  <link rel="stylesheet" href="css/views/report.css" />
+  <link rel="stylesheet" href="css/views/challenge.css" />
+  <link rel="stylesheet" href="css/views/magicMachine.css" />
+</head>
+
+<body class="min-h-screen overflow-x-hidden">
+
+  <!-- ===== 背景装饰光晕球 ===== -->
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+
+  <!-- ===== 桌面端居中外壳 ===== -->
+  <div id="app-shell">
+
+  <!-- ===== 主应用容器 ===== -->
+  <div id="app" class="relative min-h-screen flex flex-col">
+
+    <!-- 顶部 Header（各视图自行注入内容） -->
+    <header id="app-header"
+      class="sticky top-0 z-40 px-5 pt-14 pb-4
+             backdrop-blur-xl bg-white/40
+             border-b border-white/50">
+    </header>
+
+    <!-- 主内容区（各视图动态渲染到此处） -->
+    <main id="app-content"
+      class="flex-1 overflow-y-auto px-4 py-5 pb-32">
+    </main>
+
+    <!-- ===== 底部导航栏 ===== -->
+    <nav id="bottom-nav"
+      class="fixed bottom-0 left-0 right-0 z-50
+             backdrop-blur-xl bg-white/75
+             border-t border-white/60
+             shadow-[0_-8px_40px_rgba(139,92,246,0.10)]
+             safe-area-pb">
+
+      <div class="flex items-center justify-around px-1 py-2">
+
+        <!-- 训练营 -->
+        <button class="nav-item active" data-view="trainingCamp" aria-label="训练营">
+          <div class="nav-icon-wrap">
+            <!-- 地图旗帜图标 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18"/>
+              <path d="M3 5l7-2 4 2 7-2v10l-7 2-4-2-7 2"/>
+            </svg>
+          </div>
+          <span>训练营</span>
+        </button>
+
+        <!-- 魔法机器 -->
+        <button class="nav-item" data-view="magicMachine" aria-label="魔法机器">
+          <div class="nav-icon-wrap">
+            <!-- 机器人图标 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="8" width="18" height="13" rx="2"/>
+              <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+              <circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/>
+              <path d="M9.5 18h5"/>
+            </svg>
+          </div>
+          <span>魔法机器</span>
+        </button>
+
+        <!-- 挑战赛 -->
+        <button class="nav-item" data-view="challenge" aria-label="挑战赛">
+          <div class="nav-icon-wrap">
+            <!-- 闪电图标 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+            </svg>
+          </div>
+          <span>挑战赛</span>
+        </button>
+
+        <!-- 我的成长 -->
+        <button class="nav-item" data-view="growth" aria-label="我的成长">
+          <div class="nav-icon-wrap">
+            <!-- 折线图图标 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+            </svg>
+          </div>
+          <span>我的成长</span>
+        </button>
+
+      </div>
+    </nav>
+  </div><!-- #app -->
+  </div><!-- #app-shell -->
+
+  <!-- ===== 全局 Toast 挂载点 ===== -->
+  <div id="toast-container" aria-live="polite" class="fixed top-24 left-0 right-0 z-[200] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+  <!-- ===== 入口 JS（ES Module） ===== -->
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
