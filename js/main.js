@@ -12,6 +12,7 @@
 
 // 引入 router（会自动挂载 window.__router）
 import { navigate } from './router.js';
+import { store } from './store.js';
 
 /* ═══════════════════════════════════════════════════
    1. 底部导航初始化
@@ -65,8 +66,12 @@ window.__showToast = showToast;
 function initApp() {
   initNavigation();
 
-  // 默认展示训练营视图
-  navigate('trainingCamp', {}, false);
+  // 新用户先走引导，老用户直接进训练营
+  if (store.isNewUser()) {
+    navigate('onboarding', {}, false);
+  } else {
+    navigate('trainingCamp', {}, false);
+  }
 
   console.log('%c感觉训练系统 v1.0.0 已启动 🌸', 'color:#A78BFA;font-weight:bold;font-size:14px;');
 }

@@ -44,12 +44,22 @@ function fmt(n) {
 function drawRingChart(canvasId, percent, color = '#FF8FAB') {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const size = parseInt(canvas.getAttribute('width') || canvas.style.width);
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+
   const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const H = canvas.height;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const W = size;
+  const H = size;
   const cx = W / 2;
   const cy = H / 2;
-  const r = W * 0.38;
+  const r = W * 0.36;
   const lineW = W * 0.10;
 
   ctx.clearRect(0, 0, W, H);
@@ -57,7 +67,7 @@ function drawRingChart(canvasId, percent, color = '#FF8FAB') {
   // 背景圆环
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
   ctx.lineWidth = lineW;
   ctx.stroke();
 
@@ -75,34 +85,39 @@ function drawRingChart(canvasId, percent, color = '#FF8FAB') {
 }
 
 // ═══════════════════════════════════════════════════
-// 2. 五感雷达图（Canvas）
+// 2. 五感雷达图（Canvas — 只画图形，不画文字）
 // ═══════════════════════════════════════════════════
 
-function drawRadarChart(canvasId, scores) {
+function drawRadarChart(canvasId, scores, activeIndex = -1) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const size = 240;
+  // 每次强制重置尺寸（触发 canvas clear + transform reset）
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+
   const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const H = canvas.height;
-  const cx = W / 2;
-  const cy = H / 2;
-  const maxR = Math.min(cx, cy) * 0.72;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const W = size, H = size;
+  const cx = W / 2, cy = H / 2;
+  const maxR = Math.min(cx, cy) * 0.78;
   const n = scores.length;
   const angleStep = (Math.PI * 2) / n;
   const startAngle = -Math.PI / 2;
 
   ctx.clearRect(0, 0, W, H);
 
-  // 计算各顶点坐标
   function getPoint(i, radius) {
     const angle = startAngle + i * angleStep;
-    return {
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
-    };
+    return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
   }
 
-  // 画网格（3层同心多边形）
+  // 网格
   for (let ring = 1; ring <= 3; ring++) {
     const ringR = maxR * (ring / 3);
     ctx.beginPath();
@@ -111,23 +126,29 @@ function drawRadarChart(canvasId, scores) {
       i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
     }
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.strokeStyle = `rgba(167,139,250,${0.12 + ring * 0.06})`;
     ctx.lineWidth = 1;
     ctx.stroke();
+    if (ring === 3) { ctx.fillStyle = 'rgba(167,139,250,0.04)'; ctx.fill(); }
   }
 
-  // 画轴线
+  // 轴线（激活轴高亮）
   for (let i = 0; i < n; i++) {
     const p = getPoint(i, maxR);
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(p.x, p.y);
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = activeIndex === i
+      ? (scores[i].color || '#A78BFA')
+      : 'rgba(167,139,250,0.18)';
+    ctx.lineWidth = activeIndex === i ? 2 : 1;
     ctx.stroke();
   }
 
-  // 画数据填充区
+  // 数据填充
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+  grad.addColorStop(0, 'rgba(167,139,250,0.50)');
+  grad.addColorStop(1, 'rgba(236,72,153,0.28)');
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const r = maxR * (scores[i].score / 100);
@@ -135,44 +156,24 @@ function drawRadarChart(canvasId, scores) {
     i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(255, 143, 171, 0.18)';
+  ctx.fillStyle = grad;
   ctx.fill();
-  ctx.strokeStyle = '#FF8FAB';
+  ctx.strokeStyle = 'rgba(139,92,246,0.60)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // 画数据点
+  // 数据点
   for (let i = 0; i < n; i++) {
     const r = maxR * (scores[i].score / 100);
     const p = getPoint(i, r);
+    const isActive = activeIndex === i;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = scores[i].color || '#FF8FAB';
+    ctx.arc(p.x, p.y, isActive ? 7 : 5, 0, Math.PI * 2);
+    ctx.fillStyle = scores[i].color || '#A78BFA';
     ctx.fill();
     ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = isActive ? 2.5 : 2;
     ctx.stroke();
-  }
-
-  // 画标签
-  ctx.font = `bold ${W * 0.075}px -apple-system, PingFang SC, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (let i = 0; i < n; i++) {
-    const labelR = maxR + W * 0.13;
-    const p = getPoint(i, labelR);
-    ctx.fillStyle = '#555';
-    const lines = scores[i].label.split('（');
-    if (lines.length > 1) {
-      ctx.fillText(lines[0], p.x, p.y - W * 0.04);
-      ctx.fillStyle = '#999';
-      ctx.font = `${W * 0.065}px -apple-system, PingFang SC, sans-serif`;
-      ctx.fillText('（' + lines[1], p.x, p.y + W * 0.04);
-      ctx.font = `bold ${W * 0.075}px -apple-system, PingFang SC, sans-serif`;
-      ctx.fillStyle = '#555';
-    } else {
-      ctx.fillText(scores[i].label, p.x, p.y);
-    }
   }
 }
 
@@ -219,13 +220,15 @@ function buildHTML(data) {
       </div>`;
   }).join('');
 
-  // 五感图例
-  const radarLegend = senseScores.map(s => `
-    <div class="radar-legend-item">
-      <span class="radar-dot" style="background:${s.color}"></span>
-      <span class="radar-label">${s.label.split('（')[0]}</span>
-      <span class="radar-score">${s.score}分</span>
-    </div>
+  // 五感按钮（不再用图例）
+  const senseEmojis = ['👀', '👂', '👃', '👅', '🤲'];
+  const senseShort  = ['看', '听', '闻', '尝', '摸'];
+  const senseBtns = senseScores.map((s, i) => `
+    <button class="sense-btn" data-sense-idx="${i}"
+            style="--sense-color:${s.color}">
+      <span class="sense-btn-emoji">${senseEmojis[i]}</span>
+      <span class="sense-btn-label">${senseShort[i]}</span>
+    </button>
   `).join('');
 
   // 统计徽章
@@ -299,8 +302,11 @@ function buildHTML(data) {
   <!-- 五感能力雷达图 -->
   <div class="report-section-title">五感能力</div>
   <div class="report-radar-card glass-card">
-    <canvas id="radar-chart" width="280" height="280"></canvas>
-    <div class="radar-legend">${radarLegend}</div>
+    <canvas id="radar-chart" width="240" height="240"></canvas>
+    <!-- 分数展示卡（点击按钮后显示） -->
+    <div id="sense-score-panel" class="sense-score-panel" style="display:none"></div>
+    <!-- 五感按钮 -->
+    <div class="sense-btn-row">${senseBtns}</div>
   </div>
 
   <!-- 知识点掌握度 -->
@@ -369,14 +375,52 @@ export function renderReport() {
 
   // 延迟一帧再画 Canvas（确保 DOM 已渲染）
   requestAnimationFrame(() => {
-    // 能力指数环形图（用能力指数/5.0 换算百分比）
+    // 能力指数环形图
     const abilityPercent = (user.abilityIndex / 5.0) * 100;
     drawRingChart('ability-ring', abilityPercent, '#fff');
 
     // 总进度环形图
     drawRingChart('progress-ring', overallPercent, '#FF8FAB');
 
-    // 五感雷达图
-    drawRadarChart('radar-chart', senseScores);
+    // 五感雷达图（初始无高亮）
+    drawRadarChart('radar-chart', senseScores, -1);
+
+    // 五感按钮交互
+    const senseEmojis = ['👀', '👂', '👃', '👅', '🤲'];
+    const senseShort  = ['看', '听', '闻', '尝', '摸'];
+    let activeIdx = -1;
+
+    document.querySelectorAll('.sense-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.senseIdx);
+        if (activeIdx === idx) {
+          // 再次点击取消选中
+          activeIdx = -1;
+          document.querySelectorAll('.sense-btn').forEach(b => b.classList.remove('sense-btn-active'));
+          document.getElementById('sense-score-panel').style.display = 'none';
+        } else {
+          activeIdx = idx;
+          document.querySelectorAll('.sense-btn').forEach(b => b.classList.remove('sense-btn-active'));
+          btn.classList.add('sense-btn-active');
+
+          const s = senseScores[idx];
+          const panel = document.getElementById('sense-score-panel');
+          panel.style.display = 'flex';
+          panel.innerHTML = `
+            <span style="font-size:28px">${senseEmojis[idx]}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#2D1B69">${senseShort[idx]}的能力</div>
+              <div style="font-size:12px;color:#9CA3AF;margin-top:2px">${s.label}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:28px;font-weight:900;color:${s.color}">${s.score}</div>
+              <div style="font-size:11px;color:#9CA3AF">/ 100 分</div>
+            </div>
+          `;
+          panel.style.borderColor = s.color + '40';
+        }
+        drawRadarChart('radar-chart', senseScores, activeIdx);
+      });
+    });
   });
 }

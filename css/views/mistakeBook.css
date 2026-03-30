@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    views/mistakeBook.css — 错题本视图样式
+   奶白马卡龙 · 液态玻璃风格
    ═══════════════════════════════════════════════════════ */
 
 .mb-page {
@@ -15,41 +16,47 @@
   padding: 16px 0 12px;
 }
 .mb-title-wrap { display: flex; align-items: center; gap: 8px; }
-.mb-title { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
+.mb-title { font-size: 18px; font-weight: 700; color: #2D1B69; margin: 0; }
 .mb-unreviewed-badge {
   font-size: 12px; font-weight: 700;
-  background: #FF5252; color: #fff;
+  background: #EF4444; color: #fff;
   padding: 2px 9px; border-radius: 20px;
 }
 
 /* ── 筛选栏 ── */
-.mb-filter-bar { padding: 12px 14px; margin-bottom: 10px; }
+.mb-filter-bar {
+  padding: 12px 14px; margin-bottom: 10px;
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px; border: 1px solid rgba(255,255,255,0.88);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
 .mb-filter-row { display: flex; align-items: center; gap: 10px; }
 .mb-filter-select-wrap { flex: 1; min-width: 0; }
 .mb-filter-select {
   width: 100%; padding: 7px 10px;
-  border-radius: 12px; border: 1px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.8);
-  font-size: 13px; color: #333; font-family: inherit; outline: none;
+  border-radius: 12px; border: 1px solid rgba(167,139,250,0.20);
+  background: rgba(255,255,255,0.85);
+  font-size: 13px; color: #374151; font-family: inherit; outline: none;
 }
 .mb-status-tabs { display: flex; gap: 4px; flex-shrink: 0; }
 .mb-status-tab {
   padding: 6px 10px; border-radius: 12px; border: none;
-  background: rgba(0,0,0,0.06); font-size: 12px; color: #777;
+  background: rgba(255,255,255,0.55); font-size: 12px; color: #9CA3AF;
   cursor: pointer; font-family: inherit; font-weight: 600;
-  transition: all 0.15s ease;
+  transition: all 0.15s ease; border: 1px solid rgba(255,255,255,0.70);
 }
-.mb-status-tab.active { background: #FF8FAB; color: #fff; }
+.mb-status-tab.active { background: linear-gradient(135deg, #FFB7C5, #FF8FAE); color: #fff; border-color: transparent; }
 
 /* ── 统计行 ── */
 .mb-stats-row {
   display: flex; align-items: center; justify-content: space-between;
   margin: 0 2px 10px;
 }
-.mb-stats-text { font-size: 13px; color: #999; }
-.mb-stats-text b { color: #555; }
+.mb-stats-text { font-size: 13px; color: #9CA3AF; }
+.mb-stats-text b { color: #4B3B8C; }
 .mb-clear-all-btn {
-  font-size: 12px; color: #FF9800;
+  font-size: 12px; color: #EA580C;
   border: none; background: none;
   cursor: pointer; font-family: inherit; font-weight: 600; padding: 4px 0;
 }
@@ -58,6 +65,10 @@
 .mb-list { display: flex; flex-direction: column; gap: 10px; }
 .mb-card {
   padding: 14px 14px 12px; margin-bottom: 0;
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px; border: 1px solid rgba(255,255,255,0.88);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.95);
   animation: mbSlideIn 0.3s ease both;
 }
 @keyframes mbSlideIn {
@@ -71,17 +82,17 @@
 .mb-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .mb-lesson-tag {
   font-size: 11px; font-weight: 600;
-  background: rgba(0,0,0,0.05); color: #555;
+  background: rgba(167,139,250,0.12); color: #6B7280;
   padding: 2px 8px; border-radius: 20px;
 }
 .mb-diff-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
 .mb-reviewed-tag {
   font-size: 11px; font-weight: 600;
-  background: #E8F5E9; color: #4CAF50;
+  background: rgba(34,197,94,0.12); color: #16A34A;
   padding: 2px 8px; border-radius: 20px;
 }
-.mb-time { font-size: 11px; color: #bbb; flex-shrink: 0; }
-.mb-question-text { font-size: 14px; font-weight: 600; color: #333; line-height: 1.5; margin-bottom: 10px; }
+.mb-time { font-size: 11px; color: #C4B5E8; flex-shrink: 0; }
+.mb-question-text { font-size: 14px; font-weight: 600; color: #1F1040; line-height: 1.5; margin-bottom: 10px; }
 
 /* ── 答案对比 ── */
 .mb-answers { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -89,13 +100,13 @@
   flex: 1; display: flex; flex-direction: column;
   align-items: center; padding: 8px 10px; border-radius: 12px; gap: 3px;
 }
-.mb-answer.wrong   { background: #FFEBEE; }
-.mb-answer.correct { background: #E8F5E9; }
-.mb-answer-label { font-size: 11px; color: #999; font-weight: 600; }
+.mb-answer.wrong   { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); }
+.mb-answer.correct { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.15); }
+.mb-answer-label { font-size: 11px; color: #9CA3AF; font-weight: 600; }
 .mb-answer-value { font-size: 22px; font-weight: 800; }
-.mb-answer.wrong .mb-answer-value   { color: #FF5252; }
-.mb-answer.correct .mb-answer-value { color: #4CAF50; }
-.mb-answer-arrow { font-size: 16px; color: #ccc; flex-shrink: 0; }
+.mb-answer.wrong .mb-answer-value   { color: #EF4444; }
+.mb-answer.correct .mb-answer-value { color: #22C55E; }
+.mb-answer-arrow { font-size: 16px; color: #D1D5DB; flex-shrink: 0; }
 
 /* ── 操作按钮 ── */
 .mb-actions { display: flex; gap: 8px; }
@@ -106,43 +117,43 @@
 }
 .mb-btn:active { transform: scale(0.95); }
 .mb-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.mb-btn-redo   { flex: 1; background: linear-gradient(140deg, #EDE8FF, #C4B4FF); color: #5B3FC2; }
-.mb-btn-remove { background: rgba(0,0,0,0.05); color: #999; }
-.mb-btn-submit { flex: 1; background: linear-gradient(140deg, #FFE4EC, #FF8FAB); color: #C4566E; }
-.mb-btn-cancel { background: rgba(0,0,0,0.05); color: #999; }
-.mb-btn-close  { background: rgba(0,0,0,0.05); color: #666; }
+.mb-btn-redo   { flex: 1; background: linear-gradient(140deg, rgba(196,184,255,0.55), rgba(167,139,250,0.45)); color: #5B21B6; border: 1px solid rgba(255,255,255,0.75); }
+.mb-btn-remove { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.80); color: #9CA3AF; }
+.mb-btn-submit { flex: 1; background: linear-gradient(140deg, rgba(255,183,197,0.65), rgba(255,143,174,0.55)); color: #BE185D; border: 1px solid rgba(255,255,255,0.75); }
+.mb-btn-cancel { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.80); color: #9CA3AF; }
+.mb-btn-close  { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.80); color: #6B7280; }
 
 /* ── 重做区域 ── */
-.mb-redo-area { border-top: 1px solid rgba(0,0,0,0.06); padding-top: 12px; }
-.mb-redo-title { font-size: 13px; font-weight: 700; color: #777; margin-bottom: 10px; }
+.mb-redo-area { border-top: 1px solid rgba(167,139,250,0.12); padding-top: 12px; }
+.mb-redo-title { font-size: 13px; font-weight: 700; color: #6B7280; margin-bottom: 10px; }
 .mb-redo-options { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
 .mb-redo-option {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: 12px;
-  border: 2px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.60);
   cursor: pointer; text-align: left; width: 100%;
   font-family: inherit; transition: all 0.15s ease;
 }
-.mb-redo-option:not(:disabled):hover { border-color: #C4B4FF; background: rgba(196,180,255,0.1); }
-.mb-redo-option.selected  { border-color: #C4B4FF; background: rgba(196,180,255,0.15); }
-.mb-redo-option.correct   { border-color: #4CAF50; background: rgba(76,175,80,0.08); }
-.mb-redo-option.wrong     { border-color: #FF5252; background: rgba(255,82,82,0.08); }
+.mb-redo-option:not(:disabled):hover { border-color: rgba(139,92,246,0.40); background: rgba(139,92,246,0.06); }
+.mb-redo-option.selected  { border-color: rgba(139,92,246,0.45); background: rgba(139,92,246,0.08); }
+.mb-redo-option.correct   { border-color: rgba(34,197,94,0.45); background: rgba(34,197,94,0.08); }
+.mb-redo-option.wrong     { border-color: rgba(239,68,68,0.45); background: rgba(239,68,68,0.08); }
 .mb-redo-option.disabled  { opacity: 0.5; }
 .mb-redo-letter {
   width: 24px; height: 24px; border-radius: 8px;
-  background: rgba(0,0,0,0.06);
+  background: rgba(167,139,250,0.12);
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #555; flex-shrink: 0;
+  font-size: 12px; font-weight: 800; color: #7C3AED; flex-shrink: 0;
   line-height: 24px; text-align: center;
 }
-.mb-redo-text { font-size: 13px; color: #333; font-weight: 500; text-align: left; }
+.mb-redo-text { font-size: 13px; color: #374151; font-weight: 500; text-align: left; }
 .mb-redo-feedback {
   padding: 10px 12px; border-radius: 12px;
   font-size: 13px; font-weight: 600; margin-bottom: 10px; line-height: 1.5;
 }
-.mb-redo-feedback.correct { background: #E8F5E9; color: #2E7D32; }
-.mb-redo-feedback.wrong   { background: #FFEBEE; color: #C62828; }
+.mb-redo-feedback.correct { background: rgba(34,197,94,0.10); border: 1px solid rgba(34,197,94,0.25); color: #16A34A; }
+.mb-redo-feedback.wrong   { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.20); color: #DC2626; }
 .mb-redo-hint  { font-size: 12px; font-weight: 400; margin-top: 4px; opacity: 0.8; }
 .mb-redo-actions   { display: flex; gap: 8px; }
 .mb-redo-close-row { display: flex; gap: 8px; }
@@ -153,11 +164,12 @@
   padding: 60px 20px; text-align: center;
 }
 .mb-empty-icon  { font-size: 56px; margin-bottom: 16px; }
-.mb-empty-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 8px; }
-.mb-empty-sub   { font-size: 14px; color: #999; margin-bottom: 24px; }
+.mb-empty-title { font-size: 18px; font-weight: 700; color: #2D1B69; margin-bottom: 8px; }
+.mb-empty-sub   { font-size: 14px; color: #9CA3AF; margin-bottom: 24px; }
 .mb-empty-btn {
   padding: 12px 32px; border-radius: 20px; border: none;
   background: linear-gradient(140deg, #FFB7C5, #FF8FAE);
   color: #fff; font-size: 15px; font-weight: 700;
   cursor: pointer; font-family: inherit;
+  box-shadow: 0 6px 20px rgba(255,143,171,0.30);
 }

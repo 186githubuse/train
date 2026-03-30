@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>新风格预览</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      background: #E8E0F5;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 24px 60px;
+      flex-wrap: wrap;
+    }
+
+    .preview-wrap { display: flex; flex-direction: column; align-items: center; }
+    .preview-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      color: #9B8EC4; margin-bottom: 16px; text-transform: uppercase;
+    }
+    .page-title-bar {
+      width: 100%; text-align: center; padding: 0 0 6px;
+      color: #3B1F7A; font-size: 22px; font-weight: 900;
+    }
+    .page-sub {
+      width: 100%; text-align: center;
+      color: #9B8EC4; font-size: 13px; margin-bottom: 36px;
+    }
+
+    /* ══════════════════════════════════
+       旧风格
+    ══════════════════════════════════ */
+    .old-shell {
+      width: 360px; min-height: 720px; border-radius: 36px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(139,92,246,0.15), 0 6px 20px rgba(0,0,0,0.07);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .old-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(145deg, #FFF0F7 0%, #F4F0FF 30%, #EFF7FF 60%, #EDFFF7 100%);
+    }
+    .old-orb-1 {
+      position: absolute; width: 260px; height: 260px;
+      top: -90px; right: -70px; border-radius: 50%;
+      background: radial-gradient(circle, #FFB7C5, #FFD8E8);
+      filter: blur(55px); opacity: 0.6;
+    }
+    .old-orb-2 {
+      position: absolute; width: 200px; height: 200px;
+      top: 40%; left: -65px; border-radius: 50%;
+      background: radial-gradient(circle, #C4B4FF, #DED8FF);
+      filter: blur(50px); opacity: 0.5;
+    }
+    .old-content { position: relative; z-index: 2; padding: 48px 18px 90px; }
+    .old-header {
+      background: linear-gradient(135deg, rgba(167,139,250,0.75), rgba(236,72,153,0.65));
+      backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 22px; padding: 16px 18px; margin-bottom: 14px;
+      box-shadow: 0 6px 24px rgba(139,92,246,0.18);
+    }
+    .old-header-title { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .old-progress-track { height: 6px; background: rgba(255,255,255,0.28); border-radius: 99px; overflow: hidden; }
+    .old-progress-fill { height: 100%; width: 30%; border-radius: 99px; background: rgba(255,255,255,0.82); }
+    .old-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px; border-radius: 18px; margin-bottom: 9px;
+      background: rgba(255,255,255,0.30); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+    .old-icon {
+      width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
+    .macaron-rose     { background: linear-gradient(140deg, #FFB7C5, #FF6E9A); }
+    .macaron-lavender { background: linear-gradient(140deg, #CAB8FF, #8B7EFF); }
+    .macaron-mint     { background: linear-gradient(140deg, #A6F0C4, #52D888); }
+    .macaron-peach    { background: linear-gradient(140deg, #FFD4A6, #FF9E50); }
+    .macaron-sky      { background: linear-gradient(140deg, #A6D8FF, #50A8FF); }
+    .old-card-title { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 2px; }
+    .old-card-sub { font-size: 11px; color: #9CA3AF; }
+    .old-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.78); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.65); border-radius: 0 0 36px 36px;
+      padding: 10px 6px 18px; display: flex; justify-content: space-around;
+    }
+    .old-nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 5px 12px; border: none; background: transparent;
+      cursor: pointer; color: #B0A8CC; font-size: 10px; font-weight: 500;
+    }
+    .old-nav-icon {
+      width: 28px; height: 28px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .old-nav-icon svg { width: 18px; height: 18px; stroke: #B0A8CC; }
+    .old-nav-item.active { color: #7C3AED; }
+    .old-nav-item.active .old-nav-icon {
+      background: linear-gradient(135deg, #A78BFA, #EC4899);
+      box-shadow: 0 3px 12px rgba(139,92,246,0.38);
+    }
+    .old-nav-item.active .old-nav-icon svg { stroke: #fff; }
+
+    /* ══════════════════════════════════
+       新风格：奶白马卡龙 · 液态玻璃
+    ══════════════════════════════════ */
+    .new-shell {
+      width: 360px; min-height: 720px; border-radius: 36px;
+      position: relative; overflow: hidden;
+      box-shadow:
+        0 20px 56px rgba(139,92,246,0.14),
+        0 6px 20px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+      border: 1px solid rgba(255,255,255,0.75);
+    }
+    .new-bg {
+      position: absolute; inset: 0;
+      animation: bgShift 14s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      0%   { background: linear-gradient(145deg, #FFF0F8 0%, #F2EEFF 30%, #EAF5FF 60%, #EEFFF8 100%); }
+      50%  { background: linear-gradient(165deg, #FFF8EE 0%, #F4F0FF 40%, #EDFAFF 75%, #EDFFF5 100%); }
+      100% { background: linear-gradient(125deg, #FFF0F5 0%, #EDEEFF 45%, #F0FAFF 80%, #FFFFF2 100%); }
+    }
+    .new-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(62px); pointer-events: none;
+    }
+    .new-orb-1 {
+      width: 280px; height: 280px; top: -90px; right: -65px;
+      background: radial-gradient(circle, #F9A8D4 0%, #E879A4 55%, transparent 100%);
+      opacity: 0.40; animation: floatOrb 9s ease-in-out infinite;
+    }
+    .new-orb-2 {
+      width: 220px; height: 220px; top: 38%; left: -65px;
+      background: radial-gradient(circle, #C4B5FD 0%, #A78BFA 55%, transparent 100%);
+      opacity: 0.35; animation: floatOrb 13s ease-in-out infinite reverse;
+    }
+    .new-orb-3 {
+      width: 180px; height: 180px; bottom: 90px; right: -45px;
+      background: radial-gradient(circle, #86EFAC 0%, #34D399 55%, transparent 100%);
+      opacity: 0.28; animation: floatOrb 8s ease-in-out infinite 2s;
+    }
+    @keyframes floatOrb {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%       { transform: translateY(-20px) scale(1.06); }
+    }
+    .new-content { position: relative; z-index: 2; padding: 48px 18px 90px; min-height: 720px; }
+
+    /* 顶部进度卡片 */
+    .new-header {
+      background: rgba(255,255,255,0.62);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.88);
+      border-radius: 22px; padding: 16px 18px; margin-bottom: 12px;
+      box-shadow: 0 4px 18px rgba(139,92,246,0.07), inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    .new-header-greeting { font-size: 11px; font-weight: 700; color: #A78BFA; margin-bottom: 2px; letter-spacing: 0.04em; }
+    .new-header-title { font-size: 19px; font-weight: 900; color: #2D1B69; margin-bottom: 10px; }
+    .new-progress-label { font-size: 11px; color: #B0A8CC; margin-bottom: 5px; }
+    .new-progress-track { height: 6px; background: rgba(167,139,250,0.14); border-radius: 99px; overflow: hidden; }
+    .new-progress-fill {
+      height: 100%; width: 30%; border-radius: 99px;
+      background: linear-gradient(90deg, #A78BFA, #EC4899, #F59E0B);
+      box-shadow: 0 0 8px rgba(167,139,250,0.45);
+    }
+
+    /* 关卡卡片 */
+    .new-card {
+      display: flex; align-items: center; gap: 13px;
+      padding: 13px 14px; border-radius: 18px; margin-bottom: 9px;
+      background: rgba(255,255,255,0.60);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid transparent;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95);
+      cursor: pointer; position: relative;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    /* 聚光灯边框 */
+    .new-card::before {
+      content: ''; position: absolute; inset: -1.5px; border-radius: 20px; padding: 1.5px;
+      background: radial-gradient(
+        150px 150px at var(--mx, 50%) var(--my, 50%),
+        rgba(167,139,250,0.85) 0%,
+        rgba(236,72,153,0.45) 40%,
+        transparent 70%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      opacity: 0; transition: opacity 0.25s ease; pointer-events: none;
+    }
+    .new-card:hover::before { opacity: 1; }
+    .new-card:hover {
+      background: rgba(255,255,255,0.82);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    .new-card.active-card {
+      background: rgba(243,238,255,0.78);
+      box-shadow: 0 5px 20px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    .new-card.locked-card { opacity: 0.42; cursor: not-allowed; }
+    .new-card.locked-card::before { display: none; }
+
+    /* iOS 26 液态玻璃图标 */
+    .new-icon {
+      width: 50px; height: 50px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; position: relative; overflow: hidden;
+    }
+    .new-icon .ibg { position: absolute; inset: 0; border-radius: 14px; }
+    .new-icon .iglass {
+      position: absolute; inset: 0; border-radius: 14px;
+      background: rgba(255,255,255,0.20);
+      border: 1px solid rgba(255,255,255,0.42);
+    }
+    /* 顶部弧形高光 */
+    .new-icon .iglass::before {
+      content: ''; position: absolute;
+      top: -28%; left: -18%; width: 136%; height: 62%;
+      background: radial-gradient(ellipse at 50% 0%,
+        rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.16) 50%, transparent 75%);
+      border-radius: 0 0 60% 60%; pointer-events: none;
+    }
+    /* 底部反光 */
+    .new-icon .iglass::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 10%; right: 10%; height: 28%;
+      background: linear-gradient(to top, rgba(255,255,255,0.14), transparent);
+      border-radius: 0 0 14px 14px; pointer-events: none;
+    }
+    .new-icon .iemoji { position: relative; z-index: 3; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18)); }
+
+    .i-rose .ibg     { background: linear-gradient(145deg,#FF6B9D,#C44569); box-shadow: 0 5px 14px rgba(196,69,105,0.42); }
+    .i-lavender .ibg { background: linear-gradient(145deg,#A855F7,#6B21A8); box-shadow: 0 5px 14px rgba(139,92,246,0.42); }
+    .i-mint .ibg     { background: linear-gradient(145deg,#10B981,#065F46); box-shadow: 0 5px 14px rgba(16,185,129,0.42); }
+    .i-peach .ibg    { background: linear-gradient(145deg,#F97316,#C2410C); box-shadow: 0 5px 14px rgba(249,115,22,0.42); }
+    .i-sky .ibg      { background: linear-gradient(145deg,#38BDF8,#0369A1); box-shadow: 0 5px 14px rgba(56,189,248,0.42); }
+
+    .new-card-info { flex: 1; min-width: 0; }
+    .new-card-title { font-size: 13px; font-weight: 700; color: #1F1040; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .new-card-sub   { font-size: 11px; color: #B0A8CC; font-weight: 500; }
+    .new-card-stars { font-size: 12px; flex-shrink: 0; }
+
+    /* 导航栏 */
+    .new-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.78);
+      backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-top: 1px solid rgba(255,255,255,0.85);
+      border-radius: 0 0 36px 36px;
+      padding: 10px 6px 22px; display: flex; justify-content: space-around;
+      box-shadow: 0 -3px 16px rgba(139,92,246,0.05);
+    }
+    .new-nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: 4px 10px; border: none; background: transparent;
+      cursor: pointer; color: #C4B5E8; font-size: 10px; font-weight: 600;
+      transition: all 0.2s ease; letter-spacing: 0.02em;
+    }
+    .new-nav-icon {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.28s cubic-bezier(0.34,1.4,0.64,1); position: relative;
+    }
+    .new-nav-icon svg { width: 21px; height: 21px; stroke: #C4B5E8; transition: all 0.2s ease; }
+    .new-nav-item:not(.active) .new-nav-icon {
+      background: rgba(167,139,250,0.07);
+      border: 1px solid rgba(167,139,250,0.14);
+    }
+    .new-nav-item.active { color: #6D28D9; }
+    .new-nav-item.active .new-nav-icon {
+      background: linear-gradient(145deg,
+        rgba(196,170,255,0.72) 0%,
+        rgba(139,92,246,0.85) 50%,
+        rgba(196,80,200,0.68) 100%
+      );
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow: 0 5px 16px rgba(139,92,246,0.38), inset 0 1px 0 rgba(255,255,255,0.50);
+      transform: scale(1.08) translateY(-3px);
+    }
+    /* iOS 26 顶部高光 */
+    .new-nav-item.active .new-nav-icon::before {
+      content: ''; position: absolute;
+      top: 0; left: 10%; right: 10%; height: 44%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.42) 0%, transparent 100%);
+      border-radius: 14px 14px 60% 60%; pointer-events: none;
+    }
+    .new-nav-item.active .new-nav-icon svg { stroke: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
+  </style>
+</head>
+<body>
+
+  <div style="width:100%">
+    <div class="page-title-bar">🎨 UI 风格对比</div>
+    <div class="page-sub">左：当前风格 &nbsp;|&nbsp; 右：新风格「奶白马卡龙 · 液态玻璃」</div>
+  </div>
+
+  <!-- 旧风格 -->
+  <div class="preview-wrap">
+    <div class="preview-label">当前风格</div>
+    <div class="old-shell">
+      <div class="old-bg"></div>
+      <div class="old-orb-1"></div>
+      <div class="old-orb-2"></div>
+      <div class="old-content">
+        <div class="old-header">
+          <div class="old-header-title">✨ 小明的训练营</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-bottom:7px;">已完成 3/10 节课 · 1250 XP</div>
+          <div class="old-progress-track"><div class="old-progress-fill"></div></div>
+        </div>
+        <div class="old-card">
+          <div class="old-icon macaron-rose">👀</div>
+          <div><div class="old-card-title">第1课 · 什么是感觉</div><div class="old-card-sub">已通关 · ⭐⭐⭐</div></div>
+          <div style="margin-left:auto;font-size:16px">✅</div>
+        </div>
+        <div class="old-card">
+          <div class="old-icon macaron-lavender">✏️</div>
+          <div><div class="old-card-title">第2课 · 感觉与作文的关系</div><div class="old-card-sub">已通关 · ⭐⭐</div></div>
+          <div style="margin-left:auto;font-size:16px">✅</div>
+        </div>
+        <div class="old-card" style="opacity:0.5">
+          <div class="old-icon macaron-mint">👂</div>
+          <div><div class="old-card-title">第3课 · 用什么感觉</div><div class="old-card-sub">🔒 完成上一课解锁</div></div>
+          <div style="margin-left:auto;font-size:16px">🔒</div>
+        </div>
+        <div class="old-card" style="opacity:0.5">
+          <div class="old-icon macaron-peach">⚙️</div>
+          <div><div class="old-card-title">第4课 · 怎么感觉及结果</div><div class="old-card-sub">🔒 完成上一课解锁</div></div>
+          <div style="margin-left:auto;font-size:16px">🔒</div>
+        </div>
+        <div class="old-card" style="opacity:0.5">
+          <div class="old-icon macaron-sky">🎨</div>
+          <div><div class="old-card-title">第5课 · 感觉结果之"看"</div><div class="old-card-sub">🔒 完成上一课解锁</div></div>
+          <div style="margin-left:auto;font-size:16px">🔒</div>
+        </div>
+      </div>
+      <div class="old-nav">
+        <button class="old-nav-item active">
+          <div class="old-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18"/><path d="M3 5l7-2 4 2 7-2v10l-7 2-4-2-7 2"/></svg></div>
+          <span>训练营</span>
+        </button>
+        <button class="old-nav-item">
+          <div class="old-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/><path d="M9.5 18h5"/></svg></div>
+          <span>魔法机器</span>
+        </button>
+        <button class="old-nav-item">
+          <div class="old-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg></div>
+          <span>挑战赛</span>
+        </button>
+        <button class="old-nav-item">
+          <div class="old-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+          <span>我的成长</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新风格 -->
+  <div class="preview-wrap">
+    <div class="preview-label">新风格</div>
+    <div class="new-shell">
+      <div class="new-bg"></div>
+      <div class="new-orb new-orb-1"></div>
+      <div class="new-orb new-orb-2"></div>
+      <div class="new-orb new-orb-3"></div>
+      <div class="new-content">
+
+        <div class="new-header">
+          <div class="new-header-greeting">你好，小明 👋</div>
+          <div class="new-header-title">感觉训练营</div>
+          <div class="new-progress-label">已完成 3/10 节课 · 1250 XP</div>
+          <div class="new-progress-track"><div class="new-progress-fill"></div></div>
+        </div>
+
+        <div class="new-card active-card">
+          <div class="new-icon i-rose"><div class="ibg"></div><div class="iglass"></div><span class="iemoji">👀</span></div>
+          <div class="new-card-info"><div class="new-card-title">第1课 · 什么是感觉</div><div class="new-card-sub">已通关 · 680 XP</div></div>
+          <div class="new-card-stars">⭐⭐⭐</div>
+        </div>
+
+        <div class="new-card">
+          <div class="new-icon i-lavender"><div class="ibg"></div><div class="iglass"></div><span class="iemoji">✏️</span></div>
+          <div class="new-card-info"><div class="new-card-title">第2课 · 感觉与作文的关系</div><div class="new-card-sub">已通关 · 420 XP</div></div>
+          <div class="new-card-stars">⭐⭐</div>
+        </div>
+
+        <div class="new-card locked-card">
+          <div class="new-icon i-mint"><div class="ibg"></div><div class="iglass"></div><span class="iemoji">👂</span></div>
+          <div class="new-card-info"><div class="new-card-title">第3课 · 用什么感觉</div><div class="new-card-sub">🔒 完成上一课解锁</div></div>
+          <div class="new-card-stars" style="color:#C4B5E8">🔒</div>
+        </div>
+
+        <div class="new-card locked-card">
+          <div class="new-icon i-peach"><div class="ibg"></div><div class="iglass"></div><span class="iemoji">⚙️</span></div>
+          <div class="new-card-info"><div class="new-card-title">第4课 · 怎么感觉及结果</div><div class="new-card-sub">🔒 完成上一课解锁</div></div>
+          <div class="new-card-stars" style="color:#C4B5E8">🔒</div>
+        </div>
+
+        <div class="new-card locked-card">
+          <div class="new-icon i-sky"><div class="ibg"></div><div class="iglass"></div><span class="iemoji">🎨</span></div>
+          <div class="new-card-info"><div class="new-card-title">第5课 · 感觉结果之"看"</div><div class="new-card-sub">🔒 完成上一课解锁</div></div>
+          <div class="new-card-stars" style="color:#C4B5E8">🔒</div>
+        </div>
+
+      </div>
+      <div class="new-nav">
+        <button class="new-nav-item active">
+          <div class="new-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18"/><path d="M3 5l7-2 4 2 7-2v10l-7 2-4-2-7 2"/></svg></div>
+          <span>训练营</span>
+        </button>
+        <button class="new-nav-item">
+          <div class="new-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/><path d="M9.5 18h5"/></svg></div>
+          <span>魔法机器</span>
+        </button>
+        <button class="new-nav-item">
+          <div class="new-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg></div>
+          <span>挑战赛</span>
+        </button>
+        <button class="new-nav-item">
+          <div class="new-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+          <span>我的成长</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.addEventListener('pointermove', e => {
+    document.querySelectorAll('.new-card:not(.locked-card)').forEach(card => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    });
+  });
+</script>
+</body>
+</html>

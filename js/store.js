@@ -23,9 +23,9 @@
 const DEFAULT_STATE = {
   // 用户基本信息
   user: {
-    grade: 3,           // 年级（1~9），注册时设置
-    abilityIndex: 3.0,  // 能力指数（1.0~5.0），动态更新
-    name: '小学员',
+    grade: null,          // 年级（1~9），新用户为 null
+    abilityIndex: 3.0,    // 能力指数（1.0~5.0），动态更新
+    name: '',             // 新用户为空字符串
   },
 
   // 各节课进度
@@ -87,6 +87,26 @@ const _state = _load();
 const store = {
 
   /* ─── 用户信息 ─── */
+
+  /**
+   * 判断是否新用户（未完成注册）
+   * @returns {boolean}
+   */
+  isNewUser() {
+    return !_state.user.name || _state.user.grade === null;
+  },
+
+  /**
+   * 新手引导完成后保存姓名和年级
+   * @param {string} name
+   * @param {number} grade 1~9
+   */
+  setUserProfile(name, grade) {
+    _state.user.name = name;
+    _state.user.grade = grade;
+    _state.user.abilityIndex = grade; // 年级即初始能力指数
+    _save(_state);
+  },
 
   /**
    * 设置用户年级，同时重置能力指数

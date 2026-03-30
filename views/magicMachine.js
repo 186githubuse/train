@@ -10,7 +10,7 @@
  * ─────────────────────────────────────────────────────────────
  */
 
-import { API_CONFIG } from '../js/config.js';
+import { API_CONFIG, VISION_CONFIG } from '../js/config.js';
 import { store } from '../js/store.js';
 
 // ── 页面状态 ──
@@ -104,16 +104,16 @@ async function callClaude(messages, systemPrompt, maxTokens = 512) {
   return data.content?.[0]?.text || '';
 }
 
-async function callClaudeWithImage(base64, mimeType, prompt, systemPrompt) {
-  const res = await fetch(`${API_CONFIG.baseUrl}/v1/messages`, {
+async function callGeminiWithImage(base64, mimeType, prompt, systemPrompt) {
+  const res = await fetch(`${VISION_CONFIG.baseUrl}/v1/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_CONFIG.apiKey,
+      'x-api-key': VISION_CONFIG.apiKey,
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: API_CONFIG.model,
+      model: VISION_CONFIG.model,
       max_tokens: 800,
       system: systemPrompt,
       messages: [{
@@ -214,25 +214,29 @@ async function generateEssay() {
   try {
     const sensesText = _answers.map(a => `${a.sense}：${a.answer}`).join('\n');
 
-    const systemPrompt = `你是一位专业的小学语文写作老师，擅长"感觉训练法"写作教学。请根据学生收集的感觉素材，帮他写一篇真实生动的作文。
+    const systemPrompt = `你是一位严格遵循"感觉训练法"的小学语文写作老师。你的任务是：把学生收集的感觉素材，按照固定框架组织成一篇作文。
 
-【核心写作原则】
-感觉点是写作的原材料，要如实描写，不要过度修饰。
-- 用感觉点把场景写真实、写具体，让读者身临其境
-- 比喻是点睛之笔，全文最多用2-3个，放在最关键的地方，不要每句都加
-- 拟声词适度使用，用在声音描写处即可
-- 不要堆砌华丽词语，小学生的语言要自然朴实
+【铁律：只能用学生提供的素材】
+- 学生没有提到的内容，绝对不能自己加进去
+- 不能改变学生描述的内容，只能把它们串联成句子
+- 不能添加任何学生没有选择的感觉细节
 
-【段落结构】
-第1段：开头引入，写看到的（颜色、形状、动作）
-第2段：写听到的声音或声息
-第3段：写闻到的气味或气息、摸到的触感
-第4段：写内心感受，结尾有一句真实的感悟
+【感觉训练法写作框架（必须严格按此结构）】
+第1段（看）：用颜色+形状+动作，写出"看到的画面"，1-2句话
+第2段（听）：写"听到的声音或声息"，1句话
+第3段（闻+摸）：写"闻到的气味"和"摸到的触感"，1-2句话
+第4段（感受）：写内心感受，用"让我觉得……"或"我感到……"引出，结尾点题
 
-【格式要求】
-1. 严格只用学生提供的素材，不杜撰没有的内容
-2. 300字左右，语言自然，适合小学生水平
-3. 直接输出作文正文，第一行写题目《${_topic}》，然后空一行写正文`;
+【语言要求】
+- 全文只在最关键处用1-2个比喻，不要每句都用
+- 拟声词只用在声音描写那句
+- 语言朴实自然，像小学生自己写的
+- 300字左右
+
+【输出格式】
+第一行：《${_topic}》
+空一行
+正文（按上述4段结构）`;
 
     _essay = await callClaude(
       [{ role: 'user', content: `请根据以下感觉素材，帮我写一篇关于"${_topic}"的作文：\n\n${sensesText}` }],
@@ -486,7 +490,7 @@ async function handleImageUpload(file) {
       ? `这张图片和我的作文题目《${topic}》有关，请帮我发现写作灵感。`
       : `请帮我从这张图片中发现写作灵感。`;
 
-    const insight = await callClaudeWithImage(base64, mimeType, userPrompt, sysPrompt);
+    const insight = await callGeminiWithImage(base64, mimeType, userPrompt, sysPrompt);
     showImageInsight(insight, preview, topic);
   } catch (e) {
     window.__showToast(`图片识别失败：${e.message}`);

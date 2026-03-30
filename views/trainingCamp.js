@@ -212,7 +212,7 @@ function renderHeader() {
         </h1>
       </div>
       <!-- 头像占位 -->
-      <div class="w-11 h-11 rounded-[16px]
+      <div id="tc-avatar-btn" class="w-11 h-11 rounded-[16px]
                   bg-gradient-to-br from-violet-400 to-pink-400
                   flex items-center justify-center shadow-md cursor-pointer
                   hover:scale-105 transition-transform duration-200">
@@ -260,6 +260,9 @@ export function renderTrainingCamp() {
   /* 注入 Header */
   header.innerHTML = renderHeader();
 
+  /* 头像点击 → 用户信息弹窗 */
+  document.getElementById('tc-avatar-btn')?.addEventListener('click', showProfilePanel);
+
   /* 构建关卡地图 HTML */
   const mapItems = LESSONS.flatMap((lesson, index) => {
     const unlocked = store.isUnlocked(lesson.id);
@@ -283,7 +286,27 @@ export function renderTrainingCamp() {
 
   /* 绑定关卡点击事件（事件委托） */
   content.addEventListener('click', handleCardClick, { once: false });
-  // 使用一次性绑定时 once:true 会在第一次点击后移除，改为手动管理
+
+  /* 聚光灯边框：鼠标/触摸移动时更新 --mx / --my */
+  content.addEventListener('mousemove', handleSpotlight);
+  content.addEventListener('touchmove', handleSpotlightTouch, { passive: true });
+}
+
+function handleSpotlight(e) {
+  const card = e.target.closest('.lesson-card-unlocked');
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+  card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+}
+
+function handleSpotlightTouch(e) {
+  const touch = e.touches[0];
+  const card = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.lesson-card-unlocked');
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  card.style.setProperty('--mx', `${touch.clientX - rect.left}px`);
+  card.style.setProperty('--my', `${touch.clientY - rect.top}px`);
 }
 
 /**
@@ -300,4 +323,71 @@ function handleCardClick(e) {
 
   // 通过路由进入课程详情页
   window.__router.navigate('lessonDetail', { lessonId });
+}
+
+/* ─── 用户信息弹窗 ─── */
+function showProfilePanel() {
+  const user = store.getUser();
+  const gradeLabel = ['', '一', '二', '三', '四', '五', '六'][user.grade] || '';
+  const totalXp = LESSONS.reduce((sum, l) => sum + store.getProgress(l.id).xp, 0);
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:500;
+    background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);
+    display:flex;align-items:flex-end;padding:16px;box-sizing:border-box;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      width:100%;background:rgba(255,255,255,0.95);
+      border-radius:28px;padding:24px 20px 28px;
+      box-shadow:0 -8px 40px rgba(139,92,246,0.15);
+      border:1px solid rgba(255,255,255,0.9);
+    ">
+      <!-- 用户信息 -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div style="
+          width:60px;height:60px;border-radius:20px;flex-shrink:0;
+          background:linear-gradient(135deg,#A78BFA,#EC4899);
+          display:flex;align-items:center;justify-content:center;
+          font-size:28px;box-shadow:0 4px 16px rgba(139,92,246,0.35);
+        ">👤</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:#1F1040;">${user.name || '同学'}</div>
+          <div style="font-size:13px;color:#9CA3AF;margin-top:2px;">${gradeLabel}年级 · 能力指数 ${Number(user.abilityIndex).toFixed(1)}</div>
+          <div style="font-size:12px;color:#A78BFA;font-weight:600;margin-top:2px;">🌟 已获得 ${totalXp} XP</div>
+        </div>
+      </div>
+
+      <!-- 操作 -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button id="pp-reset" style="
+          width:100%;padding:14px;border-radius:16px;border:none;
+          background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.20);
+          color:#DC2626;font-size:15px;font-weight:700;cursor:pointer;
+          font-family:inherit;
+        ">重新设置姓名和年级</button>
+        <button id="pp-close" style="
+          width:100%;padding:14px;border-radius:16px;border:none;
+          background:rgba(255,255,255,0.70);border:1px solid rgba(255,255,255,0.90);
+          color:#6B7280;font-size:15px;font-weight:600;cursor:pointer;
+          font-family:inherit;backdrop-filter:blur(12px);
+        ">关闭</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  document.getElementById('pp-close').addEventListener('click', close);
+  document.getElementById('pp-reset').addEventListener('click', () => {
+    close();
+    // 重置用户信息，重新走引导
+    store.setUserProfile('', null);
+    const nav = document.getElementById('bottom-nav');
+    if (nav) nav.style.display = 'none';
+    window.__router.navigate('onboarding', {}, false);
+  });
 }

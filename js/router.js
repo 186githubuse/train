@@ -18,6 +18,9 @@
    好处：初始加载快，后续按需加载
 ═══════════════════════════════════════════════════ */
 const VIEW_MAP = {
+  // ── 新手引导 ────────────────────────────────────
+  onboarding:    () => import('../views/onboarding.js').then(m => m.renderOnboarding),
+
   // ── 底部导航栏视图 ──────────────────────────────
   trainingCamp:  () => import('../views/trainingCamp.js').then(m => m.renderTrainingCamp),
   magicMachine:  () => import('../views/magicMachine.js').then(m => m.renderMagicMachine),

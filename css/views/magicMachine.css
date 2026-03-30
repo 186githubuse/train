@@ -1,16 +1,19 @@
 /* ═══════════════════════════════════════════════════════
    views/magicMachine.css — 魔法机器视图样式
+   奶白马卡龙 · 液态玻璃风格
    ═══════════════════════════════════════════════════════ */
 
 .mm-page { padding: 0 16px 16px; width: 100%; }
 .mm-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 12px; }
-.mm-title  { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
+.mm-title  { font-size: 18px; font-weight: 700; color: #2D1B69; margin: 0; }
 
-/* ── Hero 卡片 ── */
+/* ── Hero 卡片（iOS 26 液态玻璃风格） ── */
 .mm-hero-card {
   text-align: center; padding: 28px 20px 24px; margin-bottom: 14px;
-  background: linear-gradient(140deg, #C4B4FF 0%, #9B86FF 60%, #7B62FF 100%);
-  border-radius: 24px; box-shadow: 0 6px 24px rgba(155,134,255,0.35);
+  background: linear-gradient(140deg, #CAB8FF 0%, #A99CFF 55%, #8B7EFF 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.50);
+  box-shadow: 0 8px 28px rgba(139,92,246,0.28), inset 0 1px 0 rgba(255,255,255,0.50);
 }
 .mm-hero-icon  { font-size: 50px; margin-bottom: 10px; }
 .mm-hero-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
@@ -18,87 +21,89 @@
 
 /* ── 通用卡片 ── */
 .mm-card {
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px; border: 1px solid rgba(255,255,255,0.85);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px; border: 1px solid rgba(255,255,255,0.88);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.95);
   padding: 16px; margin-bottom: 12px;
 }
-.mm-card-label { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 10px; }
+.mm-card-label { font-size: 14px; font-weight: 700; color: #4B3B8C; margin-bottom: 10px; }
 
 /* ── 题目输入 ── */
 .mm-topic-input {
   width: 100%; padding: 12px 14px; border-radius: 14px;
-  border: 2px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.9);
+  border: 2px solid rgba(167,139,250,0.25);
+  background: rgba(255,255,255,0.85);
   font-size: 14px; color: #333; font-family: inherit;
   outline: none; box-sizing: border-box; margin-bottom: 12px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.mm-topic-input:focus { border-color: #C4B4FF; }
-.mm-topic-input::placeholder { color: #ccc; }
+.mm-topic-input:focus { border-color: rgba(139,92,246,0.55); box-shadow: 0 0 0 3px rgba(139,92,246,0.10); }
+.mm-topic-input::placeholder { color: #C4B5E8; }
 
 /* ── 主按钮 ── */
 .mm-primary-btn {
   width: 100%; padding: 14px; border-radius: 16px; border: none;
-  background: linear-gradient(140deg, #C4B4FF, #9B86FF);
+  background: linear-gradient(140deg, #CAB8FF, #A99CFF 55%, #8B7EFF);
   color: #fff; font-size: 16px; font-weight: 700;
   cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 16px rgba(155,134,255,0.4);
+  box-shadow: 0 6px 20px rgba(139,92,246,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
   transition: transform 0.15s;
 }
 .mm-primary-btn:active { transform: scale(0.97); }
 
 /* ── 拍照区 ── */
-.mm-photo-title    { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 4px; }
-.mm-photo-subtitle { font-size: 12px; color: #999; margin-bottom: 12px; }
+.mm-photo-title    { font-size: 14px; font-weight: 700; color: #4B3B8C; margin-bottom: 4px; }
+.mm-photo-subtitle { font-size: 12px; color: #9CA3AF; margin-bottom: 12px; }
 .mm-photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mm-photo-btn {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 16px 12px; border-radius: 16px;
-  border: 2px dashed rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.5);
-  cursor: pointer; font-size: 13px; font-weight: 600; color: #666;
+  border: 2px dashed rgba(167,139,250,0.30);
+  background: rgba(255,255,255,0.55);
+  cursor: pointer; font-size: 13px; font-weight: 600; color: #6B7280;
   font-family: inherit; transition: all 0.15s;
 }
 .mm-photo-btn span:first-child { font-size: 26px; }
-.mm-photo-btn:active { border-color: #C4B4FF; background: rgba(196,180,255,0.1); }
+.mm-photo-btn:active { border-color: #A78BFA; background: rgba(167,139,250,0.10); }
 
 /* ── 引导页顶部 ── */
 .mm-guide-title-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-.mm-guide-topic      { font-size: 14px; font-weight: 700; color: #444; }
-.mm-progress-bar-wrap { width: 120px; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden; }
-.mm-progress-bar     { height: 100%; background: linear-gradient(90deg, #C4B4FF, #9B86FF); border-radius: 3px; transition: width 0.4s ease; }
-.mm-guide-step-txt   { font-size: 11px; color: #bbb; }
+.mm-guide-topic      { font-size: 14px; font-weight: 700; color: #4B3B8C; }
+.mm-progress-bar-wrap { width: 120px; height: 5px; background: rgba(167,139,250,0.15); border-radius: 3px; overflow: hidden; }
+.mm-progress-bar     { height: 100%; background: linear-gradient(90deg, #A78BFA, #EC4899); border-radius: 3px; transition: width 0.4s ease; }
+.mm-guide-step-txt   { font-size: 11px; color: #C4B5E8; }
 
 /* ── 已收集答案 ── */
 .mm-answered-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .mm-answered-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 12px; background: rgba(255,255,255,0.7);
-  border-radius: 12px; border: 1px solid rgba(196,180,255,0.3);
+  padding: 8px 12px; background: rgba(255,255,255,0.72);
+  border-radius: 12px; border: 1px solid rgba(167,139,250,0.20);
   animation: mmSlideIn 0.25s ease both;
 }
 @keyframes mmSlideIn {
   from { opacity: 0; transform: translateX(-8px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.mm-answered-sense { font-size: 12px; font-weight: 700; color: #9B86FF; flex-shrink: 0; min-width: 56px; }
+.mm-answered-sense { font-size: 12px; font-weight: 700; color: #7C3AED; flex-shrink: 0; min-width: 56px; }
 .mm-answered-val   { font-size: 12px; color: #555; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── 问题卡片 ── */
 .mm-question-card {
-  background: linear-gradient(140deg, #EDE8FF, #DDD4FF);
+  background: linear-gradient(140deg, rgba(196,180,255,0.35), rgba(167,139,250,0.25));
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.75);
   border-radius: 24px; padding: 24px 20px; margin-bottom: 14px;
-  text-align: center; box-shadow: 0 4px 20px rgba(155,134,255,0.2);
+  text-align: center; box-shadow: 0 4px 20px rgba(139,92,246,0.10);
 }
 .mm-question-emoji { font-size: 44px; margin-bottom: 12px; }
-.mm-question-text  { font-size: 17px; font-weight: 700; color: #444; margin-bottom: 8px; line-height: 1.5; }
-.mm-question-tip   { font-size: 12px; color: #9B86FF; font-weight: 600; }
+.mm-question-text  { font-size: 17px; font-weight: 700; color: #2D1B69; margin-bottom: 8px; line-height: 1.5; }
+.mm-question-tip   { font-size: 12px; color: #7C3AED; font-weight: 600; }
 
 /* ── Loading ── */
 .mm-options-loading { display: flex; flex-direction: column; align-items: center; padding: 32px 20px; gap: 12px; }
-.mm-loading-txt { font-size: 13px; color: #aaa; }
+.mm-loading-txt { font-size: 13px; color: #9CA3AF; }
 .mm-typing-dots { display: flex; gap: 6px; }
 .mm-typing-dots span {
   width: 8px; height: 8px; background: #C4B4FF; border-radius: 50%;
@@ -115,13 +120,14 @@
 .mm-options-list { display: flex; flex-direction: column; gap: 10px; }
 .mm-option-btn {
   width: 100%; padding: 15px 18px; border-radius: 18px;
-  border: 2px solid rgba(196,180,255,0.35);
-  background: rgba(255,255,255,0.85);
-  font-size: 15px; font-weight: 600; color: #444;
+  border: 1.5px solid rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  font-size: 15px; font-weight: 600; color: #374151;
   cursor: pointer; font-family: inherit; text-align: left;
   transition: all 0.15s ease;
   animation: mmFadeUp 0.3s ease both;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   line-height: 1.5;
 }
 @keyframes mmFadeUp {
@@ -130,43 +136,45 @@
 }
 .mm-option-btn:active,
 .mm-option-btn.mm-option-selected {
-  background: linear-gradient(140deg, #EDE8FF, #C4B4FF);
-  border-color: #9B86FF; color: #5B3FC2; transform: scale(0.98);
+  background: linear-gradient(140deg, rgba(196,180,255,0.45), rgba(167,139,250,0.35));
+  border-color: rgba(139,92,246,0.40); color: #4A2FBF; transform: scale(0.98);
 }
 
 /* ── 作文页 ── */
 .mm-sense-summary  { margin-bottom: 12px; }
-.mm-summary-title  { font-size: 13px; font-weight: 700; color: #777; margin-bottom: 10px; }
+.mm-summary-title  { font-size: 13px; font-weight: 700; color: #6B7280; margin-bottom: 10px; }
 .mm-summary-list   { display: flex; flex-direction: column; gap: 5px; }
 .mm-summary-item   { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 .mm-summary-emoji  { font-size: 14px; }
-.mm-summary-sense  { color: #9B86FF; font-weight: 700; }
+.mm-summary-sense  { color: #7C3AED; font-weight: 700; }
 .mm-summary-val    { color: #555; flex: 1; }
 .mm-essay-generating { display: flex; flex-direction: column; align-items: center; padding: 48px 20px; gap: 14px; margin-bottom: 12px; }
 .mm-essay-card     { margin-bottom: 16px; }
-.mm-essay-content  { font-size: 15px; color: #444; line-height: 1.9; }
+.mm-essay-content  { font-size: 15px; color: #374151; line-height: 1.9; }
 .mm-essay-actions  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mm-essay-btn { padding: 14px; border-radius: 16px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: inherit; transition: transform 0.15s; }
 .mm-essay-btn:active { transform: scale(0.96); }
-.mm-essay-copy { background: linear-gradient(140deg, #E8F5E9, #A8D8A8); color: #2E7D32; }
-.mm-essay-redo { background: linear-gradient(140deg, #EDE8FF, #C4B4FF); color: #5B3FC2; }
+.mm-essay-copy { background: linear-gradient(140deg, #A6F0C4, #78E4A5); color: #166534; box-shadow: 0 4px 14px rgba(78,200,130,0.25); }
+.mm-essay-redo { background: linear-gradient(140deg, rgba(196,180,255,0.55), rgba(167,139,250,0.45)); color: #5B3FC2; border: 1px solid rgba(255,255,255,0.75); }
 
 /* ── 图片灵感弹层 ── */
 .mm-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.40); z-index: 1000;
   display: flex; align-items: flex-end; padding: 16px; box-sizing: border-box;
+  backdrop-filter: blur(4px);
 }
 .mm-overlay-card {
-  background: #fff; border-radius: 24px 24px 20px 20px;
+  background: rgba(255,255,255,0.95); border-radius: 24px 24px 20px 20px;
+  border: 1px solid rgba(255,255,255,0.9);
   padding: 20px; width: 100%; max-height: 80vh; overflow-y: auto;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
 }
 .mm-overlay-img     { width: 100%; border-radius: 16px; margin-bottom: 14px; max-height: 200px; object-fit: cover; }
-.mm-overlay-title   { font-size: 16px; font-weight: 800; color: #333; margin-bottom: 10px; }
-.mm-overlay-content { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 16px; }
+.mm-overlay-title   { font-size: 16px; font-weight: 800; color: #2D1B69; margin-bottom: 10px; }
+.mm-overlay-content { font-size: 14px; color: #4B5563; line-height: 1.7; margin-bottom: 16px; }
 .mm-overlay-actions { display: flex; flex-direction: column; gap: 10px; }
 .mm-overlay-close {
   width: 100%; padding: 12px; border-radius: 14px; border: none;
-  background: rgba(0,0,0,0.06); color: #888;
+  background: rgba(0,0,0,0.05); color: #6B7280;
   font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
 }

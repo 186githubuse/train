@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    views/report.css — 学习报告视图样式
+   奶白马卡龙 · 液态玻璃风格
    ═══════════════════════════════════════════════════════ */
 
 .report-page { padding: 0 16px 16px; width: 100%; }
@@ -8,15 +9,17 @@
   display: flex; align-items: center;
   justify-content: space-between; padding: 16px 0 12px;
 }
-.report-title { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
+.report-title { font-size: 18px; font-weight: 700; color: #2D1B69; margin: 0; }
 
-.report-section-title { font-size: 15px; font-weight: 700; color: #444; margin: 16px 0 8px 4px; }
+.report-section-title { font-size: 15px; font-weight: 700; color: #4B3B8C; margin: 16px 0 8px 4px; }
 
 /* ── 能力卡片 ── */
 .report-ability-card {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 20px; margin-bottom: 0; border: none;
+  padding: 20px; margin-bottom: 0;
   background: linear-gradient(140deg, #FFB7C5 0%, #FF8FAE 55%, #FF6E9A 100%);
+  border: 1px solid rgba(255,255,255,0.50);
+  box-shadow: 0 8px 28px rgba(255,105,162,0.28), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .ability-card-left { flex: 1; color: #fff; }
 .ability-title-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
@@ -25,40 +28,93 @@
 .ability-name       { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
 .ability-grade      { font-size: 13px; opacity: 0.85; }
 .ability-card-right { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.ability-index-wrap { position: relative; width: 84px; height: 84px; }
-.ability-index-wrap canvas { position: absolute; top: 0; left: 0; }
-.ability-index-text {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column; line-height: 1;
+.ability-index-wrap {
+  position: relative; width: 84px; height: 84px;
+  display: grid; place-items: center;
 }
-.ability-index-num   { font-size: 22px; font-weight: 800; color: #fff; }
-.ability-index-max   { font-size: 11px; color: rgba(255,255,255,0.75); }
-.ability-index-label { font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600; }
+.ability-index-wrap canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+.ability-index-text {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; line-height: 1; gap: 1px;
+  pointer-events: none;
+}
+.ability-index-num   { font-size: 20px; font-weight: 900; color: #fff; }
+.ability-index-max   { font-size: 10px; color: rgba(255,255,255,0.75); }
+.ability-index-label { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 600; }
 
 /* ── 总进度卡片 ── */
 .report-progress-card { display: flex; align-items: center; gap: 20px; }
-.progress-ring-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
-.progress-ring-wrap canvas { position: absolute; top: 0; left: 0; }
-.progress-ring-text {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+.progress-ring-wrap {
+  position: relative; width: 100px; height: 100px; flex-shrink: 0;
+  display: grid; place-items: center;
 }
-.progress-ring-num { font-size: 24px; font-weight: 800; color: #FF8FAB; }
+.progress-ring-wrap canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+.progress-ring-text {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.progress-ring-num { font-size: 22px; font-weight: 900; color: #EC4899; }
 .progress-stats { display: flex; align-items: center; gap: 12px; flex: 1; }
 .progress-stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
-.progress-stat-num   { font-size: 24px; font-weight: 800; color: #333; line-height: 1; }
-.progress-stat-label { font-size: 12px; color: #999; }
-.progress-stat-divider { width: 1px; height: 32px; background: rgba(0,0,0,0.08); }
+.progress-stat-num   { font-size: 24px; font-weight: 800; color: #2D1B69; line-height: 1; }
+.progress-stat-label { font-size: 12px; color: #9CA3AF; }
+.progress-stat-divider { width: 1px; height: 32px; background: rgba(167,139,250,0.20); }
 
 /* ── 雷达图卡片 ── */
-.report-radar-card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.report-radar-card canvas { max-width: 280px; width: 100%; }
+.report-radar-card { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.report-radar-card canvas { width: 240px; height: 240px; flex-shrink: 0; }
+
+/* ── 分数展示卡 ── */
+.sense-score-panel {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 16px;
+  background: rgba(255,255,255,0.70);
+  border: 1.5px solid rgba(167,139,250,0.25);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+  animation: senseCardIn 0.25s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes senseCardIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── 五感按钮行 ── */
+.sense-btn-row {
+  display: flex; gap: 8px; width: 100%; justify-content: space-between;
+}
+.sense-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px; border-radius: 14px; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.62);
+  border: 1.5px solid rgba(255,255,255,0.85);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.34,1.4,0.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.sense-btn:active { transform: scale(0.94); }
+.sense-btn-emoji { font-size: 22px; line-height: 1; }
+.sense-btn-label { font-size: 12px; font-weight: 700; color: #6B7280; }
+
+/* 激活状态 */
+.sense-btn-active {
+  background: rgba(255,255,255,0.90);
+  border-color: var(--sense-color);
+  transform: scale(1.06) translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+.sense-btn-active .sense-btn-label { color: var(--sense-color); font-weight: 800; }
 .radar-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; width: 100%; padding: 0 4px; }
 .radar-legend-item { display: flex; align-items: center; gap: 6px; }
 .radar-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.radar-label { font-size: 13px; color: #555; flex: 1; }
-.radar-score { font-size: 13px; font-weight: 700; color: #333; }
+.radar-label { font-size: 13px; color: #4B5563; flex: 1; }
+.radar-score { font-size: 13px; font-weight: 700; color: #2D1B69; }
 
 /* ── 知识点列表 ── */
 .report-lessons-list { display: flex; flex-direction: column; gap: 8px; }
@@ -75,20 +131,20 @@
 .report-lesson-emoji { font-size: 22px; flex-shrink: 0; }
 .report-lesson-info  { min-width: 0; }
 .report-lesson-title {
-  font-size: 14px; font-weight: 700; color: #333;
+  font-size: 14px; font-weight: 700; color: #1F1040;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .report-lesson-sub {
-  font-size: 11px; color: #999; margin-top: 2px;
+  font-size: 11px; color: #9CA3AF; margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .report-lesson-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 8px; }
-.report-mastery-bar  { width: 70px; height: 6px; background: rgba(0,0,0,0.07); border-radius: 3px; overflow: hidden; }
+.report-mastery-bar  { width: 70px; height: 6px; background: rgba(167,139,250,0.14); border-radius: 3px; overflow: hidden; }
 .report-mastery-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
-.report-mastery-num  { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; }
+.report-mastery-num  { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; color: #4B3B8C; }
 .report-lesson-tag   { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
-.tag-todo   { background: rgba(0,0,0,0.06); color: #aaa; }
-.tag-review { background: #FFF3E0; color: #E65100; }
+.tag-todo   { background: rgba(167,139,250,0.10); color: #C4B5E8; }
+.tag-review { background: rgba(251,146,60,0.12); color: #EA580C; }
 
 /* ── 快捷入口 ── */
 .report-quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
@@ -100,13 +156,21 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .report-action-btn:active { transform: scale(0.96); }
-.btn-mistake  { background: linear-gradient(140deg, #FFE4EC 0%, #FFB7C5 100%); box-shadow: 0 4px 16px rgba(255,143,171,0.3); }
-.btn-challenge { background: linear-gradient(140deg, #EDE8FF 0%, #C4B4FF 100%); box-shadow: 0 4px 16px rgba(196,180,255,0.3); }
+.btn-mistake  {
+  background: linear-gradient(140deg, rgba(255,183,197,0.65), rgba(255,143,174,0.55));
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.80);
+  box-shadow: 0 4px 16px rgba(255,143,171,0.20);
+}
+.btn-challenge {
+  background: linear-gradient(140deg, rgba(196,184,255,0.65), rgba(167,139,250,0.55));
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.80);
+  box-shadow: 0 4px 16px rgba(167,139,250,0.20);
+}
 .action-btn-icon  { font-size: 28px; }
-.action-btn-label { font-size: 15px; font-weight: 700; color: #444; }
+.action-btn-label { font-size: 15px; font-weight: 700; color: #2D1B69; }
 .action-btn-badge {
   position: absolute; top: 10px; right: 10px;
-  background: #FF5252; color: #fff;
+  background: #EF4444; color: #fff;
   font-size: 11px; font-weight: 700;
   min-width: 20px; height: 20px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; padding: 0 5px;
