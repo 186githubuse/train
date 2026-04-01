@@ -177,8 +177,9 @@ const store = {
    * @returns {boolean}
    */
   isUnlocked(lessonId) {
-    if (lessonId === 1) return true;
-    return this.getProgress(lessonId - 1).passed;
+    return true; // 【临时】全部解锁，客户测试视频用
+    // if (lessonId === 1) return true;
+    // return this.getProgress(lessonId - 1).passed;
   },
 
   /* ─── 能力指数 ─── */

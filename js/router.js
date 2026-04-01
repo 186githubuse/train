@@ -69,9 +69,17 @@ async function navigate(viewName, params = {}, pushHistory = true) {
   });
 
   // 非训练营视图：清空顶部 header（训练进度只在训练营显示）
-  if (viewName !== 'trainingCamp') {
-    const header = document.getElementById('app-header');
-    if (header) header.innerHTML = '';
+  // lessonDetail / quiz 会自己写入 header，不能隐藏
+  const viewsWithHeader = ['trainingCamp', 'lessonDetail', 'quiz'];
+  const header = document.getElementById('app-header');
+  if (header) {
+    if (viewsWithHeader.includes(viewName)) {
+      header.style.display = '';
+      if (viewName !== 'trainingCamp') header.innerHTML = '';
+    } else {
+      header.innerHTML = '';
+      header.style.display = 'none';
+    }
   }
 
   // 滚动回顶部

@@ -183,44 +183,35 @@ function drawRadarChart(canvasId, scores, activeIndex = -1) {
 
 function buildHTML(data) {
   const {
-    user, stats, lessonProgress, senseScores,
+    user, stats, senseScores,
     overallPercent, masteryList,
   } = data;
 
   const abilityTitle = getAbilityTitle(user.abilityIndex);
 
-  // 知识点列表
-  const lessonItems = masteryList.map(item => {
-    const needReview = item.mastery < 60 && item.passed;
-    const notStarted = !item.passed && item.mastery === 0;
-    const progressColor = item.mastery >= 80 ? '#4CAF50'
-      : item.mastery >= 60 ? '#FF9800'
-      : '#FF5252';
+  // 动态建议语
+  function getSuggestion() {
+    const completed = stats.completedLessons;
+    const total = stats.totalLessons;
+    if (completed === 0) {
+      return `第1课「什么是感觉」等你来挑战，出发吧！🚀`;
+    }
+    if (completed === total) {
+      return `太棒了！${total}课全部完成，五感能力全面提升 🎉`;
+    }
+    // 找出已通关但掌握度最低的课（建议复习）
+    const passed = masteryList.filter(l => l.passed);
+    const weakest = passed.sort((a, b) => a.mastery - b.mastery)[0];
+    const next = masteryList.find(l => !l.passed);
+    if (weakest && weakest.mastery < 70) {
+      return `已完成 ${completed}/${total} 课，建议复习《${weakest.title}》巩固一下 💪`;
+    }
+    return next
+      ? `已完成 ${completed}/${total} 课，继续加油！下一课：《${next.title}》→`
+      : `已完成 ${completed}/${total} 课，继续保持！💪`;
+  }
 
-    return `
-      <div class="report-lesson-item glass-card" style="animation-delay:${item.index * 50}ms">
-        <div class="report-lesson-left">
-          <span class="report-lesson-emoji">${item.emoji}</span>
-          <div class="report-lesson-info">
-            <div class="report-lesson-title">${item.title}</div>
-            <div class="report-lesson-sub">${item.subtitle}</div>
-          </div>
-        </div>
-        <div class="report-lesson-right">
-          ${notStarted
-            ? `<span class="report-lesson-tag tag-todo">未开始</span>`
-            : `<div class="report-mastery-bar">
-                <div class="report-mastery-fill"
-                     style="width:${item.mastery}%;background:${progressColor}"></div>
-              </div>
-              <span class="report-mastery-num" style="color:${progressColor}">${item.mastery}%</span>`
-          }
-          ${needReview ? `<span class="report-lesson-tag tag-review">建议复习</span>` : ''}
-        </div>
-      </div>`;
-  }).join('');
-
-  // 五感按钮（不再用图例）
+  // 五感按钮
   const senseEmojis = ['👀', '👂', '👃', '👅', '🤲'];
   const senseShort  = ['看', '听', '闻', '尝', '摸'];
   const senseBtns = senseScores.map((s, i) => `
@@ -231,9 +222,7 @@ function buildHTML(data) {
     </button>
   `).join('');
 
-  // 统计徽章
   const mistakeCount = store.getMistakes().length;
-  const unreviewedCount = store.getMistakes().filter(m => !m.reviewed).length;
 
   return `
 <div class="report-page">
@@ -261,14 +250,14 @@ function buildHTML(data) {
       <div class="ability-grade">${user.grade}年级 · 小学员</div>
     </div>
     <div class="ability-card-right">
-      <div class="ability-index-wrap">
-        <canvas id="ability-ring" width="100" height="100"></canvas>
-        <div class="ability-index-text">
-          <span class="ability-index-num">${fmt(user.abilityIndex)}</span>
-          <span class="ability-index-max">/5.0</span>
+      <div class="ability-index-block">
+        <div class="ability-index-num-big">${fmt(user.abilityIndex)}</div>
+        <div class="ability-index-max-label">/ 5.0 能力指数</div>
+        <div class="ability-index-bar-track">
+          <div class="ability-index-bar-fill" style="width:${Math.round((user.abilityIndex/5)*100)}%"></div>
         </div>
+        <div class="ability-index-stars">${'⭐'.repeat(Math.round(user.abilityIndex))}${'☆'.repeat(5 - Math.round(user.abilityIndex))}</div>
       </div>
-      <div class="ability-index-label">能力指数</div>
     </div>
   </div>
 
@@ -299,36 +288,35 @@ function buildHTML(data) {
     </div>
   </div>
 
+  <!-- 智能建议 -->
+  <div class="report-suggestion glass-card">
+    <span class="report-suggestion-icon">💡</span>
+    <span class="report-suggestion-text">${getSuggestion()}</span>
+  </div>
+
   <!-- 五感能力雷达图 -->
   <div class="report-section-title">五感能力</div>
   <div class="report-radar-card glass-card">
     <canvas id="radar-chart" width="240" height="240"></canvas>
-    <!-- 分数展示卡（点击按钮后显示） -->
     <div id="sense-score-panel" class="sense-score-panel" style="display:none"></div>
-    <!-- 五感按钮 -->
     <div class="sense-btn-row">${senseBtns}</div>
   </div>
 
-  <!-- 知识点掌握度 -->
-  <div class="report-section-title">知识点详情</div>
-  <div class="report-lessons-list">
-    ${lessonItems}
-  </div>
-
-  <!-- 快捷入口 -->
+  <!-- 错题本入口 -->
   <div class="report-quick-actions">
     <button class="report-action-btn btn-mistake"
             onclick="window.__router.navigate('mistakeBook')">
-      <span class="action-btn-icon">📖</span>
-      <span class="action-btn-label">错题本</span>
+      <div class="action-btn-left">
+        <span class="action-btn-icon">📖</span>
+        <div>
+          <div class="action-btn-label">我的错题本</div>
+          <div class="action-btn-sub">${mistakeCount > 0 ? `还有 ${mistakeCount} 道题待复习` : '暂无错题，继续保持！'}</div>
+        </div>
+      </div>
       ${mistakeCount > 0
         ? `<span class="action-btn-badge">${mistakeCount}</span>`
-        : ''}
-    </button>
-    <button class="report-action-btn btn-challenge"
-            onclick="window.__router.navigate('challenge')">
-      <span class="action-btn-icon">⚡</span>
-      <span class="action-btn-label">挑战赛</span>
+        : `<svg style="width:18px;height:18px;color:#C4B5E8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
+      }
     </button>
   </div>
 
@@ -375,10 +363,6 @@ export function renderReport() {
 
   // 延迟一帧再画 Canvas（确保 DOM 已渲染）
   requestAnimationFrame(() => {
-    // 能力指数环形图
-    const abilityPercent = (user.abilityIndex / 5.0) * 100;
-    drawRingChart('ability-ring', abilityPercent, '#fff');
-
     // 总进度环形图
     drawRingChart('progress-ring', overallPercent, '#FF8FAB');
 

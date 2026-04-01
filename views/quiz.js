@@ -401,7 +401,26 @@ function showResult() {
   const header = document.getElementById('app-header');
   const content = document.getElementById('app-content');
 
-  header.innerHTML = '';
+  // 结果页 header：保留返回按钮，回到训练营
+  header.innerHTML = `
+    <div class="quiz-header">
+      <button class="back-btn" id="result-back-btn" aria-label="返回训练营">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="quiz-header-info">
+        <span class="quiz-header-emoji">${_lesson.emoji}</span>
+        <span class="quiz-header-title">第${_lesson.id}课 · 通关结果</span>
+      </div>
+      <div style="width:40px"></div>
+    </div>`;
+  document.getElementById('result-back-btn').addEventListener('click', () => {
+    window.__router.navigate('trainingCamp');
+  });
+
   content.innerHTML = renderResult();
 
   // 绑定结果页事件
@@ -458,12 +477,10 @@ export function renderQuiz(params = {}) {
   const header = document.getElementById('app-header');
   header.innerHTML = renderHeader(_lesson);
 
-  // 绑定 Header 事件
-  header.addEventListener('click', e => {
-    if (e.target.closest('[data-action="quit-quiz"]')) {
-      window.__router.goBack();
-    }
-  });
+  // 绑定退出按钮（用 onclick 避免重复绑定）
+  header.querySelector('[data-action="quit-quiz"]').onclick = () => {
+    window.__router.goBack();
+  };
 
   // 渲染第一道题
   renderCurrentQuestion();

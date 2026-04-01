@@ -184,7 +184,6 @@ function bindEvents(lesson, progress) {
     const btn = e.target.closest('[data-action="start-quiz"]');
     if (btn) {
       const id = Number(btn.dataset.lessonId);
-      window.__showToast?.(`即将进入答题 ${lesson.emoji}`);
       window.__router.navigate('quiz', { lessonId: id });
     }
   });

@@ -7,7 +7,10 @@
  */
 
 import { LESSONS } from '../js/data/lessons.js';
+import { TOPICS } from '../js/data/topics.js';
 import { store } from '../js/store.js';
+
+let _activeTab = 'basic'; // 'basic' | 'topic'
 
 /* ─── 私有辅助函数 ─── */
 
@@ -181,6 +184,28 @@ function renderLockedCard(lesson, index) {
 }
 
 /**
+ * 渲染专题训练内容
+ */
+function renderTopics() {
+  const cards = TOPICS.map(topic => `
+    <div class="topic-card ${topic.colorClass} rounded-[2rem] p-5">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-4xl leading-none">${topic.emoji}</span>
+        <span class="topic-coming-badge">即将上线</span>
+      </div>
+      <h3 class="text-white font-black text-[18px] leading-snug drop-shadow-sm">
+        ${topic.title}
+      </h3>
+      <p class="text-white/75 text-[12px] mt-1 leading-relaxed">
+        ${topic.subtitle}
+      </p>
+    </div>
+  `).join('');
+
+  return `<div class="topic-grid">${cards}</div>`;
+}
+
+/**
  * 渲染关卡间的路径连接符
  * @param {boolean} isUnlocked 上方关卡是否已解锁
  * @returns {string} HTML string
@@ -225,10 +250,10 @@ function renderHeader() {
       </div>
     </div>
 
-    <!-- 总进度卡片 -->
-    <div class="overall-progress-card rounded-[1.75rem] px-5 py-4">
+    <!-- 总进度卡片（仅基础训练显示） -->
+    <div class="overall-progress-card rounded-[1.75rem] px-5 py-4 mb-4">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-white/90 font-semibold text-[13px]">总体进度</span>
+        <span class="text-white/90 font-semibold text-[13px]">基础训练进度</span>
         <span class="text-white font-black text-[14px]">
           ${unlockedCount} <span class="font-normal opacity-70">/ ${totalLessons} 关</span>
         </span>
@@ -244,6 +269,16 @@ function renderHeader() {
             : '🎉 全部完成！'}
         </span>
       </div>
+    </div>
+
+    <!-- Tab 切换 -->
+    <div class="tc-tab-bar">
+      <button class="tc-tab ${_activeTab === 'basic' ? 'tc-tab-active' : ''}" data-tab="basic">
+        📚 基础训练
+      </button>
+      <button class="tc-tab ${_activeTab === 'topic' ? 'tc-tab-active' : ''}" data-tab="topic">
+        🎯 专题训练
+      </button>
     </div>`;
 }
 
@@ -263,7 +298,21 @@ export function renderTrainingCamp() {
   /* 头像点击 → 用户信息弹窗 */
   document.getElementById('tc-avatar-btn')?.addEventListener('click', showProfilePanel);
 
-  /* 构建关卡地图 HTML */
+  /* Tab 切换 */
+  header.querySelectorAll('.tc-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _activeTab = btn.dataset.tab;
+      renderTrainingCamp();
+    });
+  });
+
+  /* 根据 Tab 渲染内容 */
+  if (_activeTab === 'topic') {
+    content.innerHTML = renderTopics();
+    return;
+  }
+
+  /* 基础训练：构建关卡地图 HTML */
   const mapItems = LESSONS.flatMap((lesson, index) => {
     const unlocked = store.isUnlocked(lesson.id);
     const progress = store.getProgress(lesson.id);
