@@ -1,5 +1,5 @@
 /* ============================================================
-   感觉训练系统 — 新手引导样式
+   感觉训练系统 — 注册 / 登录样式
    ============================================================ */
 
 /* ── 页面容器 ── */
@@ -9,7 +9,10 @@
   align-items: center;
   min-height: calc(100vh - 80px);
   padding: 24px 20px 40px;
-  gap: 0;
+}
+
+.ob-page-form {
+  padding-top: 20px;
 }
 
 /* ── Step 1：Hero 区 ── */
@@ -17,20 +20,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 32px;
-  margin-bottom: 36px;
+  margin-top: 28px;
+  margin-bottom: 32px;
   gap: 10px;
 }
 
 .ob-hero-icon {
-  font-size: 72px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, rgba(167,139,250,0.18), rgba(192,132,252,0.12));
+  border-radius: 28px;
+  margin-bottom: 4px;
   animation: obBounce 2.4s ease-in-out infinite;
 }
 
 @keyframes obBounce {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
+  50%       { transform: translateY(-8px); }
 }
 
 .ob-hero-title {
@@ -52,8 +61,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 36px;
+  gap: 10px;
+  margin-bottom: 32px;
 }
 
 .ob-feature-item {
@@ -69,9 +78,15 @@
   box-shadow: 0 2px 12px rgba(139, 92, 246, 0.08);
 }
 
-.ob-feature-emoji {
-  font-size: 28px;
+.ob-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: rgba(167,139,250,0.12);
+  border-radius: 12px;
 }
 
 .ob-feature-name {
@@ -87,20 +102,24 @@
   line-height: 1.5;
 }
 
-/* ── Step 2/3：步骤 header ── */
+/* ── Step 2/3：顶部 Logo ── */
 .ob-step-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 48px;
-  margin-bottom: 40px;
-  gap: 10px;
+  margin-bottom: 24px;
+  gap: 6px;
 }
 
-.ob-step-icon {
-  font-size: 60px;
-  line-height: 1;
-  animation: obBounce 2.4s ease-in-out infinite;
+.ob-step-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(192,132,252,0.12));
+  border-radius: 20px;
+  margin-bottom: 4px;
 }
 
 .ob-step-title {
@@ -114,37 +133,110 @@
   color: #7C6FAA;
 }
 
-/* ── 输入框 ── */
-.ob-input-wrap {
+/* ── Tab 切换 ── */
+.ob-tab-bar {
+  display: flex;
   width: 100%;
-  margin-bottom: 32px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(139,92,246,0.08);
 }
 
+.ob-tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #9B8AC4;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.ob-tab-active {
+  background: linear-gradient(135deg, #A78BFA, #C084FC);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(139,92,246,0.28);
+}
+
+/* ── 表单区 ── */
+.ob-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.ob-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ob-field-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #5B21B6;
+  padding-left: 2px;
+}
+
+/* ── 输入框 ── */
 .ob-input {
   width: 100%;
-  padding: 16px 20px;
-  font-size: 18px;
-  font-weight: 600;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 500;
   color: #3B1F7A;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 2px solid rgba(167, 139, 250, 0.35);
-  border-radius: 16px;
+  border: 1.5px solid rgba(167, 139, 250, 0.3);
+  border-radius: 14px;
   outline: none;
-  text-align: center;
-  box-shadow: 0 2px 16px rgba(139, 92, 246, 0.10);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.07);
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .ob-input:focus {
-  border-color: rgba(139, 92, 246, 0.6);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.55);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.10);
 }
 
 .ob-input::placeholder {
   color: #C4B5E8;
   font-weight: 400;
+}
+
+/* ── 密码框（带眼睛按钮）── */
+.ob-password-wrap {
+  position: relative;
+}
+
+.ob-input-password {
+  padding-right: 48px;
+}
+
+.ob-eye-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── 年级格子 ── */
@@ -153,7 +245,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .ob-grade-btn {
@@ -164,7 +256,7 @@
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 2px solid rgba(167, 139, 250, 0.25);
+  border: 1.5px solid rgba(167, 139, 250, 0.25);
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -185,22 +277,26 @@
 /* ── 主按钮 ── */
 .ob-primary-btn {
   width: 100%;
-  padding: 17px 24px;
-  font-size: 17px;
+  padding: 16px 24px;
+  font-size: 16px;
   font-weight: 800;
   color: #fff;
   background: linear-gradient(135deg, #A78BFA 0%, #C084FC 100%);
   border: none;
-  border-radius: 18px;
+  border-radius: 16px;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.32);
   transition: transform 0.15s, box-shadow 0.15s;
   letter-spacing: 0.02em;
 }
 
+.ob-form-btn {
+  margin-top: 4px;
+}
+
 .ob-primary-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 3px 12px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.22);
 }
 
 .ob-btn-disabled {
@@ -212,7 +308,7 @@
 .ob-dots {
   display: flex;
   gap: 8px;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .ob-dot {

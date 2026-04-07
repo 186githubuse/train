@@ -27,6 +27,9 @@
 .ability-title-text { font-size: 15px; font-weight: 700; }
 .ability-name       { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
 .ability-grade      { font-size: 13px; opacity: 0.85; }
+.ability-stars-row  { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+.ability-stars-num  { font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.95); }
+.ability-stars-label { font-size: 12px; opacity: 0.85; }
 .ability-card-right { display: flex; flex-direction: column; align-items: flex-end; min-width: 110px; }
 .ability-index-block { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
 .ability-index-num-big {
@@ -170,6 +173,11 @@
   background: linear-gradient(140deg, rgba(255,143,174,0.80), rgba(236,72,153,0.65));
   backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.50);
   box-shadow: 0 4px 16px rgba(255,143,171,0.30);
+}
+.btn-medal {
+  background: linear-gradient(140deg, rgba(167,139,250,0.80), rgba(109,40,217,0.65));
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.50);
+  box-shadow: 0 4px 16px rgba(167,139,250,0.30);
 }
 .action-btn-left { display: flex; align-items: center; gap: 14px; }
 .action-btn-icon  { font-size: 28px; line-height: 1; }

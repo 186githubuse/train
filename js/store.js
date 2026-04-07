@@ -26,6 +26,7 @@ const DEFAULT_STATE = {
     grade: null,          // 年级（1~9），新用户为 null
     abilityIndex: 3.0,    // 能力指数（1.0~5.0），动态更新
     name: '',             // 新用户为空字符串
+    totalStars: 0,        // 累计星星数（积分）
   },
 
   // 各节课进度
@@ -120,6 +121,34 @@ const store = {
 
   getUser() {
     return { ..._state.user };
+  },
+
+  /* ─── 星星积分 ─── */
+
+  /**
+   * 增加星星（积分）
+   * @param {number} amount
+   */
+  addStars(amount) {
+    _state.user.totalStars = (_state.user.totalStars || 0) + amount;
+    _save(_state);
+  },
+
+  getStars() {
+    return _state.user.totalStars || 0;
+  },
+
+  /**
+   * 根据星星数返回称号
+   * @returns {string}
+   */
+  getTitle() {
+    const s = this.getStars();
+    if (s >= 200) return '感觉大师';
+    if (s >= 100) return '感觉高手';
+    if (s >=  50) return '感觉达人';
+    if (s >=  20) return '感觉学徒';
+    return '感觉新手';
   },
 
   /* ─── 课程进度 ─── */
@@ -309,6 +338,7 @@ const store = {
       difficulty,
       timestamp: Date.now(),
       reviewed: false,
+      rewardClaimed: false,
     });
     _save(_state);
   },
@@ -322,7 +352,12 @@ const store = {
 
   markMistakeReviewed(id) {
     const m = _state.mistakes.find(m => m.id === id);
-    if (m) {
+    if (m && !m.rewardClaimed) {
+      m.reviewed = true;
+      m.rewardClaimed = true;
+      this.addStars(3); // 每道错题只能领一次奖励
+      _save(_state);
+    } else if (m) {
       m.reviewed = true;
       _save(_state);
     }
@@ -389,6 +424,7 @@ const store = {
     _state.mistakes = [];
     _state.challengeRecords = [];
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('ob_accounts');
     console.warn('[Store] 已重置所有状态');
   },
 };

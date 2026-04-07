@@ -1,21 +1,29 @@
 /**
  * views/onboarding.js
  * ─────────────────────────────────────────────────────────────
- * 感觉训练系统 — 新手引导
+ * 感觉训练系统 — 注册 / 登录
  *
- * 流程（三步）：
- *   Step 1：欢迎页（App 介绍）
- *   Step 2：输入姓名
- *   Step 3：选择年级
+ * 流程：
+ *   Step 1：欢迎页
+ *   Step 2：注册 Tab / 登录 Tab
+ *   Step 3（注册）：选择年级
  *   → 完成后保存到 store，跳转训练营
+ *
+ * 上线改造说明：
+ *   所有账号数据目前存 localStorage（store）。
+ *   上线接入 CloudBase 时，只需把 _doRegister / _doLogin 里的
+ *   store 调用换成云函数 API，视图层无需改动。
  * ─────────────────────────────────────────────────────────────
  */
 
 import { store } from '../js/store.js';
 
 // ── 状态 ──
-let _step = 1;       // 1 | 2 | 3
+let _step = 1;          // 1=欢迎 | 2=注册/登录 | 3=选年级
+let _tab  = 'register'; // 'register' | 'login'
 let _name = '';
+let _phone = '';
+let _password = '';
 let _grade = null;
 let _container = null;
 
@@ -35,28 +43,36 @@ function buildStep1HTML() {
   return `
 <div class="ob-page">
   <div class="ob-hero">
-    <div class="ob-hero-icon">🌸</div>
+    <div class="ob-hero-icon">
+      <ph-sparkle weight="fill" color="#A78BFA" size="72"></ph-sparkle>
+    </div>
     <div class="ob-hero-title">感觉训练营</div>
     <div class="ob-hero-subtitle">用五感发现世界<br>让作文充满生命力</div>
   </div>
 
   <div class="ob-features">
     <div class="ob-feature-item">
-      <span class="ob-feature-emoji">📚</span>
+      <span class="ob-feature-icon">
+        <ph-books weight="fill" color="#A78BFA" size="28"></ph-books>
+      </span>
       <div>
         <div class="ob-feature-name">10节感觉训练课</div>
         <div class="ob-feature-desc">从看、听、闻、尝、摸，全方位训练感知力</div>
       </div>
     </div>
     <div class="ob-feature-item">
-      <span class="ob-feature-emoji">🤖</span>
+      <span class="ob-feature-icon">
+        <ph-robot weight="fill" color="#A78BFA" size="28"></ph-robot>
+      </span>
       <div>
         <div class="ob-feature-name">AI 魔法机器</div>
         <div class="ob-feature-desc">拍照或输入题目，AI 一步步引导你写作文</div>
       </div>
     </div>
     <div class="ob-feature-item">
-      <span class="ob-feature-emoji">⚡</span>
+      <span class="ob-feature-icon">
+        <ph-lightning weight="fill" color="#A78BFA" size="28"></ph-lightning>
+      </span>
       <div>
         <div class="ob-feature-name">挑战赛 &amp; 错题本</div>
         <div class="ob-feature-desc">巩固所学，看见自己的成长</div>
@@ -64,42 +80,79 @@ function buildStep1HTML() {
     </div>
   </div>
 
-  <button class="ob-primary-btn" id="ob-next-1">开始我的训练 🚀</button>
+  <button class="ob-primary-btn" id="ob-next-1">开始我的训练</button>
 
   <div class="ob-dots">
     <span class="ob-dot ob-dot-active"></span>
-    <span class="ob-dot"></span>
     <span class="ob-dot"></span>
   </div>
 </div>`;
 }
 
 function buildStep2HTML() {
+  const isReg = _tab === 'register';
   return `
-<div class="ob-page">
+<div class="ob-page ob-page-form">
   <div class="ob-step-header">
-    <div class="ob-step-icon">👋</div>
-    <div class="ob-step-title">你叫什么名字？</div>
-    <div class="ob-step-desc">让我认识一下你吧！</div>
+    <div class="ob-step-logo">
+      <ph-sparkle weight="fill" color="#A78BFA" size="36"></ph-sparkle>
+    </div>
+    <div class="ob-step-title">感觉训练营</div>
   </div>
 
-  <div class="ob-input-wrap">
-    <input
-      type="text"
-      id="ob-name-input"
-      class="ob-input"
-      placeholder="输入你的名字…"
-      maxlength="10"
-      value="${escHtml(_name)}"
-    >
+  <!-- Tab 切换 -->
+  <div class="ob-tab-bar">
+    <button class="ob-tab ${isReg ? 'ob-tab-active' : ''}" data-tab="register">注册</button>
+    <button class="ob-tab ${!isReg ? 'ob-tab-active' : ''}" data-tab="login">登录</button>
   </div>
 
-  <button class="ob-primary-btn" id="ob-next-2">下一步 →</button>
+  <!-- 表单区 -->
+  <div class="ob-form">
+    ${isReg ? `
+    <!-- 注册：姓名 -->
+    <div class="ob-field">
+      <div class="ob-field-label">
+        <ph-user weight="bold" color="#A78BFA" size="16"></ph-user>
+        学生姓名
+      </div>
+      <input type="text" id="ob-name-input" class="ob-input"
+        placeholder="输入你的名字" maxlength="10" value="${escHtml(_name)}">
+    </div>
+    ` : ''}
+
+    <!-- 手机号 -->
+    <div class="ob-field">
+      <div class="ob-field-label">
+        <ph-device-mobile weight="bold" color="#A78BFA" size="16"></ph-device-mobile>
+        手机号
+      </div>
+      <input type="tel" id="ob-phone-input" class="ob-input"
+        placeholder="输入手机号" maxlength="11" value="${escHtml(_phone)}">
+    </div>
+
+    <!-- 密码 -->
+    <div class="ob-field">
+      <div class="ob-field-label">
+        <ph-lock-simple weight="bold" color="#A78BFA" size="16"></ph-lock-simple>
+        密码
+      </div>
+      <div class="ob-password-wrap">
+        <input type="password" id="ob-password-input" class="ob-input ob-input-password"
+          placeholder="${isReg ? '设置密码（至少6位）' : '输入密码'}" value="${escHtml(_password)}">
+        <button class="ob-eye-btn" id="ob-eye-btn" type="button">
+          <ph-eye id="ob-eye-icon" weight="bold" color="#C4B5E8" size="20"></ph-eye>
+        </button>
+      </div>
+    </div>
+
+    <button class="ob-primary-btn ob-form-btn" id="ob-form-submit">
+      ${isReg ? '下一步，选年级' : '登录进入训练营'}
+    </button>
+  </div>
 
   <div class="ob-dots">
     <span class="ob-dot"></span>
     <span class="ob-dot ob-dot-active"></span>
-    <span class="ob-dot"></span>
   </div>
 </div>`;
 }
@@ -112,9 +165,11 @@ function buildStep3HTML() {
     </button>`).join('');
 
   return `
-<div class="ob-page">
+<div class="ob-page ob-page-form">
   <div class="ob-step-header">
-    <div class="ob-step-icon">🎒</div>
+    <div class="ob-step-logo">
+      <ph-graduation-cap weight="fill" color="#A78BFA" size="36"></ph-graduation-cap>
+    </div>
     <div class="ob-step-title">你在几年级？</div>
     <div class="ob-step-desc">帮我为你调整合适的题目难度</div>
   </div>
@@ -125,7 +180,7 @@ function buildStep3HTML() {
 
   <button class="ob-primary-btn ${_grade === null ? 'ob-btn-disabled' : ''}"
           id="ob-finish" ${_grade === null ? 'disabled' : ''}>
-    进入训练营 🌸
+    进入训练营
   </button>
 
   <div class="ob-dots">
@@ -144,6 +199,51 @@ function escHtml(str) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function isValidPhone(p) {
+  return /^1[3-9]\d{9}$/.test(p);
+}
+
+// ── 业务逻辑（上线时替换为云函数调用）──────────────────────
+
+/**
+ * 注册：把账号信息存 localStorage
+ * 上线时：改为调 CloudBase 注册接口，返回 token 后再 setUserProfile
+ */
+function _doRegister(name, phone, password, grade) {
+  // 简单防重：同手机号不能重复注册
+  const accounts = JSON.parse(localStorage.getItem('ob_accounts') || '[]');
+  if (accounts.find(a => a.phone === phone)) {
+    return { ok: false, msg: '该手机号已注册，请直接登录' };
+  }
+  accounts.push({ phone, password, name, grade });
+  localStorage.setItem('ob_accounts', JSON.stringify(accounts));
+  store.setUserProfile(name, grade);
+  return { ok: true };
+}
+
+/**
+ * 登录：校验 localStorage 中的账号
+ * 上线时：改为调 CloudBase 登录接口
+ */
+function _doLogin(phone, password) {
+  const accounts = JSON.parse(localStorage.getItem('ob_accounts') || '[]');
+  const account = accounts.find(a => a.phone === phone && a.password === password);
+  if (!account) {
+    return { ok: false, msg: '手机号或密码错误' };
+  }
+  store.setUserProfile(account.name, account.grade);
+  return { ok: true };
+}
+
+// ── 完成引导，进入训练营 ──
+
+function _enterApp(name) {
+  const nav = document.getElementById('bottom-nav');
+  if (nav) nav.style.display = '';
+  window.__showToast(`欢迎你，${name}！训练开始咯 🌸`);
+  window.__router.navigate('trainingCamp', {}, false);
+}
+
 // ── 渲染 & 事件 ──────────────────────────────────────────────
 
 function rerender() {
@@ -159,20 +259,75 @@ function bindEvents() {
   document.getElementById('ob-next-1')?.addEventListener('click', () => {
     _step = 2;
     rerender();
-    setTimeout(() => document.getElementById('ob-name-input')?.focus(), 150);
   });
 
-  // Step 2 → Step 3
-  const nameInput = document.getElementById('ob-name-input');
-  document.getElementById('ob-next-2')?.addEventListener('click', () => {
-    const val = nameInput?.value.trim();
-    if (!val) { window.__showToast('请输入你的名字 😊'); nameInput?.focus(); return; }
-    _name = val;
-    _step = 3;
-    rerender();
+  // Tab 切换
+  document.querySelectorAll('.ob-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _tab = btn.dataset.tab;
+      rerender();
+      // 聚焦第一个输入框
+      setTimeout(() => {
+        const first = _container.querySelector('.ob-input');
+        first?.focus();
+      }, 100);
+    });
   });
-  nameInput?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('ob-next-2')?.click();
+
+  // 密码显示/隐藏
+  const eyeBtn = document.getElementById('ob-eye-btn');
+  const pwdInput = document.getElementById('ob-password-input');
+  eyeBtn?.addEventListener('click', () => {
+    const isHidden = pwdInput.type === 'password';
+    pwdInput.type = isHidden ? 'text' : 'password';
+    const icon = document.getElementById('ob-eye-icon');
+    if (icon) {
+      icon.outerHTML = isHidden
+        ? `<ph-eye-slash id="ob-eye-icon" weight="bold" color="#A78BFA" size="20"></ph-eye-slash>`
+        : `<ph-eye id="ob-eye-icon" weight="bold" color="#C4B5E8" size="20"></ph-eye>`;
+    }
+  });
+
+  // 表单提交（注册 or 登录）
+  document.getElementById('ob-form-submit')?.addEventListener('click', () => {
+    const phoneVal = document.getElementById('ob-phone-input')?.value.trim() || '';
+    const pwdVal = document.getElementById('ob-password-input')?.value || '';
+
+    if (!isValidPhone(phoneVal)) {
+      window.__showToast('请输入正确的手机号');
+      document.getElementById('ob-phone-input')?.focus();
+      return;
+    }
+    if (pwdVal.length < 6) {
+      window.__showToast('密码至少6位');
+      document.getElementById('ob-password-input')?.focus();
+      return;
+    }
+
+    _phone = phoneVal;
+    _password = pwdVal;
+
+    if (_tab === 'register') {
+      const nameVal = document.getElementById('ob-name-input')?.value.trim() || '';
+      if (!nameVal) {
+        window.__showToast('请输入你的名字');
+        document.getElementById('ob-name-input')?.focus();
+        return;
+      }
+      _name = nameVal;
+      // 进入选年级步骤
+      _step = 3;
+      rerender();
+    } else {
+      // 登录
+      const result = _doLogin(_phone, _password);
+      if (!result.ok) {
+        window.__showToast(result.msg);
+        return;
+      }
+      const name = store.getUser().name || '同学';
+      _enterApp(name);
+    }
   });
 
   // Step 3：年级选择
@@ -183,15 +338,18 @@ function bindEvents() {
     });
   });
 
-  // 完成
+  // 完成注册
   document.getElementById('ob-finish')?.addEventListener('click', () => {
     if (_grade === null) return;
-    store.setUserProfile(_name, _grade);
-    // 恢复底部导航
-    const nav = document.getElementById('bottom-nav');
-    if (nav) nav.style.display = '';
-    window.__showToast(`欢迎你，${_name}！训练开始咯 🌸`);
-    window.__router.navigate('trainingCamp', {}, false);
+    const result = _doRegister(_name, _phone, _password, _grade);
+    if (!result.ok) {
+      window.__showToast(result.msg);
+      _step = 2;
+      _tab = 'login';
+      rerender();
+      return;
+    }
+    _enterApp(_name);
   });
 }
 
@@ -201,7 +359,7 @@ export function renderOnboarding() {
   _container = document.getElementById('app-content');
   if (!_container) return;
 
-  // 隐藏顶部 header（新手引导不需要）
+  // 隐藏顶部 header
   const header = document.getElementById('app-header');
   if (header) header.innerHTML = '';
 
@@ -210,7 +368,10 @@ export function renderOnboarding() {
   if (nav) nav.style.display = 'none';
 
   _step = 1;
+  _tab = 'register';
   _name = '';
+  _phone = '';
+  _password = '';
   _grade = null;
 
   rerender();

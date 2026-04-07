@@ -449,6 +449,7 @@ function nextQuestion() {
       accuracy,
       duration: _totalMs,
     });
+    store.addStars(15); // 挑战赛完成固定+15星
     _phase = 'result';
     render();
   } else {

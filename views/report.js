@@ -188,6 +188,7 @@ function buildHTML(data) {
   } = data;
 
   const abilityTitle = getAbilityTitle(user.abilityIndex);
+  const { totalStars, starTitle } = data;
 
   // 动态建议语
   function getSuggestion() {
@@ -248,6 +249,11 @@ function buildHTML(data) {
       </div>
       <div class="ability-name">${user.name}</div>
       <div class="ability-grade">${user.grade}年级 · 小学员</div>
+      <div class="ability-stars-row">
+        <ph-star weight="fill" size="14" color="rgba(255,255,255,0.9)"></ph-star>
+        <span class="ability-stars-num">${totalStars}</span>
+        <span class="ability-stars-label">颗星 · ${starTitle}</span>
+      </div>
     </div>
     <div class="ability-card-right">
       <div class="ability-index-block">
@@ -285,6 +291,11 @@ function buildHTML(data) {
         <span class="progress-stat-num">${stats.totalXp}</span>
         <span class="progress-stat-label">总经验</span>
       </div>
+      <div class="progress-stat-divider"></div>
+      <div class="progress-stat-item">
+        <span class="progress-stat-num">${totalStars}</span>
+        <span class="progress-stat-label">星星</span>
+      </div>
     </div>
   </div>
 
@@ -318,6 +329,17 @@ function buildHTML(data) {
         : `<svg style="width:18px;height:18px;color:white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
       }
     </button>
+    <button class="report-action-btn btn-medal"
+            onclick="window.__router.navigate('medalHall')">
+      <div class="action-btn-left">
+        <ph-medal weight="fill" size="22" color="white" class="action-btn-icon"></ph-medal>
+        <div>
+          <div class="action-btn-label">勋章馆</div>
+          <div class="action-btn-sub">${totalStars} 颗星 · ${starTitle}</div>
+        </div>
+      </div>
+      <ph-caret-right weight="bold" color="white" size="18"></ph-caret-right>
+    </button>
   </div>
 
   <!-- 底部占位 -->
@@ -336,6 +358,8 @@ export function renderReport() {
   // 收集数据
   const user = store.getUser();
   const stats = store.getStats();
+  const totalStars = store.getStars();
+  const starTitle = store.getTitle();
   const lessonProgress = {};
   for (let i = 1; i <= 10; i++) {
     lessonProgress[i] = store.getProgress(i);
@@ -358,7 +382,7 @@ export function renderReport() {
   // 渲染 HTML
   container.innerHTML = buildHTML({
     user, stats, lessonProgress, senseScores,
-    overallPercent, masteryList,
+    overallPercent, masteryList, totalStars, starTitle,
   });
 
   // 延迟一帧再画 Canvas（确保 DOM 已渲染）

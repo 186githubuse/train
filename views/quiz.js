@@ -44,7 +44,7 @@ function renderHeader(lesson) {
         </svg>
       </button>
       <div class="quiz-header-info">
-        <span class="quiz-header-emoji">${lesson.emoji}</span>
+        <ph-${lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${lesson.icon}>
         <span class="quiz-header-title">第${lesson.id}课 · ${lesson.title}</span>
       </div>
       <div class="quiz-streak" id="quiz-streak">
@@ -133,7 +133,16 @@ function renderResult() {
   const xp = Math.min(100, _totalCorrect * 20 + stars * 10);
 
   // 保存进度
+  const prevProgress = store.getProgress(_lesson.id);
+  const isFirstPass = !prevProgress.passed; // 首次通关才发星星
   store.passLesson(_lesson.id, stars, xp);
+
+  // 发放星星（首次通关才发，防重复）
+  if (isFirstPass) {
+    const zeroMistake = _totalAnswered === _totalCorrect;
+    store.addStars(10);
+    if (zeroMistake) store.addStars(5); // 0错误额外+5
+  }
 
   // 增加 attemptCount
   const prev = store.getProgress(_lesson.id);
@@ -154,7 +163,9 @@ function renderResult() {
   return `
     <div class="quiz-result-page">
       <div class="quiz-result-card ${_lesson.colorClass} rounded-[2rem] p-6">
-        <div class="quiz-result-emoji">${_lesson.emoji}</div>
+        <div class="quiz-result-icon">
+          <ph-${_lesson.icon} weight="fill" size="48" color="rgba(255,255,255,0.95)"></ph-${_lesson.icon}>
+        </div>
         <h2 class="quiz-result-title">恭喜通关！</h2>
         <p class="quiz-result-subtitle">第${_lesson.id}课 · ${_lesson.title}</p>
         <div class="quiz-result-stars">${starsHtml}</div>
@@ -412,7 +423,7 @@ function showResult() {
         </svg>
       </button>
       <div class="quiz-header-info">
-        <span class="quiz-header-emoji">${_lesson.emoji}</span>
+        <ph-${_lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${_lesson.icon}>
         <span class="quiz-header-title">第${_lesson.id}课 · 通关结果</span>
       </div>
       <div style="width:40px"></div>

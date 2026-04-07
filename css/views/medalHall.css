@@ -1,0 +1,326 @@
+/* ============================================================
+   views/medalHall.css — 勋章馆样式
+   深色流动渐变背景 + 精致勋章展示
+   ============================================================ */
+
+/* ── 页面容器 ── */
+.mh-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  overflow: hidden;
+  background: #0F0A1E;
+}
+
+/* ── 流动渐变背景 ── */
+.mh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0F0A1E 0%, #1A0F2E 50%, #0D1B2A 100%);
+}
+
+.mh-bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: mhBlobFloat 12s ease-in-out infinite alternate;
+}
+
+.mh-blob-1 {
+  width: 380px; height: 380px;
+  top: -100px; left: -80px;
+  background: radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 70%);
+  animation-duration: 14s;
+}
+
+.mh-blob-2 {
+  width: 320px; height: 320px;
+  top: 40%; right: -60px;
+  background: radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%);
+  animation-duration: 10s;
+  animation-delay: -4s;
+}
+
+.mh-blob-3 {
+  width: 280px; height: 280px;
+  bottom: 10%; left: 20%;
+  background: radial-gradient(circle, rgba(59,130,246,0.22) 0%, transparent 70%);
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+
+@keyframes mhBlobFloat {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -40px) scale(1.08); }
+  66%  { transform: translate(-20px, 30px) scale(0.95); }
+  100% { transform: translate(15px, -20px) scale(1.05); }
+}
+
+/* ── 粒子 ── */
+.mh-particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.mh-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.8);
+  animation: mhParticleFloat linear infinite;
+}
+@keyframes mhParticleFloat {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(-80px) scale(0.5); opacity: 0; }
+}
+
+/* ── Header ── */
+.mh-header {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 56px 20px 16px;
+}
+
+.mh-back-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mh-header-center { text-align: center; }
+
+.mh-header-title {
+  font-size: 22px; font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 24px rgba(167,139,250,0.6);
+}
+
+.mh-header-sub {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  margin-top: 3px;
+}
+
+/* ── 进度条 ── */
+.mh-progress-wrap {
+  position: relative; z-index: 10;
+  padding: 0 20px 20px;
+}
+
+.mh-progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mh-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #A78BFA, #F472B6);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 0 8px rgba(167,139,250,0.6);
+}
+
+/* ── 勋章网格 ── */
+.mh-grid {
+  position: relative; z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 12px;
+  padding: 8px 16px 24px;
+}
+
+/* ── 勋章单项 ── */
+.mh-medal-item {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer;
+  animation: mhMedalIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes mhMedalIn {
+  0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mh-medal-item:active { transform: scale(0.93); }
+
+/* ── 勋章图片区 ── */
+.mh-medal-img-wrap {
+  position: relative;
+  width: 90px; height: 90px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mh-medal-img-wrap.unlocked {
+  animation: mhMedalFloat 3.5s ease-in-out infinite;
+}
+
+@keyframes mhMedalFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* 每个勋章浮动频率略不同 */
+.mh-medal-item:nth-child(2) .mh-medal-img-wrap.unlocked { animation-delay: -0.8s; }
+.mh-medal-item:nth-child(3) .mh-medal-img-wrap.unlocked { animation-delay: -1.6s; }
+.mh-medal-item:nth-child(4) .mh-medal-img-wrap.unlocked { animation-delay: -2.4s; }
+.mh-medal-item:nth-child(5) .mh-medal-img-wrap.unlocked { animation-delay: -0.4s; }
+.mh-medal-item:nth-child(6) .mh-medal-img-wrap.unlocked { animation-delay: -1.2s; }
+.mh-medal-item:nth-child(7) .mh-medal-img-wrap.unlocked { animation-delay: -2.0s; }
+
+.mh-glow {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  filter: blur(16px);
+  opacity: 0.7;
+  animation: mhGlowPulse 3s ease-in-out infinite;
+}
+
+@keyframes mhGlowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50%       { opacity: 0.85; transform: scale(1.1); }
+}
+
+.mh-medal-img {
+  width: 90px; height: 90px;
+  object-fit: contain;
+  position: relative; z-index: 1;
+  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.4));
+}
+
+/* ── 未解锁状态 ── */
+.mh-medal-grayscale {
+  filter: grayscale(1) brightness(0.35) drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+.mh-locked-overlay {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mh-lock-icon {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mh-lock-icon.large {
+  position: absolute;
+}
+
+/* ── 勋章名称 ── */
+.mh-medal-name {
+  font-size: 13px; font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.mh-medal-name.unlocked { color: rgba(255,255,255,0.92); }
+.mh-medal-name.locked   { color: rgba(255,255,255,0.25); }
+
+.mh-medal-desc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── 底部提示 ── */
+.mh-footer-tip {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 12px; color: rgba(255,255,255,0.25);
+  padding: 8px 0 16px;
+}
+
+.mh-footer-complete {
+  color: rgba(252,211,77,0.7);
+}
+
+/* ── 详情弹窗 ── */
+.mh-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0);
+  backdrop-filter: blur(0px);
+  display: flex; align-items: flex-end; padding: 16px;
+  box-sizing: border-box;
+  transition: background 0.3s, backdrop-filter 0.3s;
+}
+
+.mh-overlay.show {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+}
+
+.mh-detail-card {
+  width: 100%;
+  background: linear-gradient(160deg, #1E1235 0%, #2D1B69 100%);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: 28px;
+  padding: 32px 24px 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transform: translateY(60px); opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  box-shadow: 0 -8px 60px rgba(167,139,250,0.2);
+}
+
+.mh-overlay.show .mh-detail-card {
+  transform: translateY(0); opacity: 1;
+}
+
+.mh-detail-img-wrap {
+  position: relative;
+  width: 130px; height: 130px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+
+.mh-detail-img-wrap.unlocked {
+  animation: mhMedalFloat 3s ease-in-out infinite;
+}
+
+.mh-detail-glow {
+  position: absolute; inset: -16px;
+  border-radius: 50%; filter: blur(24px); opacity: 0.7;
+  animation: mhGlowPulse 2.5s ease-in-out infinite;
+}
+
+.mh-detail-img {
+  width: 130px; height: 130px;
+  object-fit: contain; position: relative; z-index: 1;
+  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.5));
+}
+
+.mh-detail-name {
+  font-size: 22px; font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.mh-detail-status {
+  font-size: 12px; color: rgba(255,255,255,0.45);
+}
+
+.mh-detail-desc {
+  font-size: 14px; color: rgba(255,255,255,0.6);
+  text-align: center; line-height: 1.6;
+}
+
+.mh-detail-close {
+  margin-top: 8px;
+  width: 100%; padding: 14px;
+  background: rgba(167,139,250,0.15);
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.8);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.2s;
+}
+
+.mh-detail-close:active { background: rgba(167,139,250,0.3); }

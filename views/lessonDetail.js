@@ -22,7 +22,6 @@ function renderVideoSection(lesson, progress) {
                   controls playsinline preload="metadata"
                   class="w-full rounded-2xl"></video>`
         : `<div class="video-placeholder">
-            <div class="video-placeholder-icon">${lesson.emoji}</div>
             <p class="video-placeholder-text">课程视频制作中</p>
             <p class="video-placeholder-hint">视频准备好后将在这里播放</p>
           </div>`
@@ -120,7 +119,6 @@ function renderHeader(lesson) {
         </svg>
       </button>
       <div class="lesson-detail-title">
-        <span class="lesson-detail-emoji">${lesson.emoji}</span>
         <div>
           <h1 class="text-[18px] font-black text-gray-800 leading-tight">
             第${lesson.id}课 · ${lesson.title}

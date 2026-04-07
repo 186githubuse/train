@@ -262,7 +262,7 @@ function renderHeader() {
         <div class="progress-bar-fill" style="width:${pct}%"></div>
       </div>
       <div class="flex items-center justify-between mt-2.5 text-white/75 text-[11px]">
-        <span><ph-star weight="fill" size="13" color="rgba(255,255,255,0.75)"></ph-star> 已获得 ${totalXp} XP</span>
+        <span><ph-star weight="fill" size="13" color="rgba(255,255,255,0.75)"></ph-star> 已获得 ${totalXp} XP · ${store.getStars()} 颗星</span>
         <span>
           ${unlockedCount < totalLessons
             ? `下一关：${LESSONS[unlockedCount].title} →`
@@ -274,10 +274,10 @@ function renderHeader() {
     <!-- Tab 切换 -->
     <div class="tc-tab-bar">
       <button class="tc-tab ${_activeTab === 'basic' ? 'tc-tab-active' : ''}" data-tab="basic">
-        <ph-books weight="${_activeTab === 'basic' ? 'fill' : 'regular'}" size="16"></ph-books> 基础训练
+        <ph-books weight="${_activeTab === 'basic' ? 'fill' : 'regular'}" size="16" color="${_activeTab === 'basic' ? 'white' : '#9B8AC4'}"></ph-books> 基础训练
       </button>
       <button class="tc-tab ${_activeTab === 'topic' ? 'tc-tab-active' : ''}" data-tab="topic">
-        <ph-target weight="${_activeTab === 'topic' ? 'fill' : 'regular'}" size="16"></ph-target> 专题训练
+        <ph-target weight="${_activeTab === 'topic' ? 'fill' : 'regular'}" size="16" color="${_activeTab === 'topic' ? 'white' : '#9B8AC4'}"></ph-target> 专题训练
       </button>
     </div>`;
 }

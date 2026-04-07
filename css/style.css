@@ -606,7 +606,17 @@ body {
   box-shadow: 0 10px 40px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.60);
   margin-bottom: 20px;
 }
-.quiz-result-emoji { font-size: 56px; line-height: 1; margin-bottom: 8px; animation: bounceSoft 2.2s ease-in-out infinite; }
+.quiz-result-icon {
+  width: 88px; height: 88px; border-radius: 28px; margin: 0 auto 12px;
+  background: rgba(255,255,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  animation: resultIconPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both, bounceSoft 2.8s ease-in-out 0.6s infinite;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+@keyframes resultIconPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
 .quiz-result-title { font-size: 24px; font-weight: 900; color: #fff; margin: 0 0 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.10); }
 .quiz-result-subtitle { font-size: 13px; color: rgba(255,255,255,0.80); margin: 0 0 16px; }
 .quiz-result-stars { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }

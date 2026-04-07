@@ -32,6 +32,7 @@ const VIEW_MAP = {
   quiz:          () => import('../views/quiz.js').then(m => m.renderQuiz),
   report:        () => import('../views/report.js').then(m => m.renderReport),
   mistakeBook:   () => import('../views/mistakeBook.js').then(m => m.renderMistakeBook),
+  medalHall:     () => import('../views/medalHall.js').then(m => m.renderMedalHall),
 };
 
 /* ═══════════════════════════════════════════════════
