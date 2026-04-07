@@ -142,7 +142,7 @@ function buildHTML(medals, stats) {
 
       <!-- 顶部 Header -->
       <div class="mh-header">
-        <button class="mh-back-btn" onclick="window.__router.goBack()">
+        <button class="mh-back-btn" aria-label="返回">
           <ph-caret-left weight="bold" color="rgba(255,255,255,0.85)" size="22"></ph-caret-left>
         </button>
         <div class="mh-header-center">
@@ -203,6 +203,10 @@ export function renderMedalHall() {
   const nav = document.getElementById('bottom-nav');
   if (nav) nav.style.display = 'none';
 
+  // 撑满全屏：去掉 app-content 的内边距，让页面自己控制布局
+  content.style.padding = '0';
+  content.style.overflow = 'hidden';
+
   const stats = getMedalStats();
   content.innerHTML = buildHTML(MEDALS, stats);
 
@@ -214,6 +218,13 @@ export function renderMedalHall() {
       const unlocked = medal.condition(stats);
       showMedalDetail(medal, unlocked);
     });
+  });
+
+  // 返回按钮：恢复 content 样式
+  content.querySelector('.mh-back-btn')?.addEventListener('click', () => {
+    content.style.padding = '';
+    content.style.overflow = '';
+    window.__router.goBack();
   });
 }
 
