@@ -31,49 +31,49 @@ let _imagePreview = null;
 const GUIDE_STEPS = [
   {
     sense: '颜色',
-    emoji: '🎨',
+    icon: 'paint-brush',
     question: '用眼睛看，它是什么颜色的？',
     tip: '颜色让画面鲜活起来！',
     aiGuide: '颜色（如红色、白色、金黄色等，用生动的比喻描述颜色）',
   },
   {
     sense: '形状',
-    emoji: '🔷',
+    icon: 'shapes',
     question: '它的形状是什么样的？',
     tip: '形状让读者脑补画面！',
     aiGuide: '形状或体型（如圆圆的、高高大大的、小巧玲珑的，用比喻更生动）',
   },
   {
     sense: '动作',
-    emoji: '🏃',
+    icon: 'person-simple-run',
     question: '它在做什么动作？',
     tip: '动作让画面动起来！',
     aiGuide: '正在做的动作（用生动的动词描述，让画面活起来）',
   },
   {
     sense: '声音',
-    emoji: '👂',
+    icon: 'ear',
     question: '用耳朵听，能听到什么声音？',
     tip: '声音让文章更有感染力！',
     aiGuide: '能听到的声音或声息（用拟声词，区分响亮的"声音"和细小的"声息"）',
   },
   {
     sense: '气味',
-    emoji: '👃',
+    icon: 'flower-lotus',
     question: '用鼻子闻，能闻到什么气味？',
     tip: '气味能让读者身临其境！',
     aiGuide: '能闻到的气味或气息（区分浓烈的"气味"和淡淡的"气息"）',
   },
   {
     sense: '触感',
-    emoji: '✋',
+    icon: 'hand-palm',
     question: '用手摸一摸，感觉是什么样的？',
     tip: '触感描写让读者"隔空触摸"！',
     aiGuide: '触摸时的感觉（光滑/粗糙、软/硬、冷/热、干/湿等）',
   },
   {
     sense: '心情',
-    emoji: '💖',
+    icon: 'heart',
     question: '看到它，你心里有什么感觉？',
     tip: '写出内心感受，文章更有温度！',
     aiGuide: '内心的情感感受（开心、好奇、感动、自豪等，写出为什么有这种感受）',
@@ -258,32 +258,32 @@ function buildHomeHTML() {
 <div class="mm-page">
   <div class="mm-header">
     <div style="width:36px"></div>
-    <h1 class="mm-title">🤖 魔法机器</h1>
+    <h1 class="mm-title">魔法机器</h1>
     <div style="width:36px"></div>
   </div>
 
   <div class="mm-hero-card">
-    <div class="mm-hero-icon">✨</div>
+    <div class="mm-hero-icon"><ph-sparkle weight="fill" size="40" color="white"></ph-sparkle></div>
     <div class="mm-hero-title">感觉魔法机器</div>
     <div class="mm-hero-desc">告诉我你的作文题目<br>我来一步步引导你收集写作素材<br>最后帮你写出一篇好作文！</div>
   </div>
 
   <div class="mm-card">
-    <div class="mm-card-label">📝 你的作文题目是？</div>
+    <div class="mm-card-label"><ph-note-pencil weight="fill" size="18"></ph-note-pencil> 你的作文题目是？</div>
     <input type="text"
            id="mm-topic-input"
            class="mm-topic-input"
            placeholder="例如：我的小狗、秋天的公园…"
            maxlength="20">
-    <button class="mm-primary-btn" id="mm-start-btn">开始写作之旅 🚀</button>
+    <button class="mm-primary-btn" id="mm-start-btn">开始写作之旅 <ph-rocket-launch weight="fill" size="16"></ph-rocket-launch></button>
   </div>
 
   <div class="mm-card mm-photo-card">
-    <div class="mm-photo-title">📷 拍张照片找灵感</div>
+    <div class="mm-photo-title"><ph-camera weight="fill" size="18"></ph-camera> 拍张照片找灵感</div>
     <div class="mm-photo-subtitle">拍下你想写的事物，AI 帮你发现写作素材</div>
     <div class="mm-photo-btns">
-      <button class="mm-photo-btn" id="mm-camera-btn"><span>📸</span><span>拍照</span></button>
-      <button class="mm-photo-btn" id="mm-upload-btn"><span>🖼️</span><span>从相册选</span></button>
+      <button class="mm-photo-btn" id="mm-camera-btn"><ph-camera weight="fill" size="22"></ph-camera><span>拍照</span></button>
+      <button class="mm-photo-btn" id="mm-upload-btn"><ph-image-square weight="fill" size="22"></ph-image-square><span>从相册选</span></button>
     </div>
     <input type="file" id="mm-file-camera" accept="image/*" capture="environment" style="display:none">
     <input type="file" id="mm-file-upload" accept="image/*" style="display:none">
@@ -299,7 +299,7 @@ function buildGuideHTML() {
 
   const answeredHtml = _answers.map((a, i) => `
     <div class="mm-answered-item" style="animation-delay:${i * 30}ms">
-      <span class="mm-answered-sense">${a.emoji} ${a.sense}</span>
+      <span class="mm-answered-sense"><ph-${a.icon} weight="fill" size="14"></ph-${a.icon}> ${a.sense}</span>
       <span class="mm-answered-val">${a.answer}</span>
     </div>`).join('');
 
@@ -333,7 +333,7 @@ function buildGuideHTML() {
 
   <!-- 问题卡片 -->
   <div class="mm-question-card">
-    <div class="mm-question-emoji">${step.emoji}</div>
+    <div class="mm-question-icon"><ph-${step.icon} weight="fill" size="40"></ph-${step.icon}></div>
     <div class="mm-question-text">${step.question}</div>
     <div class="mm-question-tip">💡 ${step.tip}</div>
   </div>
@@ -362,17 +362,17 @@ function buildEssayHTML() {
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </button>
-    <h1 class="mm-title">${isGenerating ? '✍️ 生成中…' : '✍️ 你的作文'}</h1>
+    <h1 class="mm-title">${isGenerating ? '<ph-pencil-line weight="fill" size="20"></ph-pencil-line> 生成中…' : '<ph-pencil-line weight="fill" size="20"></ph-pencil-line> 你的作文'}</h1>
     <div style="width:36px"></div>
   </div>
 
   <!-- 素材小结 -->
   <div class="mm-sense-summary glass-card">
-    <div class="mm-summary-title">🎯 你收集的感觉素材</div>
+    <div class="mm-summary-title"><ph-target weight="fill" size="18"></ph-target> 你收集的感觉素材</div>
     <div class="mm-summary-list">
       ${_answers.map(a => `
         <div class="mm-summary-item">
-          <span class="mm-summary-emoji">${a.emoji}</span>
+          <span class="mm-summary-icon"><ph-${a.icon} weight="fill" size="18"></ph-${a.icon}></span>
           <span class="mm-summary-sense">${a.sense}：</span>
           <span class="mm-summary-val">${escHtml(a.answer)}</span>
         </div>`).join('')}
@@ -389,8 +389,8 @@ function buildEssayHTML() {
     <div class="mm-essay-content">${formatText(_essay)}</div>
   </div>
   <div class="mm-essay-actions">
-    <button class="mm-essay-btn mm-essay-copy" id="mm-copy-btn">📋 复制作文</button>
-    <button class="mm-essay-btn mm-essay-redo" id="mm-redo-btn">🔄 重新收集</button>
+    <button class="mm-essay-btn mm-essay-copy" id="mm-copy-btn"><ph-clipboard-text weight="fill" size="16"></ph-clipboard-text> 复制作文</button>
+    <button class="mm-essay-btn mm-essay-redo" id="mm-redo-btn"><ph-arrow-counter-clockwise weight="bold" size="16"></ph-arrow-counter-clockwise> 重新收集</button>
   </div>`}
 
   <div style="height:100px"></div>
@@ -463,7 +463,7 @@ function selectAnswer(optIdx) {
   const answer = _currentOptions[optIdx];
   if (!answer) return;
   const step = GUIDE_STEPS[_step];
-  _answers.push({ sense: step.sense, emoji: step.emoji, answer });
+  _answers.push({ sense: step.sense, icon: step.icon, answer });
 
   if (_step + 1 >= TOTAL_STEPS) {
     generateEssay();
@@ -485,7 +485,10 @@ async function handleImageUpload(file) {
     _imagePreview = preview;
 
     const topic = document.getElementById('mm-topic-input')?.value.trim() || '';
-    const sysPrompt = `你是一个帮助小学生写作文的AI助手。请用亲切活泼的语言，从图片中用"15个感觉点"框架（颜色、形状、动作、声音、气味、触感等）发现写作素材，给出4-6句生动具体的描述，适合小学生直接用于写作。`;
+    const sysPrompt = `你是一个帮助小学生写作文的AI助手。
+请先判断图片内容是否适合小学生写作（普通物品、动物、风景、食物、人物、场景等均可）。
+如果图片包含色情、暴力、血腥或政治敏感内容，请只回复：「这张图片不太适合写作文，换一张试试吧 😊」，不要做任何其他描述。
+如果图片内容正常，请用亲切活泼的语言，从图片中用"15个感觉点"框架（颜色、形状、动作、声音、气味、触感等）发现写作素材，给出4-6句生动具体的描述，适合小学生直接用于写作。`;
     const userPrompt = topic
       ? `这张图片和我的作文题目《${topic}》有关，请帮我发现写作灵感。`
       : `请帮我从这张图片中发现写作灵感。`;

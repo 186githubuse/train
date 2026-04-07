@@ -39,7 +39,7 @@
 }
 .ch-history-item:last-child { border-bottom: none; }
 .ch-history-rank  { font-size: 12px; color: #C4B5E8; font-weight: 700; width: 20px; }
-.ch-history-emoji { font-size: 18px; flex-shrink: 0; }
+.ch-history-icon  { display: flex; align-items: center; flex-shrink: 0; }
 .ch-history-info  { flex: 1; }
 .ch-history-score { font-size: 16px; font-weight: 800; color: #2D1B69; display: block; }
 .ch-history-meta  { font-size: 11px; color: #9CA3AF; }
@@ -132,7 +132,7 @@
 .ch-result-wrap { padding: 20px 0; display: flex; flex-direction: column; gap: 14px; }
 .ch-new-record  { text-align: center; font-size: 16px; font-weight: 800; color: #D97706; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.30); border-radius: 12px; padding: 8px; }
 .ch-grade-card  { display: flex; flex-direction: column; align-items: center; padding: 28px 16px 20px; text-align: center; }
-.ch-grade-emoji { font-size: 52px; margin-bottom: 10px; }
+.ch-grade-icon  { margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
 .ch-grade-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; color: #2D1B69; }
 .ch-grade-desc  { font-size: 14px; color: #6B7280; }
 .ch-result-stats {

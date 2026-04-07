@@ -20,10 +20,10 @@ const CHALLENGE_QUESTION_COUNT = 10;
 
 // 评级阈值
 const GRADES = [
-  { min: 90, title: '感觉大师！', emoji: '🏆', color: '#FF9800', desc: '你对所有感觉点都了如指掌！' },
-  { min: 70, title: '表现不错！', emoji: '⭐', color: '#4CAF50', desc: '继续努力，离大师只差一步！' },
-  { min: 60, title: '继续加油！', emoji: '💪', color: '#2196F3', desc: '还有些知识点需要再巩固一下。' },
-  { min: 0,  title: '再试一次！', emoji: '🌱', color: '#FF5252', desc: '没关系，失败是成功之母！' },
+  { min: 90, title: '感觉大师！', icon: 'trophy', color: '#FF9800', desc: '你对所有感觉点都了如指掌！' },
+  { min: 70, title: '表现不错！', icon: 'star',   color: '#4CAF50', desc: '继续努力，离大师只差一步！' },
+  { min: 60, title: '继续加油！', icon: 'bicep',  color: '#2196F3', desc: '还有些知识点需要再巩固一下。' },
+  { min: 0,  title: '再试一次！', icon: 'plant',  color: '#FF5252', desc: '没关系，失败是成功之母！' },
 ];
 
 // ═══════════════════════════════════════════════════
@@ -107,7 +107,7 @@ function buildHomeHTML() {
     return `
       <div class="ch-history-item">
         <span class="ch-history-rank">#${i + 1}</span>
-        <span class="ch-history-emoji">${grade.emoji}</span>
+        <span class="ch-history-icon"><ph-${grade.icon} weight="fill" size="18" color="${grade.color}"></ph-${grade.icon}></span>
         <div class="ch-history-info">
           <span class="ch-history-score">${r.score}分</span>
           <span class="ch-history-meta">${Math.round(r.accuracy * 100)}% · ${formatTime(r.duration)}</span>
@@ -131,7 +131,7 @@ function buildHomeHTML() {
 
   <!-- 挑战信息卡 -->
   <div class="ch-info-card glass-card macaron-lavender">
-    <div class="ch-info-icon">⚡</div>
+    <div class="ch-info-icon"><ph-lightning weight="fill" size="28" color="white"></ph-lightning></div>
     <div class="ch-info-content">
       <div class="ch-info-title">综合感觉挑战</div>
       <div class="ch-info-desc">
@@ -286,7 +286,7 @@ function buildResultHTML() {
 
     <!-- 称号 -->
     <div class="ch-grade-card glass-card" style="border-top: 4px solid ${grade.color}">
-      <div class="ch-grade-emoji">${grade.emoji}</div>
+      <div class="ch-grade-icon"><ph-${grade.icon} weight="fill" size="48" color="${grade.color}"></ph-${grade.icon}></div>
       <div class="ch-grade-title" style="color:${grade.color}">${grade.title}</div>
       <div class="ch-grade-desc">${grade.desc}</div>
     </div>

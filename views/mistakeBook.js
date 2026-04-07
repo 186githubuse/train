@@ -52,7 +52,7 @@ function buildFilterBar() {
   // 知识点选项
   const lessonOptions = LESSONS.map(l => `
     <option value="${l.id}" ${_filterLesson === l.id ? 'selected' : ''}>
-      ${l.emoji} ${l.title}
+      ${l.title}
     </option>
   `).join('');
 
@@ -61,7 +61,7 @@ function buildFilterBar() {
       <div class="mb-filter-row">
         <div class="mb-filter-select-wrap">
           <select id="mb-lesson-filter" class="mb-filter-select">
-            <option value="0" ${_filterLesson === 0 ? 'selected' : ''}>📚 全部知识点</option>
+            <option value="0" ${_filterLesson === 0 ? 'selected' : ''}>全部知识点</option>
             ${lessonOptions}
           </select>
         </div>
@@ -79,7 +79,7 @@ function buildFilterBar() {
 
 function buildMistakeCard(mistake, index) {
   const lesson = getLessonById(mistake.lessonId);
-  const lessonName = lesson ? `${lesson.emoji} ${lesson.title}` : `第${mistake.lessonId}课`;
+  const lessonName = lesson ? lesson.title : `第${mistake.lessonId}课`;
   const diffText = DIFFICULTY_TEXT[mistake.difficulty] || '未知';
   const diffColor = DIFFICULTY_COLOR[mistake.difficulty] || '#999';
   const timeStr = new Date(mistake.timestamp).toLocaleDateString('zh-CN');
@@ -205,7 +205,7 @@ function buildRedoArea(mistake) {
 function buildEmptyState() {
   return `
     <div class="mb-empty">
-      <div class="mb-empty-icon">🎉</div>
+      <div class="mb-empty-icon"><ph-confetti weight="fill" size="52" color="#A78BFA"></ph-confetti></div>
       <div class="mb-empty-title">太棒了，暂无错题！</div>
       <div class="mb-empty-sub">继续保持，成为感觉大师！</div>
       <button class="mb-empty-btn" onclick="window.__router.navigate('trainingCamp')">

@@ -167,14 +167,14 @@
 }
 .report-action-btn:active { transform: scale(0.98); }
 .btn-mistake {
-  background: linear-gradient(140deg, rgba(255,183,197,0.65), rgba(255,143,174,0.55));
-  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.80);
-  box-shadow: 0 4px 16px rgba(255,143,171,0.20);
+  background: linear-gradient(140deg, rgba(255,143,174,0.80), rgba(236,72,153,0.65));
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.50);
+  box-shadow: 0 4px 16px rgba(255,143,171,0.30);
 }
 .action-btn-left { display: flex; align-items: center; gap: 14px; }
 .action-btn-icon  { font-size: 28px; line-height: 1; }
-.action-btn-label { font-size: 16px; font-weight: 700; color: #2D1B69; text-align: left; }
-.action-btn-sub   { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.action-btn-label { font-size: 16px; font-weight: 700; color: #fff; text-align: left; }
+.action-btn-sub   { font-size: 12px; color: rgba(255,255,255,0.80); margin-top: 2px; }
 .action-btn-badge {
   background: #EF4444; color: #fff;
   font-size: 12px; font-weight: 700;

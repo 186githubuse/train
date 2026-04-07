@@ -85,7 +85,7 @@ function renderUnlockedCard(lesson, index) {
                  style="color: ${lesson.textColor}">
               ${lesson.id}
             </div>
-            <span class="text-3xl leading-none select-none">${lesson.emoji}</span>
+            <ph-${lesson.icon} weight="fill" size="32" color="rgba(255,255,255,0.9)"></ph-${lesson.icon}>
           </div>
 
           <!-- 右：星星 -->
@@ -147,7 +147,7 @@ function renderLockedCard(lesson, index) {
                         font-black text-sm text-gray-400">
               ${lesson.id}
             </div>
-            <span class="text-3xl leading-none select-none opacity-25">${lesson.emoji}</span>
+            <ph-${lesson.icon} weight="fill" size="32" color="rgba(180,180,190,0.4)"></ph-${lesson.icon}>
           </div>
 
           <!-- 右：锁定图标 -->
@@ -190,7 +190,7 @@ function renderTopics() {
   const cards = TOPICS.map(topic => `
     <div class="topic-card ${topic.colorClass} rounded-[2rem] p-5">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-4xl leading-none">${topic.emoji}</span>
+        <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.9)"></ph-${topic.icon}>
         <span class="topic-coming-badge">即将上线</span>
       </div>
       <h3 class="text-white font-black text-[18px] leading-snug drop-shadow-sm">
@@ -262,11 +262,11 @@ function renderHeader() {
         <div class="progress-bar-fill" style="width:${pct}%"></div>
       </div>
       <div class="flex items-center justify-between mt-2.5 text-white/75 text-[11px]">
-        <span>🌟 已获得 ${totalXp} XP</span>
+        <span><ph-star weight="fill" size="13" color="rgba(255,255,255,0.75)"></ph-star> 已获得 ${totalXp} XP</span>
         <span>
           ${unlockedCount < totalLessons
             ? `下一关：${LESSONS[unlockedCount].title} →`
-            : '🎉 全部完成！'}
+            : '全部完成！🎉'}
         </span>
       </div>
     </div>
@@ -274,10 +274,10 @@ function renderHeader() {
     <!-- Tab 切换 -->
     <div class="tc-tab-bar">
       <button class="tc-tab ${_activeTab === 'basic' ? 'tc-tab-active' : ''}" data-tab="basic">
-        📚 基础训练
+        <ph-books weight="${_activeTab === 'basic' ? 'fill' : 'regular'}" size="16"></ph-books> 基础训练
       </button>
       <button class="tc-tab ${_activeTab === 'topic' ? 'tc-tab-active' : ''}" data-tab="topic">
-        🎯 专题训练
+        <ph-target weight="${_activeTab === 'topic' ? 'fill' : 'regular'}" size="16"></ph-target> 专题训练
       </button>
     </div>`;
 }
@@ -404,7 +404,7 @@ function showProfilePanel() {
         <div>
           <div style="font-size:20px;font-weight:800;color:#1F1040;">${user.name || '同学'}</div>
           <div style="font-size:13px;color:#9CA3AF;margin-top:2px;">${gradeLabel}年级 · 能力指数 ${Number(user.abilityIndex).toFixed(1)}</div>
-          <div style="font-size:12px;color:#A78BFA;font-weight:600;margin-top:2px;">🌟 已获得 ${totalXp} XP</div>
+          <div style="font-size:12px;color:#A78BFA;font-weight:600;margin-top:2px;">✦ 已获得 ${totalXp} XP</div>
         </div>
       </div>
 

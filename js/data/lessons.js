@@ -12,7 +12,7 @@
  * @property {string}  title       - 课程标题
  * @property {string}  subtitle    - 副标题
  * @property {string}  description - 课程简介
- * @property {string}  emoji       - 装饰 emoji
+ * @property {string}  icon        - Phosphor 图标名（如 'eye'，对应 <ph-eye>）
  * @property {string}  colorClass  - 马卡龙颜色类名（对应 style.css）
  * @property {string}  textColor   - 徽章文字颜色（hex）
  * @property {string|null} videoUrl - 视频地址（null = 占位，待填充）
@@ -27,7 +27,7 @@ export const LESSONS = [
     title: '什么是感觉',
     subtitle: '感觉的定义：眼看、耳听、鼻闻、口尝、手摸',
     description: '通过骆宾王《咏鹅》和王安石《梅花》，认识"感觉"的定义——用身体五官感知世界，是写好作文的第一步。',
-    emoji: '👀',
+    icon: 'eye',
     colorClass: 'macaron-rose',
     textColor: '#C4566E',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson1.mov',
@@ -39,7 +39,7 @@ export const LESSONS = [
     title: '感觉与作文的关系',
     subtitle: '感觉是写作的源泉',
     description: '感觉是作文的原材料，就像做饭需要食材——没有感觉，再聪明的大脑也写不出有内容的作文。',
-    emoji: '✏️',
+    icon: 'pencil',
     colorClass: 'macaron-lavender',
     textColor: '#6B5FC7',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson2.mov',
@@ -51,7 +51,7 @@ export const LESSONS = [
     title: '用什么感觉',
     subtitle: '感觉器官：眼、耳、鼻、口、手',
     description: '认识五大感觉器官：眼睛看、耳朵听、鼻子闻、嘴巴尝、手摸——每个器官都是写作的好帮手。',
-    emoji: '👂',
+    icon: 'ear',
     colorClass: 'macaron-mint',
     textColor: '#2D8A5E',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson3.mov',
@@ -63,7 +63,7 @@ export const LESSONS = [
     title: '怎么感觉及结果',
     subtitle: '感觉过程：器官 + 动作 = 感觉点',
     description: '掌握感觉的完整过程：感觉器官 + 感觉动作 = 感觉结果（感觉点），感觉点就是写作的宝贵素材。',
-    emoji: '⚙️',
+    icon: 'gear',
     colorClass: 'macaron-peach',
     textColor: '#C47840',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson3.mov',
@@ -75,7 +75,7 @@ export const LESSONS = [
     title: '感觉结果精讲之"看"',
     subtitle: '颜色、形状、组成、作用、动作',
     description: '眼睛侦探能发现5个秘密：颜色、形状、组成、作用、动作——掌握这5点，写什么都能写具体。',
-    emoji: '🎨',
+    icon: 'palette',
     colorClass: 'macaron-sky',
     textColor: '#3A7FAA',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson5.mov',
@@ -87,7 +87,7 @@ export const LESSONS = [
     title: '感觉结果精讲之"听"',
     subtitle: '声音与声息的区别',
     description: '耳朵侦探能听出两种声音：响亮的"声音"和细微的"声息"——用对了，文章意境大不同。',
-    emoji: '🎵',
+    icon: 'music-note',
     colorClass: 'macaron-lemon',
     textColor: '#9A7E10',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson6.mov',
@@ -99,7 +99,7 @@ export const LESSONS = [
     title: '感觉结果精讲之"闻"',
     subtitle: '气味与气息的区别',
     description: '鼻子侦探有两个绝活：浓烈的"气味"和清淡的"气息"——王安石的"暗香"就是气息的最好例子。',
-    emoji: '🌸',
+    icon: 'flower-lotus',
     colorClass: 'macaron-coral',
     textColor: '#B85040',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson7.mov',
@@ -111,7 +111,7 @@ export const LESSONS = [
     title: '感觉结果精讲之"尝"',
     subtitle: '酸、甜、苦、辣、咸、麻、涩',
     description: '嘴巴侦探能尝出7种味道，把这些写出来，读者仿佛也能亲口品尝到！',
-    emoji: '🍋',
+    icon: 'orange',
     colorClass: 'macaron-lilac',
     textColor: '#8040B8',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson8.mov',
@@ -123,7 +123,7 @@ export const LESSONS = [
     title: '感觉结果精讲之"摸"',
     subtitle: '光滑/粗糙、软/硬、干/湿、冷/热、尖/平/凸/钝',
     description: '皮肤侦探能摸出5组对比感觉，写出来让读者也能感同身受！',
-    emoji: '🤲',
+    icon: 'hand-palm',
     colorClass: 'macaron-teal',
     textColor: '#2A8A8E',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
@@ -135,7 +135,7 @@ export const LESSONS = [
     title: '15个基本感觉点总结',
     subtitle: '形成完整知识框架，成为感觉大师',
     description: '把10节课的所有感觉点汇成一张"宝藏地图"——掌握15个基本感觉点，任何事物都能写得丰富生动！',
-    emoji: '🏆',
+    icon: 'trophy',
     colorClass: 'macaron-cherry',
     textColor: '#B8406E',
     videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson1.mov',

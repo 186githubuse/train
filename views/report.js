@@ -212,12 +212,12 @@ function buildHTML(data) {
   }
 
   // 五感按钮
-  const senseEmojis = ['👀', '👂', '👃', '👅', '🤲'];
+  const senseIcons = ['eye', 'ear', 'flower-lotus', 'orange', 'hand-palm'];
   const senseShort  = ['看', '听', '闻', '尝', '摸'];
   const senseBtns = senseScores.map((s, i) => `
     <button class="sense-btn" data-sense-idx="${i}"
             style="--sense-color:${s.color}">
-      <span class="sense-btn-emoji">${senseEmojis[i]}</span>
+      <ph-${senseIcons[i]} class="sense-btn-icon" weight="regular" size="22" color="${s.color}"></ph-${senseIcons[i]}>
       <span class="sense-btn-label">${senseShort[i]}</span>
     </button>
   `).join('');
@@ -243,7 +243,7 @@ function buildHTML(data) {
   <div class="report-ability-card glass-card macaron-rose">
     <div class="ability-card-left">
       <div class="ability-title-row">
-        <span class="ability-crown">👑</span>
+        <ph-crown weight="fill" size="16" color="rgba(255,255,255,0.9)"></ph-crown>
         <span class="ability-title-text">${abilityTitle}</span>
       </div>
       <div class="ability-name">${user.name}</div>
@@ -256,7 +256,7 @@ function buildHTML(data) {
         <div class="ability-index-bar-track">
           <div class="ability-index-bar-fill" style="width:${Math.round((user.abilityIndex/5)*100)}%"></div>
         </div>
-        <div class="ability-index-stars">${'⭐'.repeat(Math.round(user.abilityIndex))}${'☆'.repeat(5 - Math.round(user.abilityIndex))}</div>
+        <div class="ability-index-stars">${Array.from({length:5},(_,i)=>`<ph-star weight="${i<Math.round(user.abilityIndex)?'fill':'regular'}" size="14" color="${i<Math.round(user.abilityIndex)?'#FFD700':'rgba(255,255,255,0.4)'}"></ph-star>`).join('')}</div>
       </div>
     </div>
   </div>
@@ -290,7 +290,7 @@ function buildHTML(data) {
 
   <!-- 智能建议 -->
   <div class="report-suggestion glass-card">
-    <span class="report-suggestion-icon">💡</span>
+    <ph-lightbulb weight="fill" size="18" color="#7C3AED" class="report-suggestion-icon"></ph-lightbulb>
     <span class="report-suggestion-text">${getSuggestion()}</span>
   </div>
 
@@ -307,7 +307,7 @@ function buildHTML(data) {
     <button class="report-action-btn btn-mistake"
             onclick="window.__router.navigate('mistakeBook')">
       <div class="action-btn-left">
-        <span class="action-btn-icon">📖</span>
+        <ph-book-open weight="fill" size="22" color="white" class="action-btn-icon"></ph-book-open>
         <div>
           <div class="action-btn-label">我的错题本</div>
           <div class="action-btn-sub">${mistakeCount > 0 ? `还有 ${mistakeCount} 道题待复习` : '暂无错题，继续保持！'}</div>
@@ -315,7 +315,7 @@ function buildHTML(data) {
       </div>
       ${mistakeCount > 0
         ? `<span class="action-btn-badge">${mistakeCount}</span>`
-        : `<svg style="width:18px;height:18px;color:#C4B5E8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
+        : `<svg style="width:18px;height:18px;color:white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
       }
     </button>
   </div>
@@ -370,7 +370,7 @@ export function renderReport() {
     drawRadarChart('radar-chart', senseScores, -1);
 
     // 五感按钮交互
-    const senseEmojis = ['👀', '👂', '👃', '👅', '🤲'];
+    const senseIcons = ['eye', 'ear', 'flower-lotus', 'orange', 'hand-palm'];
     const senseShort  = ['看', '听', '闻', '尝', '摸'];
     let activeIdx = -1;
 
@@ -380,18 +380,28 @@ export function renderReport() {
         if (activeIdx === idx) {
           // 再次点击取消选中
           activeIdx = -1;
-          document.querySelectorAll('.sense-btn').forEach(b => b.classList.remove('sense-btn-active'));
+          document.querySelectorAll('.sense-btn').forEach(b => {
+            b.classList.remove('sense-btn-active');
+            const icon = b.querySelector('[class="sense-btn-icon"]');
+            if (icon) icon.setAttribute('weight', 'regular');
+          });
           document.getElementById('sense-score-panel').style.display = 'none';
         } else {
           activeIdx = idx;
-          document.querySelectorAll('.sense-btn').forEach(b => b.classList.remove('sense-btn-active'));
+          document.querySelectorAll('.sense-btn').forEach((b, bi) => {
+            b.classList.remove('sense-btn-active');
+            const icon = b.querySelector('[class="sense-btn-icon"]');
+            if (icon) icon.setAttribute('weight', 'regular');
+          });
           btn.classList.add('sense-btn-active');
+          const activeIcon = btn.querySelector('[class="sense-btn-icon"]');
+          if (activeIcon) activeIcon.setAttribute('weight', 'fill');
 
           const s = senseScores[idx];
           const panel = document.getElementById('sense-score-panel');
           panel.style.display = 'flex';
           panel.innerHTML = `
-            <span style="font-size:28px">${senseEmojis[idx]}</span>
+            <ph-${senseIcons[idx]} weight="fill" size="28" color="${s.color}"></ph-${senseIcons[idx]}>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:800;color:#2D1B69">${senseShort[idx]}的能力</div>
               <div style="font-size:12px;color:#9CA3AF;margin-top:2px">${s.label}</div>
