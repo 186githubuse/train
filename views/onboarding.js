@@ -18,6 +18,25 @@
 
 import { store } from '../js/store.js';
 
+// ── IP 图片 ──
+const IP_BASE = 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/IP/';
+const IP_POSES = {
+  teach:   IP_BASE + 'pose1.png',  // 指教学（默认/欢迎）
+  shy:     IP_BASE + 'pose2.png',  // 捂眼睛（密码输入中）
+  clap:    IP_BASE + 'pose3.png',  // 鼓掌（表单填写完整）
+  no:      IP_BASE + 'pose4.png',  // 摇手（校验失败）
+  approve: IP_BASE + 'pose5.png',  // 点头竖拇指（登录成功前）
+};
+
+// ── IP 气泡 & 装饰配置 ──
+const IP_META = {
+  teach:   { bubble: '欢迎来到感觉训练营！✨', decos: ['✨', '📚', '🌟'] },
+  shy:     { bubble: '放心输入，我不偷看～', decos: ['🙈', '🔒', '💜'] },
+  clap:    { bubble: '棒棒的！继续加油！', decos: ['👏', '🎉', '⭐'] },
+  no:      { bubble: '再检查一下哦～', decos: ['💡', '🔍', '❤️'] },
+  approve: { bubble: '太好了，出发！🚀', decos: ['🎊', '🌈', '⚡'] },
+};
+
 // ── 状态 ──
 let _step = 1;          // 1=欢迎 | 2=注册/登录 | 3=选年级
 let _tab  = 'register'; // 'register' | 'login'
@@ -26,6 +45,7 @@ let _phone = '';
 let _password = '';
 let _grade = null;
 let _container = null;
+let _currentPose = 'teach';
 
 // ── 年级配置 ──
 const GRADES = [
@@ -43,9 +63,7 @@ function buildStep1HTML() {
   return `
 <div class="ob-page">
   <div class="ob-hero">
-    <div class="ob-hero-icon">
-      <ph-sparkle weight="fill" color="#A78BFA" size="72"></ph-sparkle>
-    </div>
+    ${buildIPWrap('teach', 'ob-ip-float')}
     <div class="ob-hero-title">感觉训练营</div>
     <div class="ob-hero-subtitle">用五感发现世界<br>让作文充满生命力</div>
   </div>
@@ -94,9 +112,7 @@ function buildStep2HTML() {
   return `
 <div class="ob-page ob-page-form">
   <div class="ob-step-header">
-    <div class="ob-step-logo">
-      <ph-sparkle weight="fill" color="#A78BFA" size="36"></ph-sparkle>
-    </div>
+    ${buildIPWrap(_currentPose, 'ob-ip-small')}
     <div class="ob-step-title">感觉训练营</div>
   </div>
 
@@ -167,9 +183,7 @@ function buildStep3HTML() {
   return `
 <div class="ob-page ob-page-form">
   <div class="ob-step-header">
-    <div class="ob-step-logo">
-      <ph-graduation-cap weight="fill" color="#A78BFA" size="36"></ph-graduation-cap>
-    </div>
+    ${buildIPWrap('clap', 'ob-ip-small')}
     <div class="ob-step-title">你在几年级？</div>
     <div class="ob-step-desc">帮我为你调整合适的题目难度</div>
   </div>
@@ -201,6 +215,20 @@ function escHtml(str) {
 
 function isValidPhone(p) {
   return /^1[3-9]\d{9}$/.test(p);
+}
+
+/** 构建 IP 图片 + 气泡 + 装饰的包裹 HTML */
+function buildIPWrap(pose, extraClass = '') {
+  const meta = IP_META[pose] || IP_META.teach;
+  const isSmall = extraClass === 'ob-ip-small';
+  const decos = meta.decos.map((d, i) => `<span class="ob-ip-deco ob-ip-deco-${i + 1}">${d}</span>`).join('');
+  const bubble = isSmall ? '' : `<div class="ob-ip-bubble${extraClass === 'ob-ip-float' ? ' ob-ip-bubble-large' : ''}" id="ob-ip-bubble">${meta.bubble}</div>`;
+  return `
+<div class="ob-ip-wrap">
+  ${decos}
+  <img class="ob-ip-img${extraClass ? ' ' + extraClass : ''}" src="${IP_POSES[pose]}" alt="杨老师" id="ob-ip">
+  ${bubble}
+</div>`;
 }
 
 // ── 业务逻辑（上线时替换为云函数调用）──────────────────────
@@ -255,8 +283,42 @@ function rerender() {
 }
 
 function bindEvents() {
+  // IP 姿势切换工具函数
+  function setPose(pose) {
+    if (_currentPose === pose) return;
+    _currentPose = pose;
+    const img = document.getElementById('ob-ip');
+    const bubble = document.getElementById('ob-ip-bubble');
+    const meta = IP_META[pose] || IP_META.teach;
+    if (img) {
+      img.style.opacity = '0';
+      img.style.transform = img.classList.contains('ob-ip-small')
+        ? 'scale(0.92)' : 'translateY(-4px) scale(0.95)';
+      setTimeout(() => {
+        img.src = IP_POSES[pose];
+        img.style.opacity = '1';
+        img.style.transform = '';
+      }, 150);
+    }
+    if (bubble) {
+      bubble.style.opacity = '0';
+      setTimeout(() => {
+        bubble.textContent = meta.bubble;
+        bubble.style.opacity = '1';
+      }, 150);
+    }
+    // update deco icons
+    const wrap = img?.closest('.ob-ip-wrap');
+    if (wrap) {
+      wrap.querySelectorAll('.ob-ip-deco').forEach((el, i) => {
+        setTimeout(() => { el.textContent = meta.decos[i] || ''; }, 100);
+      });
+    }
+  }
+
   // Step 1 → Step 2
   document.getElementById('ob-next-1')?.addEventListener('click', () => {
+    _currentPose = 'teach';
     _step = 2;
     rerender();
   });
@@ -272,6 +334,28 @@ function bindEvents() {
         first?.focus();
       }, 100);
     });
+  });
+
+  // 输入框监听 → 切换姿势
+  const phoneInput = document.getElementById('ob-phone-input');
+  const nameInput  = document.getElementById('ob-name-input');
+  const pwdInput2  = document.getElementById('ob-password-input');
+
+  pwdInput2?.addEventListener('focus', () => setPose('shy'));
+  pwdInput2?.addEventListener('blur', () => {
+    const phone = phoneInput?.value.trim() || '';
+    const name  = nameInput?.value.trim() || '';
+    const pwd   = pwdInput2?.value || '';
+    const formOk = _tab === 'login'
+      ? (isValidPhone(phone) && pwd.length >= 6)
+      : (name.length > 0 && isValidPhone(phone) && pwd.length >= 6);
+    setPose(formOk ? 'clap' : 'teach');
+  });
+
+  phoneInput?.addEventListener('input', () => {
+    const phone = phoneInput.value.trim();
+    if (phone.length > 0 && !isValidPhone(phone)) setPose('no');
+    else if (isValidPhone(phone)) setPose('teach');
   });
 
   // 密码显示/隐藏
@@ -296,11 +380,13 @@ function bindEvents() {
     if (!isValidPhone(phoneVal)) {
       window.__showToast('请输入正确的手机号');
       document.getElementById('ob-phone-input')?.focus();
+      setPose('no');
       return;
     }
     if (pwdVal.length < 6) {
       window.__showToast('密码至少6位');
       document.getElementById('ob-password-input')?.focus();
+      setPose('no');
       return;
     }
 
@@ -312,6 +398,7 @@ function bindEvents() {
       if (!nameVal) {
         window.__showToast('请输入你的名字');
         document.getElementById('ob-name-input')?.focus();
+        setPose('no');
         return;
       }
       _name = nameVal;
@@ -323,10 +410,14 @@ function bindEvents() {
       const result = _doLogin(_phone, _password);
       if (!result.ok) {
         window.__showToast(result.msg);
+        setPose('no');
         return;
       }
-      const name = store.getUser().name || '同学';
-      _enterApp(name);
+      setPose('approve');
+      setTimeout(() => {
+        const name = store.getUser().name || '同学';
+        _enterApp(name);
+      }, 600);
     }
   });
 

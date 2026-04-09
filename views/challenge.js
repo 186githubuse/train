@@ -11,7 +11,7 @@
  */
 
 import { store } from '../js/store.js';
-import { QUESTIONS, pickRandomQuestions } from '../js/data/questions.js';
+import { generateChallengeSet } from '../js/data/questions.js';
 
 // ═══════════════════════════════════════════════════
 // 挑战配置
@@ -69,27 +69,12 @@ function stopTimer() {
   }
 }
 
-// 从综合挑战题库（lessonId=11）抽题，不足则从所有知识点补充
+// 从全题库按难度自适应抽题（只抽单选题，挑战赛不支持多选）
 function buildChallengeQuestions() {
   const difficulty = store.getCurrentDifficulty();
-
-  // 优先从综合挑战（lessonId=11）当前难度抽
-  let pool = pickRandomQuestions(11, difficulty, CHALLENGE_QUESTION_COUNT);
-
-  // 不够的话从其他知识点补充（每个知识点各抽一题）
-  if (pool.length < CHALLENGE_QUESTION_COUNT) {
-    const needed = CHALLENGE_QUESTION_COUNT - pool.length;
-    const usedIds = new Set(pool.map(q => q.id));
-    const supplement = [];
-    for (let lessonId = 1; lessonId <= 10 && supplement.length < needed; lessonId++) {
-      const candidates = pickRandomQuestions(lessonId, difficulty, 1)
-        .filter(q => !usedIds.has(q.id));
-      supplement.push(...candidates);
-    }
-    pool = [...pool, ...supplement.slice(0, needed)];
-  }
-
-  return pool;
+  const all = generateChallengeSet(difficulty, CHALLENGE_QUESTION_COUNT * 3);
+  const singleChoice = all.filter(q => !Array.isArray(q.correct));
+  return singleChoice.slice(0, CHALLENGE_QUESTION_COUNT);
 }
 
 // ═══════════════════════════════════════════════════

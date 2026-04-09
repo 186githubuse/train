@@ -19,7 +19,7 @@ import { store } from '../js/store.js';
 let _lesson = null;
 let _questions = [];
 let _currentIdx = 0;
-let _selected = null;        // 用户选的选项 'A'|'B'|'C'|'D'
+let _selected = new Set();   // 用户选的选项，支持多选
 let _answered = false;       // 当前题是否已提交
 let _consecutiveCorrect = 0; // 连续答对
 let _consecutiveWrong = 0;   // 连续答错
@@ -27,6 +27,26 @@ let _totalCorrect = 0;
 let _totalAnswered = 0;
 let _passed = false;
 let _questionStartTime = 0;
+
+/** 判断当前题是否为多选题 */
+function isMultiSelect(q) {
+  return Array.isArray(q.correct);
+}
+
+/** 判断答案是否正确 */
+function checkAnswer(q, selected) {
+  if (isMultiSelect(q)) {
+    const correctSet = new Set(q.correct);
+    return correctSet.size === selected.size &&
+      [...selected].every(k => correctSet.has(k));
+  }
+  return selected.size === 1 && selected.has(q.correct);
+}
+
+/** 格式化正确答案为显示字符串 */
+function formatCorrect(q) {
+  return Array.isArray(q.correct) ? q.correct.join('、') : q.correct;
+}
 
 /* ═══════════════════════════════════════════════════
    渲染函数
@@ -73,6 +93,7 @@ function renderProgress() {
 
 /** 渲染题目和选项 */
 function renderQuestion(q) {
+  const multi = isMultiSelect(q);
   const optionLetters = ['A', 'B', 'C', 'D'];
   const optionsHtml = optionLetters.map(letter => {
     if (!q.options[letter]) return '';
@@ -83,24 +104,33 @@ function renderQuestion(q) {
       </button>`;
   }).join('');
 
+  const multiTip = multi
+    ? `<p class="quiz-multi-tip">（多选题，请选出所有正确答案）</p>`
+    : '';
+
   return `
     <div class="quiz-question-card glass-card rounded-[1.5rem] p-5" id="quiz-question-card">
       <p class="quiz-question-text">${q.text}</p>
+      ${multiTip}
     </div>
     <div class="quiz-options" id="quiz-options">
       ${optionsHtml}
-    </div>`;
+    </div>
+    ${multi ? `<button class="quiz-confirm-btn" id="quiz-confirm-btn" disabled>确认答案</button>` : ''}`;
 }
 
 /** 渲染反馈区域 */
-function renderFeedback(isCorrect, correctAnswer, hint) {
+function renderFeedback(isCorrect, q) {
+  const correctDisplay = formatCorrect(q);
   const icon = isCorrect
     ? `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
     : `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
 
   const title = isCorrect ? '答对了！' : '再想想';
   const cls = isCorrect ? 'quiz-feedback-correct' : 'quiz-feedback-wrong';
-  const hintHtml = hint && !isCorrect ? `<p class="quiz-feedback-hint">正确答案是 ${correctAnswer}${hint ? '：' + hint : ''}</p>` : '';
+  const hintHtml = !isCorrect
+    ? `<p class="quiz-feedback-hint">正确答案是 ${correctDisplay}${q.hint ? '：' + q.hint : ''}</p>`
+    : '';
 
   return `
     <div class="quiz-feedback ${cls}" id="quiz-feedback">
@@ -233,7 +263,7 @@ function renderCurrentQuestion() {
     return;
   }
 
-  _selected = null;
+  _selected = new Set();
   _answered = false;
   _questionStartTime = Date.now();
 
@@ -285,6 +315,9 @@ function bindQuestionEvents() {
   const optionsEl = document.getElementById('quiz-options');
   if (!optionsEl) return;
 
+  const q = _questions[_currentIdx];
+  const multi = isMultiSelect(q);
+
   optionsEl.addEventListener('click', e => {
     if (_answered) return;
 
@@ -293,31 +326,44 @@ function bindQuestionEvents() {
 
     const option = btn.dataset.option;
 
-    // 如果点的是已选中的，取消选中
-    if (_selected === option) {
-      _selected = null;
-      btn.classList.remove('quiz-option-selected');
-      return;
+    if (multi) {
+      // 多选：toggle 选中状态
+      if (_selected.has(option)) {
+        _selected.delete(option);
+        btn.classList.remove('quiz-option-selected');
+      } else {
+        _selected.add(option);
+        btn.classList.add('quiz-option-selected');
+      }
+      // 有选择时启用确认按钮
+      const confirmBtn = document.getElementById('quiz-confirm-btn');
+      if (confirmBtn) confirmBtn.disabled = _selected.size === 0;
+    } else {
+      // 单选：清除旧选中，选中当前，自动提交
+      optionsEl.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('quiz-option-selected'));
+      _selected = new Set([option]);
+      btn.classList.add('quiz-option-selected');
+      submitAnswer();
     }
-
-    // 清除之前的选中
-    optionsEl.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('quiz-option-selected'));
-
-    // 选中当前
-    _selected = option;
-    btn.classList.add('quiz-option-selected');
-
-    // 自动提交
-    submitAnswer();
   });
+
+  // 多选确认按钮
+  if (multi) {
+    const confirmBtn = document.getElementById('quiz-confirm-btn');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        if (_selected.size > 0 && !_answered) submitAnswer();
+      });
+    }
+  }
 }
 
 function submitAnswer() {
-  if (!_selected || _answered) return;
+  if (_selected.size === 0 || _answered) return;
   _answered = true;
 
   const q = _questions[_currentIdx];
-  const isCorrect = _selected === q.correct;
+  const isCorrect = checkAnswer(q, _selected);
   const responseTime = Date.now() - _questionStartTime;
 
   // 更新状态
@@ -338,8 +384,8 @@ function submitAnswer() {
       lessonId: _lesson.id,
       questionId: q.id,
       questionText: q.text,
-      userAnswer: _selected,
-      correctAnswer: q.correct,
+      userAnswer: [..._selected].join('、'),
+      correctAnswer: formatCorrect(q),
       difficulty: q.difficulty,
     });
   }
@@ -347,19 +393,19 @@ function submitAnswer() {
   // 检查是否通关
   _passed = _consecutiveCorrect >= 3;
 
-  // 更新选项样式
+  // 更新选项样式：高亮正确答案（可能多个）
+  const correctSet = new Set(Array.isArray(q.correct) ? q.correct : [q.correct]);
   const optionsEl = document.getElementById('quiz-options');
   optionsEl.querySelectorAll('.quiz-option').forEach(btn => {
     const opt = btn.dataset.option;
     btn.classList.add('quiz-option-disabled');
-
-    if (opt === q.correct) {
-      btn.classList.add('quiz-option-correct');
-    }
-    if (opt === _selected && !isCorrect) {
-      btn.classList.add('quiz-option-wrong');
-    }
+    if (correctSet.has(opt)) btn.classList.add('quiz-option-correct');
+    if (_selected.has(opt) && !correctSet.has(opt)) btn.classList.add('quiz-option-wrong');
   });
+
+  // 隐藏多选确认按钮
+  const confirmBtn = document.getElementById('quiz-confirm-btn');
+  if (confirmBtn) confirmBtn.style.display = 'none';
 
   // 更新 streak 显示
   updateStreakDisplay();
@@ -367,14 +413,12 @@ function submitAnswer() {
   // 显示反馈
   const feedbackArea = document.getElementById('quiz-feedback-area');
   if (feedbackArea) {
-    // 连续答错3题 → 提示回看视频
     if (_consecutiveWrong >= 3) {
-      feedbackArea.innerHTML = renderFeedback(isCorrect, q.correct, q.hint) + renderVideoHint();
+      feedbackArea.innerHTML = renderFeedback(isCorrect, q) + renderVideoHint();
     } else {
-      feedbackArea.innerHTML = renderFeedback(isCorrect, q.correct, q.hint);
+      feedbackArea.innerHTML = renderFeedback(isCorrect, q);
     }
 
-    // 绑定"下一题"按钮
     const nextBtn = document.getElementById('quiz-next-btn');
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
@@ -387,7 +431,6 @@ function submitAnswer() {
       }, { once: true });
     }
 
-    // 绑定视频提示按钮
     bindVideoHintEvents();
   }
 }
@@ -466,7 +509,7 @@ export function renderQuiz(params = {}) {
 
   // 初始化状态
   _currentIdx = 0;
-  _selected = null;
+  _selected = new Set();
   _answered = false;
   _consecutiveCorrect = 0;
   _consecutiveWrong = 0;
