@@ -220,10 +220,12 @@ export function renderMedalHall() {
     });
   });
 
-  // 返回按钮：恢复 content 样式
+  // 返回按钮：恢复 content 样式 + 导航栏
   content.querySelector('.mh-back-btn')?.addEventListener('click', () => {
     content.style.padding = '';
     content.style.overflow = '';
+    const nav = document.getElementById('bottom-nav');
+    if (nav) nav.style.display = '';
     window.__router.goBack();
   });
 }

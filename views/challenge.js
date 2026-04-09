@@ -450,8 +450,17 @@ export function renderChallenge() {
   _container = document.getElementById('app-content');
   if (!_container) return;
 
+  // 重置所有页面级状态，防止上次遗留状态导致交互失效
   stopTimer();
   _phase = 'home';
+  _questions = [];
+  _currentIdx = 0;
+  _selected = null;
+  _answered = false;
+  _correctCount = 0;
+  _startTime = 0;
+  _questionStartTime = 0;
+  _totalMs = 0;
 
   render();
 }
