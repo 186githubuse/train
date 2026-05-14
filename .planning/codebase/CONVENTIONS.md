@@ -13,7 +13,7 @@ Pure vanilla JS (ES Modules) + Tailwind CDN + custom CSS project. No build tools
 **Files:**
 - Views: `camelCase.js` — `views/trainingCamp.js`, `views/lessonDetail.js`, `views/mistakeBook.js`
 - CSS: `camelCase.css` for view-specific — `css/views/mistakeBook.css`, `css/views/report.css`
-- Data modules: `camelCase.js` — `js/data/lessons.js`, `js/data/questions.js`
+- Data modules: `camelCase.js` — `js/data/lessons.js`, `js/data/questions/q01.js`..`q10.js`
 
 **Exported render functions:**
 - Always named `render` + PascalCase view name: `renderTrainingCamp`, `renderLessonDetail`, `renderQuiz`, `renderMistakeBook`, `renderReport`, `renderChallenge`
@@ -125,7 +125,7 @@ Always use `window.__router.navigate(...)` (not the imported `navigate`) from wi
 ```js
 // 1. Data modules
 import { LESSONS, getLessonById } from '../js/data/lessons.js';
-import { QUESTIONS } from '../js/data/questions.js';
+import { QUESTIONS } from '../js/data/questions/index.js';
 
 // 2. Store
 import { store } from '../js/store.js';

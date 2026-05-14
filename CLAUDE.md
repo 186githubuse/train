@@ -13,18 +13,36 @@
 ## 目录结构
 ```
 index.html              # 入口，含底部导航 + 背景光晕球
-css/style.css           # 全局样式（马卡龙色系、液态玻璃、动画）
+css/
+  style.css             # 全局样式（马卡龙色系、液态玻璃、动画）
+  components.css        # 通用组件
+  views/                # 各视图独立样式（report / mistakeBook / challenge / magicMachine / onboarding / medalHall / topic）
 js/
   main.js               # 应用入口，初始化路由 / Toast
-  router.js             # 路由系统（懒加载视图 + 历史栈），main.js 已接入
+  router.js             # 路由系统（懒加载视图 + 历史栈）
   store.js              # 全局状态管理（localStorage 持久化）
+  config.js             # API 密钥 + 模型配置（勿提交 git）
   data/
-    lessons.js          # 课程数据（10节课，含 keyPoints / videoUrl）
-    questions.js        # 题库数据（180题，10知识点+综合挑战，3层难度）
+    lessons.js          # 10 节课定义
+    courseLogic.js      # 课程核心教学逻辑
+    questions/          # 基础训练题库（150题拆分到 q01~q10.js）
+    topics/             # 专题训练题库
+      index.js          # 6 模块入口（静物→植物→动物→景物→人物→事件）
+      jingwu/           # 静物专题
+        gaozhi.js       # 稿纸完整题库（type1/type2/type3）
 views/
-  trainingCamp.js       # ✅ 训练营关卡地图视图（已完成）
-  lessonDetail.js       # ✅ 课程详情页（视频占位 + 知识点 + 进入答题）
-  quiz.js               # ✅ 答题页（题目+选项+正误反馈+通关逻辑）
+  trainingCamp.js       # ✅ 训练营（基础 + 专题 Tab）
+  lessonDetail.js       # ✅ 课程详情页
+  quiz.js               # ✅ 基础答题页
+  magicMachine.js       # ✅ 魔法机器
+  challenge.js          # ✅ 挑战赛
+  report.js             # ✅ 学习报告/我的成长
+  mistakeBook.js        # ✅ 错题本
+  medalHall.js          # ✅ 勋章馆
+  onboarding.js         # ✅ 注册/登录
+  topicDetail.js        # ✅ 专题子内容列表
+  topicQuiz.js          # ✅ 专题答题（单/多/判/排序，16:9 图片框）
+  topicCompose.js       # ✅ 专题连句成段 + AI 评分 + OCR
 ```
 
 ## 全局 API（挂载于 window）
@@ -37,34 +55,41 @@ views/
 ## 路由视图注册表（router.js）
 | 视图名 | 文件 | 状态 |
 |--------|------|------|
-| `trainingCamp` | views/trainingCamp.js | ✅ 已完成 |
-| `magicMachine` | views/placeholder.js | ⬜ 占位 |
-| `challenge` | views/challenge.js | ⬜ 待开发 |
-| `growth` | views/report.js | ⬜ 待开发 |
-| `lessonDetail` | views/lessonDetail.js | ✅ 已完成 |
-| `quiz` | views/quiz.js | ✅ 已完成 |
-| `report` | views/report.js | ⬜ 待开发 |
-| `mistakeBook` | views/mistakeBook.js | ⬜ 待开发 |
+| `onboarding` | views/onboarding.js | ✅ |
+| `trainingCamp` | views/trainingCamp.js | ✅ |
+| `magicMachine` | views/magicMachine.js | ✅ |
+| `challenge` | views/challenge.js | ✅ |
+| `growth` / `report` | views/report.js | ✅ |
+| `lessonDetail` | views/lessonDetail.js | ✅ |
+| `quiz` | views/quiz.js | ✅ |
+| `mistakeBook` | views/mistakeBook.js | ✅ |
+| `medalHall` | views/medalHall.js | ✅ |
+| `topicDetail` | views/topicDetail.js | ✅ |
+| `topicQuiz` | views/topicQuiz.js | ✅ |
+| `topicCompose` | views/topicCompose.js | ✅ |
+
+**viewsWithHeader 白名单**（router.js 内）：`trainingCamp / lessonDetail / quiz / topicDetail / topicQuiz / topicCompose` —— 这些视图自己渲染 header，路由器不清空。
 
 ## 课程数据（js/data/lessons.js）
-10节课，主题：感觉与写作的关系
-1. 什么是感觉（👀 macaron-rose）
-2. 感觉与作文的关系（✏️ macaron-lavender）
-3. 用什么感觉（👂 macaron-mint）
-4. 怎么感觉及结果（⚙️ macaron-peach）
-5. 感觉结果精讲之"看"（🎨 macaron-sky）
-6. 感觉结果精讲之"听"（🎵 macaron-lemon）
-7. 感觉结果精讲之"闻"（🌸 macaron-coral）
-8. 感觉结果精讲之"尝"（🍋 macaron-lilac）
-9. 感觉结果精讲之"摸"（🤲 macaron-teal）
-10. 15个基本感觉点总结（🏆 macaron-cherry）
+10节课，主题：感觉与写作（2026-05-14 重排后顺序）
+1. 什么是感觉（eye · macaron-rose）
+2. 怎么感觉及感觉结果（list-numbers · macaron-lavender）
+3. 眼看感觉点专项（eye · macaron-peach）
+4. 耳听感觉点专项（ear · macaron-sky）
+5. 鼻闻感觉点专项（flower-lotus · macaron-lemon）
+6. 口尝感觉点专项（orange · macaron-coral）
+7. 手摸感觉点专项（hand-palm · macaron-lilac）
+8. 五感综合识别（circles-four · macaron-teal）
+9. 感觉三步法（steps · macaron-mint）  ← 2026-05-14 从第3课移到此处
+10. 三步法加五感综合练习（trophy · macaron-cherry）
 
-所有课程的 `videoUrl: null`，`duration: 0`（待填充）。
+视频托管在腾讯云 COS：`https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lessonX.mov`。文件名仍沿用旧编号（`lesson3.mov` 对应三步法，现在挂在第 9 课 `videoUrl` 上）。第 1–3、5–9 课已上传正式视频，第 4、10 课暂用替代。
 
 ## Store 数据结构（store.js）
 ```js
 {
-  user: { grade, abilityIndex, name },
+  schemaVersion: 2,   // 2026-05-14：基础训练课程重排后 bump，旧数据自动清空
+  user: { grade, abilityIndex, name, totalStars },
   lessonProgress: {
     [lessonId]: { passed, stars, xp, totalXp, attemptCount, videoWatched }
   },
@@ -73,6 +98,7 @@ views/
   _session: null  // 当前答题会话，不持久化
 }
 ```
+Schema 版本不匹配时 `_load()` 自动清 localStorage，避免老用户进度错位到新课程编号。
 
 ## 能力指数系统
 - 范围：1.0 ~ 5.0
@@ -83,12 +109,41 @@ views/
 ## CSS 马卡龙色系（对应 colorClass）
 macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / cherry
 
-## 待开发优先级（建议顺序）
-1. ~~**lessonDetail.js** — 课程详情页~~ ✅ 已完成
-2. ~~**quiz.js** — 答题页（题目展示 + 选项 + 结果反馈）~~ ✅ 已完成
-3. **report.js** — 学习报告 / 我的成长
-4. **mistakeBook.js** — 错题本
-5. **challenge.js** — 挑战赛
+## 专题训练（2026-05-13/14 新增）
+
+数据：`js/data/topics/index.js` + `js/data/topics/jingwu/gaozhi.js`
+视图：`topicDetail` / `topicQuiz` / `topicCompose`
+
+**题型联动模式（专题核心）**：
+- 题型1（16题）：single/multi/judge，识记感觉点
+- 题型2（7题）：sort 排序题 + 易混辨析（声音/声息、气味/气息）
+- 题型3（1题）：思维导图 + 文本输入 ≥80字 + AI 4 维评分
+
+**扩展方式**：新增台灯/橘子等子内容，只需在 `js/data/topics/<module>/` 写数据文件 + 在 index.js 里导入，三视图零改动。
+
+## API 配置（js/config.js · 2026-05-14 切换）
+
+- **主模型**：comfly（`https://ai.comfly.chat`）+ `gpt-4o-mini`，**OpenAI 兼容格式**，走 `/v1/chat/completions` + `Authorization: Bearer`
+- **图片识别**：itlsj（`https://ai.itlsj.com`）+ `gemini-3-flash-preview-all`，**Anthropic 兼容格式**，走 `/v1/messages` + `x-api-key`
+
+两种 format 在 `js/config.js` 的 `format` 字段标记了，调用方自己适配。原 itlsj 的 Claude 分组已失效（403 无权访问）。
+
+**破缓存技巧**：所有 `import 'config.js'` 必须带版本号 `?v=YYYYMMDD`，否则浏览器会缓存旧 key。
+
+## 专题连句成段的 OCR
+
+- `views/topicCompose.js` 的"写作区"右上角有相机/相册两个按钮
+- 图片经 canvas 压缩（长边 ≤ 1280px、JPEG 0.85），调 `ocrHandwritingFromImage()`
+- Gemini 识别结果**追加**到文本框（不覆盖已有）
+- 三种状态条：loading / success / error
+
+## 下一步待办
+
+- 专题·静物：台灯 / 橘子（等文档题库）
+- 专题·植物 / 动物 / 景物 / 人物 / 事件（文档待产出）
+- Phase 1 安全合规（API 密钥移后端、DEV_MODE 开关）
+- Phase 2 CloudBase 上云（手机号注册、云端数据）
+- 备案完成后推进正式上线
 
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
@@ -168,7 +223,7 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 ## Naming Patterns
 - Views: `camelCase.js` — `views/trainingCamp.js`, `views/lessonDetail.js`, `views/mistakeBook.js`
 - CSS: `camelCase.css` for view-specific — `css/views/mistakeBook.css`, `css/views/report.css`
-- Data modules: `camelCase.js` — `js/data/lessons.js`, `js/data/questions.js`
+- Data modules: `camelCase.js` — `js/data/lessons.js`, `js/data/questions/q01.js`..`q10.js`
 - Always named `render` + PascalCase view name: `renderTrainingCamp`, `renderLessonDetail`, `renderQuiz`, `renderMistakeBook`, `renderReport`, `renderChallenge`
 - One named export per view file, always the render function
 - Prefixed with nothing — just camelCase: `renderHeader`, `renderStars`, `bindEvents`, `handleCardClick`

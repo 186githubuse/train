@@ -50,21 +50,27 @@ const DEFAULT_STATE = {
    2. 持久化工具（localStorage）
 ═══════════════════════════════════════════════════ */
 const STORAGE_KEY = 'ganjue_training_state';
+const SCHEMA_VERSION = 2; // bump 后旧数据自动清空（2026-05-14：基础训练课程重排）
 
 function _load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_STATE };
+    if (!raw) return { ...DEFAULT_STATE, schemaVersion: SCHEMA_VERSION };
     const saved = JSON.parse(raw);
+    if (saved.schemaVersion !== SCHEMA_VERSION) {
+      localStorage.removeItem(STORAGE_KEY);
+      return { ...DEFAULT_STATE, schemaVersion: SCHEMA_VERSION };
+    }
     // 合并默认值（防止新字段缺失）
     return {
       ...DEFAULT_STATE,
       ...saved,
       user: { ...DEFAULT_STATE.user, ...saved.user },
       _session: null, // session 永远不从存储恢复
+      schemaVersion: SCHEMA_VERSION,
     };
   } catch {
-    return { ...DEFAULT_STATE };
+    return { ...DEFAULT_STATE, schemaVersion: SCHEMA_VERSION };
   }
 }
 
