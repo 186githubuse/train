@@ -7,7 +7,7 @@
  */
 
 import { LESSONS } from '../js/data/lessons.js';
-import { TOPICS } from '../js/data/topics.js';
+import { TOPICS } from '../js/data/topics/index.js';
 import { store } from '../js/store.js';
 
 let _activeTab = 'basic'; // 'basic' | 'topic'
@@ -187,20 +187,42 @@ function renderLockedCard(lesson, index) {
  * 渲染专题训练内容
  */
 function renderTopics() {
-  const cards = TOPICS.map(topic => `
-    <div class="topic-card ${topic.colorClass} rounded-[2rem] p-5">
-      <div class="flex items-center justify-between mb-3">
-        <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.9)"></ph-${topic.icon}>
-        <span class="topic-coming-badge">即将上线</span>
-      </div>
-      <h3 class="text-white font-black text-[18px] leading-snug drop-shadow-sm">
-        ${topic.title}
-      </h3>
-      <p class="text-white/75 text-[12px] mt-1 leading-relaxed">
-        ${topic.subtitle}
-      </p>
-    </div>
-  `).join('');
+  const cards = TOPICS.map(topic => {
+    const clickable = topic.available;
+    const attrs = clickable
+      ? `role="button" tabindex="0" data-topic-id="${topic.id}"`
+      : 'aria-disabled="true"';
+    const badge = clickable
+      ? `<span class="topic-available-badge">${topic.subs.filter(s => !s.comingSoon).length} 个子内容</span>`
+      : '<span class="topic-coming-badge">即将上线</span>';
+    const clsExtra = clickable ? 'topic-card-clickable' : 'topic-card-locked';
+
+    return `
+      <div class="topic-card ${topic.colorClass} ${clsExtra} rounded-[2rem] p-5"
+           ${attrs}
+           aria-label="${topic.title}${clickable ? '' : '，即将上线'}">
+        <div class="flex items-center justify-between mb-3">
+          <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.9)"></ph-${topic.icon}>
+          ${badge}
+        </div>
+        <h3 class="text-white font-black text-[18px] leading-snug drop-shadow-sm">
+          ${topic.title}
+        </h3>
+        <p class="text-white/75 text-[12px] mt-1 leading-relaxed">
+          ${topic.subtitle}
+        </p>
+        ${clickable ? `
+          <div class="mt-3 flex items-center justify-end text-white/90 text-[12px] font-semibold gap-1">
+            <span>进入</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        ` : ''}
+      </div>`;
+  }).join('');
 
   return `<div class="topic-grid">${cards}</div>`;
 }
@@ -309,6 +331,13 @@ export function renderTrainingCamp() {
   /* 根据 Tab 渲染内容 */
   if (_activeTab === 'topic') {
     content.innerHTML = renderTopics();
+    /* 专题卡点击：可用的进入详情页 */
+    content.querySelectorAll('.topic-card-clickable').forEach(card => {
+      card.addEventListener('click', () => {
+        const topicId = card.dataset.topicId;
+        if (topicId) window.__router.navigate('topicDetail', { topicId });
+      });
+    });
     return;
   }
 

@@ -10,7 +10,7 @@
  * ─────────────────────────────────────────────────────────────
  */
 
-import { API_CONFIG, VISION_CONFIG } from '../js/config.js';
+import { API_CONFIG, VISION_CONFIG } from '../js/config.js?v=20260514';
 import { store } from '../js/store.js';
 
 // ── 页面状态 ──
@@ -85,23 +85,25 @@ const TOTAL_STEPS = GUIDE_STEPS.length;
 // ── API 调用 ──────────────────────────────────────────────────
 
 async function callClaude(messages, systemPrompt, maxTokens = 512) {
-  const res = await fetch(`${API_CONFIG.baseUrl}/v1/messages`, {
+  // 切换到 comfly OpenAI 兼容格式（2026-05-14，原 itlsj Claude 分组失效）
+  const res = await fetch(`${API_CONFIG.baseUrl}/v1/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_CONFIG.apiKey,
-      'anthropic-version': '2023-06-01',
+      'Authorization': `Bearer ${API_CONFIG.apiKey}`,
     },
     body: JSON.stringify({
       model: API_CONFIG.model,
       max_tokens: maxTokens,
-      system: systemPrompt,
-      messages,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages,
+      ],
     }),
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
   const data = await res.json();
-  return data.content?.[0]?.text || '';
+  return data.choices?.[0]?.message?.content || '';
 }
 
 async function callGeminiWithImage(base64, mimeType, prompt, systemPrompt) {

@@ -33,6 +33,11 @@ const VIEW_MAP = {
   report:        () => import('../views/report.js').then(m => m.renderReport),
   mistakeBook:   () => import('../views/mistakeBook.js').then(m => m.renderMistakeBook),
   medalHall:     () => import('../views/medalHall.js').then(m => m.renderMedalHall),
+
+  // ── 专题训练视图 ─────────────────────────────────
+  topicDetail:   () => import('../views/topicDetail.js').then(m => m.renderTopicDetail),
+  topicQuiz:     () => import('../views/topicQuiz.js').then(m => m.renderTopicQuiz),
+  topicCompose:  () => import('../views/topicCompose.js').then(m => m.renderTopicCompose),
 };
 
 /* ═══════════════════════════════════════════════════
@@ -71,7 +76,7 @@ async function navigate(viewName, params = {}, pushHistory = true) {
 
   // 非训练营视图：清空顶部 header（训练进度只在训练营显示）
   // lessonDetail / quiz 会自己写入 header，不能隐藏
-  const viewsWithHeader = ['trainingCamp', 'lessonDetail', 'quiz'];
+  const viewsWithHeader = ['trainingCamp', 'lessonDetail', 'quiz', 'topicDetail', 'topicQuiz', 'topicCompose'];
   const header = document.getElementById('app-header');
   if (header) {
     if (viewsWithHeader.includes(viewName)) {
