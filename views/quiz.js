@@ -1,59 +1,84 @@
 /**
  * views/quiz.js
  * ─────────────────────────────────────────────────────────────
- * 感觉训练系统 — 答题页
- * 职责：展示题目 + 选项 + 正误反馈 + 通关/继续逻辑
+ * 基础训练 — 答题页（5.13 增补规则版）
  *
- * 通关条件：连续答对 3 题
- * 连续答错 3 题：提示回看视频
+ * 答题规则：
+ *   • 每轮 10 题（D1×3 + D2×3 + D3×4，D3 按学生学段抽）
+ *   • 答对 → 自动下一题；答错 → 显示正确答案+提示，再下一题
+ *   • 一轮 10 题答完后：
+ *       错 ≤ 3 → 通关
+ *       错 > 3 → 自动追加 3 题补测，循环至错 ≤ 3
+ *   • 最多 5 轮保险（再过不去强制提示回看视频）
+ *   • 通过轮次评星：1 轮 = 3 星，2 轮 = 2 星，≥3 轮 = 1 星
+ *
+ * 题型支持：single（单选）、multi（多选）、judge（判断/2 选项）、link（连线）
  * ─────────────────────────────────────────────────────────────
  */
 
 import { getLessonById } from '../js/data/lessons.js';
-import { generateQuizSet } from '../js/data/questions.js';
+import { generateLessonRound, generateRetryRound } from '../js/data/questions/index.js';
 import { store } from '../js/store.js';
 
 /* ═══════════════════════════════════════════════════
    状态管理（页面级）
 ═══════════════════════════════════════════════════ */
 let _lesson = null;
-let _questions = [];
+let _stage = 'S';
+let _round = 1;                  // 当前轮次（1=首轮 10 题，2+=补测 3 题）
+let _questions = [];             // 当前轮的题目
 let _currentIdx = 0;
-let _selected = new Set();   // 用户选的选项，支持多选
-let _answered = false;       // 当前题是否已提交
-let _consecutiveCorrect = 0; // 连续答对
-let _consecutiveWrong = 0;   // 连续答错
-let _totalCorrect = 0;
-let _totalAnswered = 0;
-let _passed = false;
-let _questionStartTime = 0;
+let _selected = new Set();       // 单选/多选/判断用
+let _linkPairs = {};             // 连线题：{ '①':'B', ... }
+let _activeLeftKey = null;       // 连线题：当前选中的左侧 key
+let _answered = false;           // 当前题是否已提交
+let _wrongInRound = 0;           // 当前轮的错题数
+let _totalCorrect = 0;           // 全程累计答对
+let _totalAnswered = 0;          // 全程累计答题
+let _usedIds = new Set();        // 已抽过的题 id（避免补测重复）
+const MAX_ROUND = 5;             // 最多 5 轮保险
 
-/** 判断当前题是否为多选题 */
-function isMultiSelect(q) {
-  return Array.isArray(q.correct);
+/* ═══════════════════════════════════════════════════
+   答案判定
+═══════════════════════════════════════════════════ */
+function isMulti(q) {
+  return q.qtype === 'multi';
 }
 
-/** 判断答案是否正确 */
-function checkAnswer(q, selected) {
-  if (isMultiSelect(q)) {
+function checkAnswer(q) {
+  if (q.qtype === 'multi') {
     const correctSet = new Set(q.correct);
-    return correctSet.size === selected.size &&
-      [...selected].every(k => correctSet.has(k));
+    return correctSet.size === _selected.size && [..._selected].every(k => correctSet.has(k));
   }
-  return selected.size === 1 && selected.has(q.correct);
+  if (q.qtype === 'link') {
+    const expected = q.correct;
+    const keys = Object.keys(expected);
+    return keys.every(k => _linkPairs[k] === expected[k]) &&
+           Object.keys(_linkPairs).length === keys.length;
+  }
+  // single / judge
+  return _selected.size === 1 && _selected.has(q.correct);
 }
 
-/** 格式化正确答案为显示字符串 */
 function formatCorrect(q) {
-  return Array.isArray(q.correct) ? q.correct.join('、') : q.correct;
+  if (q.qtype === 'multi') return q.correct.join('、');
+  if (q.qtype === 'link') {
+    return Object.entries(q.correct).map(([l, r]) => `${l}-${r}`).join('，');
+  }
+  return q.correct;
+}
+
+function formatUserAnswer(q) {
+  if (q.qtype === 'link') {
+    return Object.entries(_linkPairs).map(([l, r]) => `${l}-${r}`).join('，');
+  }
+  return [..._selected].sort().join('、');
 }
 
 /* ═══════════════════════════════════════════════════
-   渲染函数
+   渲染：Header / Progress
 ═══════════════════════════════════════════════════ */
-
-/** 渲染顶部 Header */
-function renderHeader(lesson) {
+function renderHeader() {
   return `
     <div class="quiz-header">
       <button class="back-btn" data-action="quit-quiz" aria-label="退出答题">
@@ -64,39 +89,39 @@ function renderHeader(lesson) {
         </svg>
       </button>
       <div class="quiz-header-info">
-        <ph-${lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${lesson.icon}>
-        <span class="quiz-header-title">第${lesson.id}课 · ${lesson.title}</span>
+        <ph-${_lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${_lesson.icon}>
+        <span class="quiz-header-title">第${_lesson.id}课 · ${_lesson.title}</span>
       </div>
       <div class="quiz-streak" id="quiz-streak">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-        </svg>
-        <span id="streak-count">0</span>/3
+        <span id="round-label">${_round === 1 ? '首轮' : `补测 ${_round - 1}`}</span>
       </div>
     </div>`;
 }
 
-/** 渲染进度条 */
 function renderProgress() {
   const total = _questions.length;
-  const pct = total > 0 ? Math.round(((_currentIdx) / total) * 100) : 0;
+  const pct = total > 0 ? Math.round(_currentIdx / total * 100) : 0;
   return `
     <div class="quiz-progress-wrap">
       <div class="quiz-progress-track">
         <div class="quiz-progress-fill" id="quiz-progress-fill" style="width: ${pct}%"></div>
       </div>
-      <span class="quiz-progress-text">${_currentIdx + 1} / ${total}</span>
+      <span class="quiz-progress-text">${_currentIdx + 1} / ${total} · 错 ${_wrongInRound}</span>
     </div>`;
 }
 
-/** 渲染题目和选项 */
+/* ═══════════════════════════════════════════════════
+   渲染：题目（按 qtype 分支）
+═══════════════════════════════════════════════════ */
 function renderQuestion(q) {
-  const multi = isMultiSelect(q);
-  const optionLetters = ['A', 'B', 'C', 'D'];
-  const optionsHtml = optionLetters.map(letter => {
-    if (!q.options[letter]) return '';
+  if (q.qtype === 'link') return renderLink(q);
+  return renderChoice(q);
+}
+
+function renderChoice(q) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const optionsHtml = letters.map(letter => {
+    if (!q.options || !q.options[letter]) return '';
     return `
       <button class="quiz-option" data-option="${letter}" aria-label="选项${letter}">
         <span class="quiz-option-letter">${letter}</span>
@@ -104,22 +129,50 @@ function renderQuestion(q) {
       </button>`;
   }).join('');
 
-  const multiTip = multi
-    ? `<p class="quiz-multi-tip">（多选题，请选出所有正确答案）</p>`
-    : '';
+  let tip = '';
+  if (q.qtype === 'multi') tip = `<p class="quiz-multi-tip">（多选题，请选出所有正确答案）</p>`;
+  else if (q.qtype === 'judge') tip = `<p class="quiz-multi-tip">（判断题）</p>`;
 
   return `
-    <div class="quiz-question-card glass-card rounded-[1.5rem] p-5" id="quiz-question-card">
+    <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
       <p class="quiz-question-text">${q.text}</p>
-      ${multiTip}
+      ${tip}
     </div>
     <div class="quiz-options" id="quiz-options">
       ${optionsHtml}
     </div>
-    ${multi ? `<button class="quiz-confirm-btn" id="quiz-confirm-btn" disabled>确认答案</button>` : ''}`;
+    ${q.qtype === 'multi' ? `<button class="quiz-confirm-btn" id="quiz-confirm-btn" disabled>确认答案</button>` : ''}`;
 }
 
-/** 渲染反馈区域 */
+function renderLink(q) {
+  const leftHtml = Object.entries(q.leftItems).map(([k, v]) => `
+    <button class="quiz-link-left" data-left="${k}">
+      <span class="quiz-link-key">${k}</span>
+      <span class="quiz-link-text">${v}</span>
+      <span class="quiz-link-pair" data-pair-for="${k}"></span>
+    </button>`).join('');
+
+  const rightHtml = Object.entries(q.rightItems).map(([k, v]) => `
+    <button class="quiz-link-right" data-right="${k}">
+      <span class="quiz-link-key">${k}</span>
+      <span class="quiz-link-text">${v}</span>
+    </button>`).join('');
+
+  return `
+    <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
+      <p class="quiz-question-text">${q.text}</p>
+      <p class="quiz-multi-tip">（连线题：先点左边一项，再点右边对应项配对）</p>
+    </div>
+    <div class="quiz-link-board" id="quiz-link-board">
+      <div class="quiz-link-col">${leftHtml}</div>
+      <div class="quiz-link-col">${rightHtml}</div>
+    </div>
+    <button class="quiz-confirm-btn" id="quiz-confirm-btn" disabled>确认答案</button>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   渲染：反馈
+═══════════════════════════════════════════════════ */
 function renderFeedback(isCorrect, q) {
   const correctDisplay = formatCorrect(q);
   const icon = isCorrect
@@ -129,8 +182,9 @@ function renderFeedback(isCorrect, q) {
   const title = isCorrect ? '答对了！' : '再想想';
   const cls = isCorrect ? 'quiz-feedback-correct' : 'quiz-feedback-wrong';
   const hintHtml = !isCorrect
-    ? `<p class="quiz-feedback-hint">正确答案是 ${correctDisplay}${q.hint ? '：' + q.hint : ''}</p>`
+    ? `<p class="quiz-feedback-hint">正确答案：${correctDisplay}${q.hint ? '。' + q.hint : ''}</p>`
     : '';
+  const isLast = _currentIdx === _questions.length - 1;
 
   return `
     <div class="quiz-feedback ${cls}" id="quiz-feedback">
@@ -141,7 +195,7 @@ function renderFeedback(isCorrect, q) {
       </div>
     </div>
     <button class="quiz-next-btn ${_lesson.colorClass}" id="quiz-next-btn">
-      ${_passed ? '查看结果' : '下一题'}
+      ${isLast ? '查看本轮结果' : '下一题'}
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round">
@@ -150,47 +204,330 @@ function renderFeedback(isCorrect, q) {
     </button>`;
 }
 
-/** 渲染通关结果页 */
-function renderResult() {
-  const accuracy = _totalAnswered > 0 ? Math.round((_totalCorrect / _totalAnswered) * 100) : 0;
-
-  // 计算星星：3星=accuracy>=90, 2星=>=70, 1星=>=0
-  let stars = 1;
-  if (accuracy >= 90) stars = 3;
-  else if (accuracy >= 70) stars = 2;
-
-  // 计算 XP
-  const xp = Math.min(100, _totalCorrect * 20 + stars * 10);
-
-  // 保存进度
-  const prevProgress = store.getProgress(_lesson.id);
-  const isFirstPass = !prevProgress.passed; // 首次通关才发星星
-  store.passLesson(_lesson.id, stars, xp);
-
-  // 发放星星（首次通关才发，防重复）
-  if (isFirstPass) {
-    const zeroMistake = _totalAnswered === _totalCorrect;
-    store.addStars(10);
-    if (zeroMistake) store.addStars(5); // 0错误额外+5
+/* ═══════════════════════════════════════════════════
+   主循环
+═══════════════════════════════════════════════════ */
+function renderCurrentQuestion() {
+  const content = document.getElementById('app-content');
+  if (!content) return;
+  const q = _questions[_currentIdx];
+  if (!q) {
+    finishRound();
+    return;
   }
 
-  // 增加 attemptCount
-  const prev = store.getProgress(_lesson.id);
+  // 重置每题状态
+  _selected = new Set();
+  _linkPairs = {};
+  _activeLeftKey = null;
+  _answered = false;
+
+  content.innerHTML = `
+    <div class="quiz-page">
+      ${renderProgress()}
+      ${renderQuestion(q)}
+      <div id="quiz-feedback-area"></div>
+    </div>`;
+
+  bindQuestionEvents(q);
+}
+
+function bindQuestionEvents(q) {
+  if (q.qtype === 'link') {
+    bindLinkEvents();
+    return;
+  }
+  bindChoiceEvents(q);
+}
+
+function bindChoiceEvents(q) {
+  const optionsEl = document.getElementById('quiz-options');
+  if (!optionsEl) return;
+  optionsEl.addEventListener('click', e => {
+    if (_answered) return;
+    const btn = e.target.closest('.quiz-option');
+    if (!btn) return;
+    const opt = btn.dataset.option;
+
+    if (q.qtype === 'multi') {
+      if (_selected.has(opt)) {
+        _selected.delete(opt);
+        btn.classList.remove('quiz-option-selected');
+      } else {
+        _selected.add(opt);
+        btn.classList.add('quiz-option-selected');
+      }
+      const confirm = document.getElementById('quiz-confirm-btn');
+      if (confirm) confirm.disabled = _selected.size === 0;
+    } else {
+      // single / judge
+      optionsEl.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('quiz-option-selected'));
+      _selected = new Set([opt]);
+      btn.classList.add('quiz-option-selected');
+      submitAnswer();
+    }
+  });
+
+  if (q.qtype === 'multi') {
+    const confirm = document.getElementById('quiz-confirm-btn');
+    if (confirm) confirm.addEventListener('click', () => {
+      if (_selected.size > 0 && !_answered) submitAnswer();
+    });
+  }
+}
+
+function bindLinkEvents() {
+  const board = document.getElementById('quiz-link-board');
+  if (!board) return;
+  board.addEventListener('click', e => {
+    if (_answered) return;
+    const left = e.target.closest('.quiz-link-left');
+    const right = e.target.closest('.quiz-link-right');
+    if (left) {
+      const k = left.dataset.left;
+      _activeLeftKey = k;
+      board.querySelectorAll('.quiz-link-left').forEach(b => b.classList.remove('quiz-link-active'));
+      left.classList.add('quiz-link-active');
+    } else if (right && _activeLeftKey) {
+      const r = right.dataset.right;
+      // 如果该左项已配对，先清掉旧配对
+      _linkPairs[_activeLeftKey] = r;
+      // 把右项 r 已经被别人配对的也清掉
+      Object.keys(_linkPairs).forEach(k => {
+        if (k !== _activeLeftKey && _linkPairs[k] === r) {
+          delete _linkPairs[k];
+        }
+      });
+      // 更新 UI：左项尾部显示 = 右项 key
+      board.querySelectorAll('.quiz-link-pair').forEach(span => {
+        const forKey = span.dataset.pairFor;
+        span.textContent = _linkPairs[forKey] ? `→${_linkPairs[forKey]}` : '';
+      });
+      // 高亮已配对左项
+      board.querySelectorAll('.quiz-link-left').forEach(b => {
+        const k = b.dataset.left;
+        b.classList.toggle('quiz-link-paired', !!_linkPairs[k]);
+        b.classList.remove('quiz-link-active');
+      });
+      _activeLeftKey = null;
+      // 全部配对完启用确认
+      const total = Object.keys(_questions[_currentIdx].leftItems).length;
+      const confirm = document.getElementById('quiz-confirm-btn');
+      if (confirm) confirm.disabled = Object.keys(_linkPairs).length !== total;
+    }
+  });
+  const confirm = document.getElementById('quiz-confirm-btn');
+  if (confirm) confirm.addEventListener('click', () => {
+    if (!_answered) submitAnswer();
+  });
+}
+
+function submitAnswer() {
+  if (_answered) return;
+  _answered = true;
+  const q = _questions[_currentIdx];
+  const correct = checkAnswer(q);
+
+  _totalAnswered++;
+  if (correct) _totalCorrect++;
+  else _wrongInRound++;
+
+  // 错题入库
+  if (!correct) {
+    store._addMistake({
+      lessonId: _lesson.id,
+      questionId: q.id,
+      questionText: q.text,
+      userAnswer: formatUserAnswer(q),
+      correctAnswer: formatCorrect(q),
+      difficulty: q.difficulty,
+    });
+  }
+
+  // 高亮答案
+  highlightAnswer(q, correct);
+
+  // 隐藏多选/连线确认按钮
+  const confirm = document.getElementById('quiz-confirm-btn');
+  if (confirm) confirm.style.display = 'none';
+
+  // 反馈
+  const feedbackArea = document.getElementById('quiz-feedback-area');
+  if (feedbackArea) {
+    feedbackArea.innerHTML = renderFeedback(correct, q);
+    const next = document.getElementById('quiz-next-btn');
+    if (next) {
+      next.addEventListener('click', () => {
+        _currentIdx++;
+        if (_currentIdx >= _questions.length) finishRound();
+        else renderCurrentQuestion();
+      }, { once: true });
+    }
+  }
+
+  // 更新进度文本
+  const progText = document.querySelector('.quiz-progress-text');
+  if (progText) progText.textContent = `${_currentIdx + 1} / ${_questions.length} · 错 ${_wrongInRound}`;
+}
+
+function highlightAnswer(q, isCorrect) {
+  if (q.qtype === 'link') {
+    const board = document.getElementById('quiz-link-board');
+    if (!board) return;
+    const expected = q.correct;
+    Object.keys(expected).forEach(leftK => {
+      const userR = _linkPairs[leftK];
+      const correctR = expected[leftK];
+      const leftBtn = board.querySelector(`.quiz-link-left[data-left="${leftK}"]`);
+      if (!leftBtn) return;
+      leftBtn.classList.add(userR === correctR ? 'quiz-link-correct' : 'quiz-link-wrong');
+      const pairSpan = leftBtn.querySelector('.quiz-link-pair');
+      if (pairSpan) pairSpan.textContent = `→${correctR}（应：${correctR}）`;
+    });
+    board.querySelectorAll('.quiz-link-left,.quiz-link-right').forEach(b => b.classList.add('quiz-option-disabled'));
+    return;
+  }
+  const correctSet = new Set(Array.isArray(q.correct) ? q.correct : [q.correct]);
+  const optionsEl = document.getElementById('quiz-options');
+  if (!optionsEl) return;
+  optionsEl.querySelectorAll('.quiz-option').forEach(btn => {
+    const opt = btn.dataset.option;
+    btn.classList.add('quiz-option-disabled');
+    if (correctSet.has(opt)) btn.classList.add('quiz-option-correct');
+    if (_selected.has(opt) && !correctSet.has(opt)) btn.classList.add('quiz-option-wrong');
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   一轮结束 → 判定
+═══════════════════════════════════════════════════ */
+function finishRound() {
+  // 通过条件：错 ≤ 3
+  if (_wrongInRound <= 3) {
+    showResult(true);
+    return;
+  }
+  // 不过：超过 5 轮强制提示视频
+  if (_round >= MAX_ROUND) {
+    showVideoSuggest();
+    return;
+  }
+  // 否则进入下一轮补测
+  showRetryHint();
+}
+
+function showRetryHint() {
+  const content = document.getElementById('app-content');
+  if (!content) return;
+  content.innerHTML = `
+    <div class="quiz-page">
+      <div class="quiz-result-card glass-card rounded-[2rem] p-6" style="text-align:center">
+        <div class="quiz-result-icon" style="background:linear-gradient(135deg,#FBBF77,#F4977C)">
+          <ph-arrow-clockwise weight="fill" size="48" color="white"></ph-arrow-clockwise>
+        </div>
+        <h2 class="quiz-result-title">本轮 ${_questions.length} 题，错了 ${_wrongInRound} 题</h2>
+        <p class="quiz-result-subtitle">差一点点就过了！再来 3 道补测题</p>
+        <div class="quiz-result-actions">
+          <button class="quiz-result-btn-primary ${_lesson.colorClass}" id="btn-retry">开始补测</button>
+          <button class="quiz-result-btn-secondary" id="btn-quit-retry">放弃返回</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    _round++;
+    _wrongInRound = 0;
+    _currentIdx = 0;
+    _questions = generateRetryRound(_lesson.id, _stage, _usedIds);
+    _questions.forEach(q => _usedIds.add(q.id));
+    // 补测一轮通过条件：补测 3 题里错 ≤ 1（参考：3 题中超半数错就再补）
+    // 但按文档原意是"错 ≤ 3 通过"——补测只有 3 题，等于 3 题全错才不过
+    renderCurrentQuestion();
+  });
+  document.getElementById('btn-quit-retry').addEventListener('click', () => {
+    window.__router.navigate('trainingCamp');
+  });
+}
+
+function showVideoSuggest() {
+  const content = document.getElementById('app-content');
+  if (!content) return;
+  content.innerHTML = `
+    <div class="quiz-page">
+      <div class="quiz-result-card glass-card rounded-[2rem] p-6" style="text-align:center">
+        <div class="quiz-result-icon" style="background:linear-gradient(135deg,#7DA9F0,#A78BFA)">
+          <ph-video weight="fill" size="48" color="white"></ph-video>
+        </div>
+        <h2 class="quiz-result-title">这节课需要再听一遍</h2>
+        <p class="quiz-result-subtitle">已经测了 ${MAX_ROUND} 轮，建议先回看视频</p>
+        <div class="quiz-result-actions">
+          <button class="quiz-result-btn-primary ${_lesson.colorClass}" id="btn-rewatch">回看视频</button>
+          <button class="quiz-result-btn-secondary" id="btn-back-camp">返回训练营</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('btn-rewatch').addEventListener('click', () => {
+    window.__router.navigate('lessonDetail', { lessonId: _lesson.id });
+  });
+  document.getElementById('btn-back-camp').addEventListener('click', () => {
+    window.__router.navigate('trainingCamp');
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   通关结果页
+═══════════════════════════════════════════════════ */
+function showResult() {
+  // 评星：1 轮 = 3 星，2 轮 = 2 星，≥3 轮 = 1 星
+  let stars = 1;
+  if (_round === 1) stars = 3;
+  else if (_round === 2) stars = 2;
+
+  const accuracy = _totalAnswered > 0 ? Math.round(_totalCorrect / _totalAnswered * 100) : 0;
+  const xp = Math.min(100, _totalCorrect * 8 + stars * 10);
+
+  const prevProgress = store.getProgress(_lesson.id);
+  const isFirstPass = !prevProgress.passed;
+  store.passLesson(_lesson.id, stars, xp, _round);
+
+  if (isFirstPass) {
+    store.addStars(10);
+    if (_round === 1 && _wrongInRound === 0) store.addStars(5); // 一轮 0 错额外 +5
+  }
 
   const starsHtml = Array.from({ length: 3 }, (_, i) => {
     const filled = i < stars;
-    return `
-      <svg class="quiz-result-star ${filled ? 'star-filled' : 'star-empty'}"
-           viewBox="0 0 24 24"
-           fill="${filled ? 'currentColor' : 'none'}"
-           stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round"
-           style="animation-delay: ${i * 200}ms">
-        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-      </svg>`;
+    return `<svg class="quiz-result-star ${filled ? 'star-filled' : 'star-empty'}"
+                 viewBox="0 0 24 24"
+                 fill="${filled ? 'currentColor' : 'none'}"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 style="animation-delay: ${i * 200}ms">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>`;
   }).join('');
 
-  return `
+  const header = document.getElementById('app-header');
+  header.innerHTML = `
+    <div class="quiz-header">
+      <button class="back-btn" id="result-back-btn" aria-label="返回训练营">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="quiz-header-info">
+        <ph-${_lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${_lesson.icon}>
+        <span class="quiz-header-title">第${_lesson.id}课 · 通关结果</span>
+      </div>
+      <div style="width:40px"></div>
+    </div>`;
+  document.getElementById('result-back-btn').addEventListener('click', () => {
+    window.__router.navigate('trainingCamp');
+  });
+
+  const content = document.getElementById('app-content');
+  content.innerHTML = `
     <div class="quiz-result-page">
       <div class="quiz-result-card ${_lesson.colorClass} rounded-[2rem] p-6">
         <div class="quiz-result-icon">
@@ -201,12 +538,12 @@ function renderResult() {
         <div class="quiz-result-stars">${starsHtml}</div>
         <div class="quiz-result-stats">
           <div class="quiz-result-stat">
-            <span class="quiz-result-stat-value">${accuracy}%</span>
-            <span class="quiz-result-stat-label">正确率</span>
+            <span class="quiz-result-stat-value">${_round}</span>
+            <span class="quiz-result-stat-label">通过轮次</span>
           </div>
           <div class="quiz-result-stat">
-            <span class="quiz-result-stat-value">${_totalCorrect}/${_totalAnswered}</span>
-            <span class="quiz-result-stat-label">答对</span>
+            <span class="quiz-result-stat-value">${accuracy}%</span>
+            <span class="quiz-result-stat-label">正确率</span>
           </div>
           <div class="quiz-result-stat">
             <span class="quiz-result-stat-value">+${xp}</span>
@@ -232,294 +569,44 @@ function renderResult() {
         </button>
       </div>
     </div>`;
-}
 
-/** 渲染回看视频提示 */
-function renderVideoHint() {
-  return `
-    <div class="quiz-video-hint glass-card rounded-[1.5rem] p-5" id="quiz-video-hint">
-      <div class="quiz-video-hint-icon">💡</div>
-      <p class="quiz-video-hint-text">连续答错了3题，要不要回去再看看视频？</p>
-      <div class="quiz-video-hint-actions">
-        <button class="quiz-video-hint-btn" data-action="rewatch-video">回看视频</button>
-        <button class="quiz-video-hint-btn quiz-video-hint-btn-secondary" data-action="continue-quiz">继续答题</button>
-      </div>
-    </div>`;
-}
-
-/* ═══════════════════════════════════════════════════
-   核心渲染
-═══════════════════════════════════════════════════ */
-
-/** 渲染当前题目状态 */
-function renderCurrentQuestion() {
-  const content = document.getElementById('app-content');
-  if (!content) return;
-
-  const q = _questions[_currentIdx];
-  if (!q) {
-    // 所有题目已答完但没通关 → 重新出题
-    refillQuestions();
-    return;
-  }
-
-  _selected = new Set();
-  _answered = false;
-  _questionStartTime = Date.now();
-
-  content.innerHTML = `
-    <div class="quiz-page">
-      ${renderProgress()}
-      ${renderQuestion(q)}
-      <div id="quiz-feedback-area"></div>
-    </div>`;
-
-  // 更新 streak 显示
-  updateStreakDisplay();
-  bindQuestionEvents();
-}
-
-/** 补充题目（题用完但还没通关） */
-function refillQuestions() {
-  const difficulty = store.getCurrentDifficulty();
-  const newQuestions = generateQuizSet(_lesson.id, difficulty, 5);
-  _questions = [..._questions, ...newQuestions];
-  renderCurrentQuestion();
-}
-
-/** 更新连续答对显示 */
-function updateStreakDisplay() {
-  const el = document.getElementById('streak-count');
-  if (el) el.textContent = _consecutiveCorrect;
-
-  const wrap = document.getElementById('quiz-streak');
-  if (wrap) {
-    wrap.classList.toggle('quiz-streak-active', _consecutiveCorrect > 0);
-  }
-}
-
-/** 更新进度条 */
-function updateProgressBar() {
-  const fill = document.getElementById('quiz-progress-fill');
-  if (fill) {
-    const pct = Math.round(((_currentIdx) / _questions.length) * 100);
-    fill.style.width = `${Math.min(pct, 100)}%`;
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   事件绑定
-═══════════════════════════════════════════════════ */
-
-function bindQuestionEvents() {
-  const optionsEl = document.getElementById('quiz-options');
-  if (!optionsEl) return;
-
-  const q = _questions[_currentIdx];
-  const multi = isMultiSelect(q);
-
-  optionsEl.addEventListener('click', e => {
-    if (_answered) return;
-
-    const btn = e.target.closest('.quiz-option');
-    if (!btn) return;
-
-    const option = btn.dataset.option;
-
-    if (multi) {
-      // 多选：toggle 选中状态
-      if (_selected.has(option)) {
-        _selected.delete(option);
-        btn.classList.remove('quiz-option-selected');
-      } else {
-        _selected.add(option);
-        btn.classList.add('quiz-option-selected');
-      }
-      // 有选择时启用确认按钮
-      const confirmBtn = document.getElementById('quiz-confirm-btn');
-      if (confirmBtn) confirmBtn.disabled = _selected.size === 0;
-    } else {
-      // 单选：清除旧选中，选中当前，自动提交
-      optionsEl.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('quiz-option-selected'));
-      _selected = new Set([option]);
-      btn.classList.add('quiz-option-selected');
-      submitAnswer();
-    }
-  });
-
-  // 多选确认按钮
-  if (multi) {
-    const confirmBtn = document.getElementById('quiz-confirm-btn');
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', () => {
-        if (_selected.size > 0 && !_answered) submitAnswer();
-      });
-    }
-  }
-}
-
-function submitAnswer() {
-  if (_selected.size === 0 || _answered) return;
-  _answered = true;
-
-  const q = _questions[_currentIdx];
-  const isCorrect = checkAnswer(q, _selected);
-  const responseTime = Date.now() - _questionStartTime;
-
-  // 更新状态
-  _totalAnswered++;
-  if (isCorrect) {
-    _totalCorrect++;
-    _consecutiveCorrect++;
-    _consecutiveWrong = 0;
-  } else {
-    _consecutiveCorrect = 0;
-    _consecutiveWrong++;
-  }
-
-  // 通过 store 更新能力指数和记录错题
-  store.updateAbility(q.difficulty, isCorrect, responseTime);
-  if (!isCorrect) {
-    store._addMistake({
-      lessonId: _lesson.id,
-      questionId: q.id,
-      questionText: q.text,
-      userAnswer: [..._selected].join('、'),
-      correctAnswer: formatCorrect(q),
-      difficulty: q.difficulty,
-    });
-  }
-
-  // 检查是否通关
-  _passed = _consecutiveCorrect >= 3;
-
-  // 更新选项样式：高亮正确答案（可能多个）
-  const correctSet = new Set(Array.isArray(q.correct) ? q.correct : [q.correct]);
-  const optionsEl = document.getElementById('quiz-options');
-  optionsEl.querySelectorAll('.quiz-option').forEach(btn => {
-    const opt = btn.dataset.option;
-    btn.classList.add('quiz-option-disabled');
-    if (correctSet.has(opt)) btn.classList.add('quiz-option-correct');
-    if (_selected.has(opt) && !correctSet.has(opt)) btn.classList.add('quiz-option-wrong');
-  });
-
-  // 隐藏多选确认按钮
-  const confirmBtn = document.getElementById('quiz-confirm-btn');
-  if (confirmBtn) confirmBtn.style.display = 'none';
-
-  // 更新 streak 显示
-  updateStreakDisplay();
-
-  // 显示反馈
-  const feedbackArea = document.getElementById('quiz-feedback-area');
-  if (feedbackArea) {
-    if (_consecutiveWrong >= 3) {
-      feedbackArea.innerHTML = renderFeedback(isCorrect, q) + renderVideoHint();
-    } else {
-      feedbackArea.innerHTML = renderFeedback(isCorrect, q);
-    }
-
-    const nextBtn = document.getElementById('quiz-next-btn');
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => {
-        if (_passed) {
-          showResult();
-        } else {
-          _currentIdx++;
-          renderCurrentQuestion();
-        }
-      }, { once: true });
-    }
-
-    bindVideoHintEvents();
-  }
-}
-
-function bindVideoHintEvents() {
-  const hint = document.getElementById('quiz-video-hint');
-  if (!hint) return;
-
-  hint.addEventListener('click', e => {
-    const action = e.target.closest('[data-action]')?.dataset.action;
-    if (action === 'rewatch-video') {
-      // 回到课程详情页
-      window.__router.navigate('lessonDetail', { lessonId: _lesson.id });
-    } else if (action === 'continue-quiz') {
-      _consecutiveWrong = 0;
-      hint.remove();
-    }
-  });
-}
-
-function showResult() {
-  const header = document.getElementById('app-header');
-  const content = document.getElementById('app-content');
-
-  // 结果页 header：保留返回按钮，回到训练营
-  header.innerHTML = `
-    <div class="quiz-header">
-      <button class="back-btn" id="result-back-btn" aria-label="返回训练营">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-      </button>
-      <div class="quiz-header-info">
-        <ph-${_lesson.icon} weight="fill" size="20" color="#7C3AED"></ph-${_lesson.icon}>
-        <span class="quiz-header-title">第${_lesson.id}课 · 通关结果</span>
-      </div>
-      <div style="width:40px"></div>
-    </div>`;
-  document.getElementById('result-back-btn').addEventListener('click', () => {
-    window.__router.navigate('trainingCamp');
-  });
-
-  content.innerHTML = renderResult();
-
-  // 绑定结果页事件
   content.addEventListener('click', e => {
     const action = e.target.closest('[data-action]')?.dataset.action;
     if (action === 'next-lesson') {
-      const nextId = _lesson.id + 1;
-      window.__router.navigate('lessonDetail', { lessonId: nextId });
+      window.__router.navigate('lessonDetail', { lessonId: _lesson.id + 1 });
     } else if (action === 'back-to-camp') {
       window.__router.navigate('trainingCamp');
     }
-  }, { once: false });
+  });
 }
 
 /* ═══════════════════════════════════════════════════
-   公开导出的视图渲染函数
+   公开导出
 ═══════════════════════════════════════════════════ */
-
-/**
- * 渲染答题页
- * @param {{ lessonId: number }} params
- */
 export function renderQuiz(params = {}) {
   const { lessonId } = params;
   _lesson = getLessonById(lessonId);
-
   if (!_lesson) {
     window.__showToast?.('未找到该课程');
     window.__router.goBack();
     return;
   }
 
-  // 初始化状态
+  // 初始化整轮状态
+  _stage = store.getStage();
+  _round = 1;
   _currentIdx = 0;
   _selected = new Set();
+  _linkPairs = {};
+  _activeLeftKey = null;
   _answered = false;
-  _consecutiveCorrect = 0;
-  _consecutiveWrong = 0;
+  _wrongInRound = 0;
   _totalCorrect = 0;
   _totalAnswered = 0;
-  _passed = false;
+  _usedIds = new Set();
 
-  // 根据能力指数选择难度，生成题目
-  const difficulty = store.getCurrentDifficulty();
-  _questions = generateQuizSet(lessonId, difficulty, 5);
+  _questions = generateLessonRound(lessonId, _stage);
+  _questions.forEach(q => _usedIds.add(q.id));
 
   if (_questions.length === 0) {
     window.__showToast?.('题目加载失败');
@@ -527,15 +614,9 @@ export function renderQuiz(params = {}) {
     return;
   }
 
-  // 渲染 Header
   const header = document.getElementById('app-header');
-  header.innerHTML = renderHeader(_lesson);
+  header.innerHTML = renderHeader();
+  header.querySelector('[data-action="quit-quiz"]').onclick = () => window.__router.goBack();
 
-  // 绑定退出按钮（用 onclick 避免重复绑定）
-  header.querySelector('[data-action="quit-quiz"]').onclick = () => {
-    window.__router.goBack();
-  };
-
-  // 渲染第一道题
   renderCurrentQuestion();
 }

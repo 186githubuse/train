@@ -23,7 +23,7 @@
 const DEFAULT_STATE = {
   // 用户基本信息
   user: {
-    grade: null,          // 年级（1~9），新用户为 null
+    grade: null,          // 年级（1~12），新用户为 null
     abilityIndex: 3.0,    // 能力指数（1.0~5.0），动态更新
     name: '',             // 新用户为空字符串
     totalStars: 0,        // 累计星星数（积分）
@@ -31,7 +31,7 @@ const DEFAULT_STATE = {
 
   // 各节课进度
   // key: lessonId (1~10)
-  // value: { passed, stars, xp, totalXp, attemptCount, videoWatched }
+  // value: { passed, stars, xp, totalXp, attemptCount, videoWatched, roundsUsed }
   lessonProgress: {},
 
   // 错题本
@@ -50,7 +50,7 @@ const DEFAULT_STATE = {
    2. 持久化工具（localStorage）
 ═══════════════════════════════════════════════════ */
 const STORAGE_KEY = 'ganjue_training_state';
-const SCHEMA_VERSION = 2; // bump 后旧数据自动清空（2026-05-14：基础训练课程重排）
+const SCHEMA_VERSION = 3; // 2026-05-15：题库重写为 K1-D3-S01 编码 + 加学段 + 答题规则改 10题/轮，旧数据全清
 
 function _load() {
   try {
@@ -106,7 +106,7 @@ const store = {
   /**
    * 新手引导完成后保存姓名和年级
    * @param {string} name
-   * @param {number} grade 1~9
+   * @param {number} grade 1~12
    */
   setUserProfile(name, grade) {
     _state.user.name = name;
@@ -117,16 +117,29 @@ const store = {
 
   /**
    * 设置用户年级，同时重置能力指数
-   * @param {number} grade 1~9
+   * @param {number} grade 1~12
    */
   setGrade(grade) {
     _state.user.grade = grade;
-    _state.user.abilityIndex = grade; // 年级即初始能力指数
+    _state.user.abilityIndex = grade;
     _save(_state);
   },
 
   getUser() {
     return { ..._state.user };
+  },
+
+  /**
+   * 学段（S/C/H）：从年级推导
+   * 1-6: S 小学；7-9: C 初中；10-12: H 高中
+   * @returns {'S'|'C'|'H'}
+   */
+  getStage() {
+    const g = _state.user.grade;
+    if (g == null) return 'S';
+    if (g <= 6) return 'S';
+    if (g <= 9) return 'C';
+    return 'H';
   },
 
   /* ─── 星星积分 ─── */
@@ -162,7 +175,7 @@ const store = {
   /**
    * 获取某节课的进度
    * @param {number} lessonId
-   * @returns {{ passed, stars, xp, totalXp, attemptCount, videoWatched }}
+   * @returns {{ passed, stars, xp, totalXp, attemptCount, videoWatched, roundsUsed }}
    */
   getProgress(lessonId) {
     return _state.lessonProgress[lessonId] ?? {
@@ -172,6 +185,7 @@ const store = {
       totalXp: 100,
       attemptCount: 0,
       videoWatched: false,
+      roundsUsed: 0,
     };
   },
 
@@ -190,10 +204,11 @@ const store = {
   /**
    * 通关一节课
    * @param {number} lessonId
-   * @param {number} stars     1~3
-   * @param {number} xp        获得的 XP
+   * @param {number} stars       1~3
+   * @param {number} xp          获得的 XP
+   * @param {number} roundsUsed  用了多少轮通过（1=一次过，2/3...=补测过）
    */
-  passLesson(lessonId, stars, xp) {
+  passLesson(lessonId, stars, xp, roundsUsed = 1) {
     const prev = this.getProgress(lessonId);
     _state.lessonProgress[lessonId] = {
       ...prev,
@@ -201,6 +216,8 @@ const store = {
       stars: Math.max(prev.stars, stars),
       xp: Math.max(prev.xp, xp),
       totalXp: 100,
+      // 取最少轮次（一次过最好），但首次记录直接写入
+      roundsUsed: prev.roundsUsed > 0 ? Math.min(prev.roundsUsed, roundsUsed) : roundsUsed,
     };
     _save(_state);
   },
