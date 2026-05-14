@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor / tooling local config
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# AI assistant per-session notes (CLAUDE.md 工作流约定：不作为主要记忆)
+memory/
+
+# Temp / cache
+*.log
+.cache/
