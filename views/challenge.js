@@ -69,10 +69,11 @@ function stopTimer() {
   }
 }
 
-// 从全题库按难度自适应抽题（只抽单选题，挑战赛不支持多选）
+// 从全题库按难度自适应抽题（只抽单选题，挑战赛不支持多选/连线）
 function buildChallengeQuestions() {
   const difficulty = store.getCurrentDifficulty();
-  const all = generateChallengeSet(difficulty, CHALLENGE_QUESTION_COUNT * 3);
+  const stage = store.getStage();
+  const all = generateChallengeSet(difficulty, CHALLENGE_QUESTION_COUNT * 3, stage);
   const singleChoice = all.filter(q => !Array.isArray(q.correct));
   return singleChoice.slice(0, CHALLENGE_QUESTION_COUNT);
 }
