@@ -156,7 +156,6 @@ export function renderLessonDetail(params = {}) {
   content.innerHTML = `
     <div class="lesson-detail-page">
       ${renderVideoSection(lesson, progress)}
-      ${renderLessonInfo(lesson)}
       ${renderKeyPoints(lesson)}
       ${renderActions(lesson, progress)}
     </div>`;

@@ -168,3 +168,31 @@ export function generateQuizSet(lessonId, currentDifficulty, count = 5) {
 export function pickRandomQuestions(lessonId, difficulty, count = 5) {
   return shuffle(getQuestions(lessonId, difficulty)).slice(0, count);
 }
+
+/**
+ * 错题本复测：同知识点 + 同难度，排除原题，随机抽 3 道
+ * @param {number} lessonId
+ * @param {1|2|3} difficulty
+ * @param {string} excludeQid  原错题的 questionId，不要抽到自己
+ * @returns {Question[]}
+ */
+export function getQuestionsByLessonAndDifficulty(lessonId, difficulty, excludeQid = '') {
+  let pool = QUESTIONS.filter(q =>
+    q.lessonId === lessonId &&
+    q.difficulty === difficulty &&
+    q.id !== excludeQid &&
+    q.qtype !== 'link'
+  );
+  // 如果同难度题不够，放宽到同知识点任意难度
+  if (pool.length < 3) {
+    const ids = new Set(pool.map(q => q.id));
+    const extra = QUESTIONS.filter(q =>
+      q.lessonId === lessonId &&
+      q.id !== excludeQid &&
+      !ids.has(q.id) &&
+      q.qtype !== 'link'
+    );
+    pool = [...pool, ...shuffle(extra)];
+  }
+  return shuffle(pool).slice(0, 3);
+}

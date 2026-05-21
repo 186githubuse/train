@@ -50,7 +50,7 @@ const DEFAULT_STATE = {
    2. 持久化工具（localStorage）
 ═══════════════════════════════════════════════════ */
 const STORAGE_KEY = 'ganjue_training_state';
-const SCHEMA_VERSION = 3; // 2026-05-15：题库重写为 K1-D3-S01 编码 + 加学段 + 答题规则改 10题/轮，旧数据全清
+const SCHEMA_VERSION = 4; // 2026-05-21：题库全量替换300题 + 四档评级 + 错题本改造（连对3题通过）
 
 function _load() {
   try {
@@ -348,7 +348,7 @@ const store = {
 
   /* ─── 错题本 ─── */
 
-  _addMistake({ lessonId, questionId, questionText, userAnswer, correctAnswer, difficulty }) {
+  _addMistake({ lessonId, questionId, questionText, userAnswer, correctAnswer, difficulty, explanation }) {
     // 同一题不重复记录（只保留最新一次）
     _state.mistakes = _state.mistakes.filter(m => m.questionId !== questionId);
     _state.mistakes.unshift({
@@ -359,9 +359,12 @@ const store = {
       userAnswer,
       correctAnswer,
       difficulty,
+      explanation: explanation || '',
       timestamp: Date.now(),
       reviewed: false,
       rewardClaimed: false,
+      status: 'open',       // open | cleared
+      reviewStreak: 0,      // 连续答对次数（达到3即cleared）
     });
     _save(_state);
   },
@@ -373,15 +376,46 @@ const store = {
     return [..._state.mistakes];
   },
 
+  getOpenMistakes() {
+    return _state.mistakes.filter(m => m.status === 'open');
+  },
+
+  getClearedMistakes() {
+    return _state.mistakes.filter(m => m.status === 'cleared');
+  },
+
   markMistakeReviewed(id) {
     const m = _state.mistakes.find(m => m.id === id);
     if (m && !m.rewardClaimed) {
       m.reviewed = true;
       m.rewardClaimed = true;
-      this.addStars(3); // 每道错题只能领一次奖励
+      this.addStars(3);
       _save(_state);
     } else if (m) {
       m.reviewed = true;
+      _save(_state);
+    }
+  },
+
+  incrementReviewStreak(id) {
+    const m = _state.mistakes.find(m => m.id === id);
+    if (!m) return;
+    m.reviewStreak = (m.reviewStreak || 0) + 1;
+    if (m.reviewStreak >= 3) {
+      m.status = 'cleared';
+      m.reviewed = true;
+      if (!m.rewardClaimed) {
+        m.rewardClaimed = true;
+        this.addStars(3);
+      }
+    }
+    _save(_state);
+  },
+
+  resetReviewStreak(id) {
+    const m = _state.mistakes.find(m => m.id === id);
+    if (m) {
+      m.reviewStreak = 0;
       _save(_state);
     }
   },

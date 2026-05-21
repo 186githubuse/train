@@ -283,6 +283,28 @@ body {
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18));
 }
 
+/* 即将上线状态（魔法机器临时锁）—— 整组移除即可恢复 */
+.nav-item.nav-coming-soon { opacity: 0.55; }
+.nav-item.nav-coming-soon .nav-icon-wrap {
+  background: rgba(180, 180, 195, 0.10);
+  border-color: rgba(180, 180, 195, 0.18);
+}
+.nav-item.nav-coming-soon .nav-icon-wrap svg { stroke: #B8B0C8; }
+.nav-item.nav-coming-soon .nav-soon-badge {
+  position: absolute;
+  top: -6px; right: -14px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(135deg, #FBA5C0 0%, #C084FC 100%);
+  box-shadow: 0 2px 6px rgba(192, 132, 252, 0.35);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* ===== 11. Safe area ===== */
 .safe-area-pb {
   padding-bottom: max(8px, env(safe-area-inset-bottom));
@@ -576,6 +598,7 @@ body {
 .quiz-feedback-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .quiz-feedback-title { font-size: 15px; font-weight: 800; margin: 0; }
 .quiz-feedback-hint { font-size: 12px; color: #6B7280; margin: 2px 0 0; line-height: 1.5; }
+.quiz-feedback-explain { font-size: 12.5px; color: #4B5563; margin: 6px 0 0; line-height: 1.65; padding: 8px 10px; background: rgba(255,255,255,0.55); border-radius: 10px; border-left: 3px solid rgba(99,102,241,0.45); }
 .quiz-multi-tip { font-size: 12px; color: #7C3AED; font-weight: 600; margin: 6px 0 0; opacity: 0.85; }
 .quiz-confirm-btn {
   display: flex; align-items: center; justify-content: center;

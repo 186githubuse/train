@@ -1,23 +1,23 @@
 /**
  * views/quiz.js
  * ─────────────────────────────────────────────────────────────
- * 基础训练 — 答题页（5.13 增补规则版）
+ * 基础训练 — 答题页（5.19 规则版）
  *
  * 答题规则：
  *   • 每轮 10 题（D1×3 + D2×3 + D3×4，D3 按学生学段抽）
- *   • 答对 → 自动下一题；答错 → 显示正确答案+提示，再下一题
- *   • 一轮 10 题答完后：
- *       错 ≤ 3 → 通关
- *       错 > 3 → 自动追加 3 题补测，循环至错 ≤ 3
- *   • 最多 5 轮保险（再过不去强制提示回看视频）
- *   • 通过轮次评星：1 轮 = 3 星，2 轮 = 2 星，≥3 轮 = 1 星
+ *   • 答对 → 自动下一题；答错 → 显示正确答案+解析，再下一题
+ *   • 一轮 10 题答完后按错题数评级：
+ *       错 ≤ 2 → 优秀（3⭐）
+ *       错 = 3 → 良好（2⭐）
+ *       错 = 4 → 及格（1⭐）
+ *       错 ≥ 5 → 不及格（0⭐，建议回看视频）
  *
  * 题型支持：single（单选）、multi（多选）、judge（判断/2 选项）、link（连线）
  * ─────────────────────────────────────────────────────────────
  */
 
 import { getLessonById } from '../js/data/lessons.js';
-import { generateLessonRound, generateRetryRound } from '../js/data/questions/index.js';
+import { generateLessonRound } from '../js/data/questions/index.js';
 import { store } from '../js/store.js';
 
 /* ═══════════════════════════════════════════════════
@@ -25,18 +25,16 @@ import { store } from '../js/store.js';
 ═══════════════════════════════════════════════════ */
 let _lesson = null;
 let _stage = 'S';
-let _round = 1;                  // 当前轮次（1=首轮 10 题，2+=补测 3 题）
 let _questions = [];             // 当前轮的题目
 let _currentIdx = 0;
 let _selected = new Set();       // 单选/多选/判断用
 let _linkPairs = {};             // 连线题：{ '①':'B', ... }
 let _activeLeftKey = null;       // 连线题：当前选中的左侧 key
 let _answered = false;           // 当前题是否已提交
-let _wrongInRound = 0;           // 当前轮的错题数
+let _wrongInRound = 0;           // 错题数
 let _totalCorrect = 0;           // 全程累计答对
 let _totalAnswered = 0;          // 全程累计答题
-let _usedIds = new Set();        // 已抽过的题 id（避免补测重复）
-const MAX_ROUND = 5;             // 最多 5 轮保险
+let _usedIds = new Set();        // 已抽过的题 id
 
 /* ═══════════════════════════════════════════════════
    答案判定
@@ -61,18 +59,18 @@ function checkAnswer(q) {
 }
 
 function formatCorrect(q) {
-  if (q.qtype === 'multi') return q.correct.join('、');
+  if (q.qtype === 'multi') return q.correct.map(k => `${k}. ${q.options[k]}`).join('、');
   if (q.qtype === 'link') {
     return Object.entries(q.correct).map(([l, r]) => `${l}-${r}`).join('，');
   }
-  return q.correct;
+  return `${q.correct}. ${q.options[q.correct] || q.correct}`;
 }
 
 function formatUserAnswer(q) {
   if (q.qtype === 'link') {
     return Object.entries(_linkPairs).map(([l, r]) => `${l}-${r}`).join('，');
   }
-  return [..._selected].sort().join('、');
+  return [..._selected].sort().map(k => `${k}. ${q.options[k] || k}`).join('、');
 }
 
 /* ═══════════════════════════════════════════════════
@@ -93,7 +91,7 @@ function renderHeader() {
         <span class="quiz-header-title">第${_lesson.id}课 · ${_lesson.title}</span>
       </div>
       <div class="quiz-streak" id="quiz-streak">
-        <span id="round-label">${_round === 1 ? '首轮' : `补测 ${_round - 1}`}</span>
+        <span id="round-label">答题中</span>
       </div>
     </div>`;
 }
@@ -119,7 +117,7 @@ function renderQuestion(q) {
 }
 
 function renderChoice(q) {
-  const letters = ['A', 'B', 'C', 'D'];
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   const optionsHtml = letters.map(letter => {
     if (!q.options || !q.options[letter]) return '';
     return `
@@ -181,8 +179,11 @@ function renderFeedback(isCorrect, q) {
 
   const title = isCorrect ? '答对了！' : '再想想';
   const cls = isCorrect ? 'quiz-feedback-correct' : 'quiz-feedback-wrong';
-  const hintHtml = !isCorrect
-    ? `<p class="quiz-feedback-hint">正确答案：${correctDisplay}${q.hint ? '。' + q.hint : ''}</p>`
+  const answerLine = !isCorrect
+    ? `<p class="quiz-feedback-hint">正确答案：${correctDisplay}</p>`
+    : '';
+  const explainLine = q.explanation
+    ? `<p class="quiz-feedback-explain">${q.explanation}</p>`
     : '';
   const isLast = _currentIdx === _questions.length - 1;
 
@@ -191,7 +192,8 @@ function renderFeedback(isCorrect, q) {
       <div class="quiz-feedback-icon">${icon}</div>
       <div>
         <p class="quiz-feedback-title">${title}</p>
-        ${hintHtml}
+        ${answerLine}
+        ${explainLine}
       </div>
     </div>
     <button class="quiz-next-btn ${_lesson.colorClass}" id="quiz-next-btn">
@@ -341,6 +343,7 @@ function submitAnswer() {
       userAnswer: formatUserAnswer(q),
       correctAnswer: formatCorrect(q),
       difficulty: q.difficulty,
+      explanation: q.explanation || '',
     });
   }
 
@@ -399,66 +402,31 @@ function highlightAnswer(q, isCorrect) {
 }
 
 /* ═══════════════════════════════════════════════════
-   一轮结束 → 判定
+   一轮结束 → 四档评级（5.19 规则）
+   错 ≤ 2 → 优秀 3⭐ | 错 = 3 → 良好 2⭐ | 错 = 4 → 及格 1⭐ | 错 ≥ 5 → 不及格 0⭐
 ═══════════════════════════════════════════════════ */
 function finishRound() {
-  // 通过条件：错 ≤ 3
-  if (_wrongInRound <= 3) {
-    showResult(true);
-    return;
+  if (_wrongInRound >= 5) {
+    showFailResult();
+  } else {
+    showResult();
   }
-  // 不过：超过 5 轮强制提示视频
-  if (_round >= MAX_ROUND) {
-    showVideoSuggest();
-    return;
-  }
-  // 否则进入下一轮补测
-  showRetryHint();
 }
 
-function showRetryHint() {
+function showFailResult() {
   const content = document.getElementById('app-content');
   if (!content) return;
-  content.innerHTML = `
-    <div class="quiz-page">
-      <div class="quiz-result-card glass-card rounded-[2rem] p-6" style="text-align:center">
-        <div class="quiz-result-icon" style="background:linear-gradient(135deg,#FBBF77,#F4977C)">
-          <ph-arrow-clockwise weight="fill" size="48" color="white"></ph-arrow-clockwise>
-        </div>
-        <h2 class="quiz-result-title">本轮 ${_questions.length} 题，错了 ${_wrongInRound} 题</h2>
-        <p class="quiz-result-subtitle">差一点点就过了！再来 3 道补测题</p>
-        <div class="quiz-result-actions">
-          <button class="quiz-result-btn-primary ${_lesson.colorClass}" id="btn-retry">开始补测</button>
-          <button class="quiz-result-btn-secondary" id="btn-quit-retry">放弃返回</button>
-        </div>
-      </div>
-    </div>`;
-  document.getElementById('btn-retry').addEventListener('click', () => {
-    _round++;
-    _wrongInRound = 0;
-    _currentIdx = 0;
-    _questions = generateRetryRound(_lesson.id, _stage, _usedIds);
-    _questions.forEach(q => _usedIds.add(q.id));
-    // 补测一轮通过条件：补测 3 题里错 ≤ 1（参考：3 题中超半数错就再补）
-    // 但按文档原意是"错 ≤ 3 通过"——补测只有 3 题，等于 3 题全错才不过
-    renderCurrentQuestion();
-  });
-  document.getElementById('btn-quit-retry').addEventListener('click', () => {
-    window.__router.navigate('trainingCamp');
-  });
-}
 
-function showVideoSuggest() {
-  const content = document.getElementById('app-content');
-  if (!content) return;
+  store.passLesson(_lesson.id, 0, 0, 1);
+
   content.innerHTML = `
     <div class="quiz-page">
       <div class="quiz-result-card glass-card rounded-[2rem] p-6" style="text-align:center">
         <div class="quiz-result-icon" style="background:linear-gradient(135deg,#7DA9F0,#A78BFA)">
           <ph-video weight="fill" size="48" color="white"></ph-video>
         </div>
-        <h2 class="quiz-result-title">这节课需要再听一遍</h2>
-        <p class="quiz-result-subtitle">已经测了 ${MAX_ROUND} 轮，建议先回看视频</p>
+        <h2 class="quiz-result-title">本次测试未通过</h2>
+        <p class="quiz-result-subtitle">错了 ${_wrongInRound} 题，建议先回看本节课视频再来挑战</p>
         <div class="quiz-result-actions">
           <button class="quiz-result-btn-primary ${_lesson.colorClass}" id="btn-rewatch">回看视频</button>
           <button class="quiz-result-btn-secondary" id="btn-back-camp">返回训练营</button>
@@ -474,24 +442,25 @@ function showVideoSuggest() {
 }
 
 /* ═══════════════════════════════════════════════════
-   通关结果页
+   通关结果页（错 ≤ 4 进入此页）
 ═══════════════════════════════════════════════════ */
 function showResult() {
-  // 评星：1 轮 = 3 星，2 轮 = 2 星，≥3 轮 = 1 星
+  // 四档评级：错≤2 优秀3⭐ / 错=3 良好2⭐ / 错=4 及格1⭐
   let stars = 1;
-  if (_round === 1) stars = 3;
-  else if (_round === 2) stars = 2;
+  let grade = '及格';
+  if (_wrongInRound <= 2) { stars = 3; grade = '优秀'; }
+  else if (_wrongInRound === 3) { stars = 2; grade = '良好'; }
 
   const accuracy = _totalAnswered > 0 ? Math.round(_totalCorrect / _totalAnswered * 100) : 0;
   const xp = Math.min(100, _totalCorrect * 8 + stars * 10);
 
   const prevProgress = store.getProgress(_lesson.id);
   const isFirstPass = !prevProgress.passed;
-  store.passLesson(_lesson.id, stars, xp, _round);
+  store.passLesson(_lesson.id, stars, xp, 1);
 
   if (isFirstPass) {
     store.addStars(10);
-    if (_round === 1 && _wrongInRound === 0) store.addStars(5); // 一轮 0 错额外 +5
+    if (_wrongInRound === 0) store.addStars(5);
   }
 
   const starsHtml = Array.from({ length: 3 }, (_, i) => {
@@ -533,13 +502,13 @@ function showResult() {
         <div class="quiz-result-icon">
           <ph-${_lesson.icon} weight="fill" size="48" color="rgba(255,255,255,0.95)"></ph-${_lesson.icon}>
         </div>
-        <h2 class="quiz-result-title">恭喜通关！</h2>
+        <h2 class="quiz-result-title">恭喜通过！成绩${grade}</h2>
         <p class="quiz-result-subtitle">第${_lesson.id}课 · ${_lesson.title}</p>
         <div class="quiz-result-stars">${starsHtml}</div>
         <div class="quiz-result-stats">
           <div class="quiz-result-stat">
-            <span class="quiz-result-stat-value">${_round}</span>
-            <span class="quiz-result-stat-label">通过轮次</span>
+            <span class="quiz-result-stat-value">${grade}</span>
+            <span class="quiz-result-stat-label">评级</span>
           </div>
           <div class="quiz-result-stat">
             <span class="quiz-result-stat-value">${accuracy}%</span>
@@ -550,6 +519,7 @@ function showResult() {
             <span class="quiz-result-stat-label">XP</span>
           </div>
         </div>
+        ${_wrongInRound > 0 ? `<p class="quiz-result-hint">记得去错题本改错，巩固薄弱知识点</p>` : ''}
       </div>
 
       <div class="quiz-result-actions">
@@ -594,7 +564,6 @@ export function renderQuiz(params = {}) {
 
   // 初始化整轮状态
   _stage = store.getStage();
-  _round = 1;
   _currentIdx = 0;
   _selected = new Set();
   _linkPairs = {};
