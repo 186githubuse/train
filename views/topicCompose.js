@@ -1,11 +1,11 @@
 /**
  * views/topicCompose.js
  * ─────────────────────────────────────────────────────────────
- * 专题训练 — 题型3：导图引导连句成段
+ * 专题训练 — D 类：参照树形结构图，按"总-分-分-分"四段式书写成文
  * 流程：
- *   1. 展示图片 + 思维导图 + 写作要求
- *   2. 学生在文本框里写一段 150-250 字
- *   3. 提交后调用 AI 按 4 维评分，展示反馈
+ *   1. 展示图片 + 树形结构图 + 四段式写作要求
+ *   2. 学生在文本框里写一篇短文
+ *   3. 提交后调用 AI 按 4 维（组成完整 30 / 顺序正确 30 / 感觉点准确 30 / 语句通顺 10）评分
  *   4. 完成后记录积分 + 回训练营
  * ─────────────────────────────────────────────────────────────
  */
@@ -130,29 +130,34 @@ async function compressImage(file) {
   });
 }
 
-const GRADING_SYSTEM_PROMPT = `你是一位耐心温柔的小学语文老师，正在批改一位小学生写的描写稿纸的片段。
-【评分原则】
+function buildGradingSystemPrompt() {
+  const objName = _sub.title;
+  return `你是一位耐心温柔的小学语文老师，正在批改一位小学生写的描写${objName}的短文。
+
+【整体原则】
 - 鼓励为主，诊断具体。不要笼统说"写得好"，要指出好在哪里。
 - 如果有问题，语气要柔和，用"如果…就更好了"这样的句式。
 - 不要给负面评价（如"很差""很糟糕"），改用"再加点…会更完整"。
+- 本期训练核心是掌握感觉方法与有序描写，不要求使用比喻、拟人等修辞手法，语言应平实、准确、具体。
 
 【评分维度】（总分 100）
-1. 组成完整性（30分）：是否写出稿纸的主要组成部分（白纸 + 300 小红格等）
-2. 顺序合理性（30分）：是否按"外形 → 手摸 → 耳听 → 鼻闻 → 作用"的顺序或其他合理顺序
-3. 感觉点准确性（30分）：声音/声息（哗啦=声音、沙沙=声息）、气味/气息（浓=气味、淡=气息）等区分是否准确
-4. 语言通顺度（10分）：语句是否流畅
+1. 组成完整 (30 分)：全文清晰体现"看组成 → 排顺序 → 再感觉"的逻辑。是否按"总-分-分-分"四段结构书写：第一段总起写组成，后续每段分别描写一个主要部分。
+2. 顺序正确 (30 分)：各部分描写顺序与树形结构图中确定的"由下到上"一致；段落内部对特征的描写有序。
+3. 感觉点准确 (30 分)：是否完整、准确地包含树形结构图中的全部感觉点（如颜色、形状、触感、声音、气息、作用等）。
+4. 语句通顺 (10 分)：用词准确，句子衔接流畅，文意连贯，无语病。
 
 【输出格式】严格按 JSON 返回，不要加任何其他文字：
 {
   "total": 总分数字,
-  "scores": { "组成完整性": 数字, "顺序合理性": 数字, "感觉点准确性": 数字, "语言通顺度": 数字 },
+  "scores": { "组成完整": 数字, "顺序正确": 数字, "感觉点准确": 数字, "语句通顺": 数字 },
   "highlights": ["写得好的地方1(具体)", "写得好的地方2"],
   "suggestions": ["如果..就更好(具体)", "可以再加..."],
   "encouragement": "一句温暖的鼓励话"
 }`;
+}
 
 async function gradeEssay(text) {
-  const prompt = `这是一位小学生写的描写"稿纸"的片段，请按照上述 4 维标准评分：
+  const prompt = `这是一位小学生写的描写"${_sub.title}"的短文，请按照上述 4 维标准评分：
 
 【学生作品】
 ${text}
@@ -160,7 +165,7 @@ ${text}
 请严格按 JSON 格式返回评分结果。`;
   const raw = await callLLM(
     [{ role: 'user', content: prompt }],
-    GRADING_SYSTEM_PROMPT,
+    buildGradingSystemPrompt(),
     900
   );
   const match = raw.match(/\{[\s\S]*\}/);
@@ -181,15 +186,15 @@ function renderHeader() {
       </button>
       <div class="quiz-header-info">
         <ph-pencil-simple weight="fill" size="20" color="#7C3AED"></ph-pencil-simple>
-        <span class="quiz-header-title">${_sub.title} · 连句成段</span>
+        <span class="quiz-header-title">${_sub.title} · D 类·书写成文</span>
       </div>
       <div class="quiz-streak" style="visibility:hidden">.</div>
     </div>`;
 }
 
-function renderMindMap() {
-  const mm = _task.mindMap;
-  const branches = mm.branches.map(b => {
+function renderTreeMap() {
+  const tm = _task.treeMap;
+  const branches = tm.branches.map(b => {
     const children = b.children.map(c => `<li class="tc-mm-leaf">${c.name}</li>`).join('');
     return `
       <div class="tc-mm-branch" style="--branch-color:${b.color}">
@@ -200,7 +205,7 @@ function renderMindMap() {
 
   return `
     <div class="tc-mindmap">
-      <div class="tc-mm-root">${mm.root}</div>
+      <div class="tc-mm-root">${tm.root}</div>
       <div class="tc-mm-branches">${branches}</div>
     </div>`;
 }
@@ -238,9 +243,9 @@ function renderWriteArea() {
       <textarea
         id="tc-essay"
         class="tc-essay-input"
-        placeholder="看着上面的思维导图，按顺序把你看到的、摸到的、听到的、闻到的、能用来做什么，一条条写下来吧～&#10;&#10;也可以点上方相机图标拍下手写内容自动识别～"
-        rows="10"
-        maxlength="500"></textarea>
+        placeholder="参照上方树形结构图，按"总-分-分-分"四段式写一篇短文：&#10;第一段总起写组成 → 后面每段分别描写一个部位 → 包含图中所有感觉点&#10;&#10;也可以点上方相机图标拍下手写内容自动识别～"
+        rows="12"
+        maxlength="800"></textarea>
       <button class="tc-submit-btn ${_topic.colorClass}" id="tc-submit-btn" disabled>
         提交评分
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
@@ -269,7 +274,7 @@ function renderGradingResult(result, text) {
   store.addStars(bonus);
 
   const scoreBars = Object.entries(result.scores || {}).map(([dim, s]) => {
-    const max = dim === '语言通顺度' ? 10 : 30;
+    const max = dim === '语句通顺' ? 10 : 30;
     const pct = Math.round((s / max) * 100);
     return `
       <div class="tc-score-row">
@@ -367,7 +372,7 @@ export function renderTopicCompose(params = {}) {
   const { topicId, subId, score = 0, total = 0 } = params;
   _topic = getTopic(topicId);
   _sub = getSub(topicId, subId);
-  _task = _sub?.type3;
+  _task = _sub?.typeD;
   _quizScore = Number(score) || 0;
   _quizTotal = Number(total) || 0;
 
@@ -394,7 +399,7 @@ export function renderTopicCompose(params = {}) {
 function renderWritePhase() {
   const content = document.getElementById('app-content');
   const recap = _quizTotal > 0
-    ? `<div class="tc-recap">前面答对 <b>${_quizScore}</b> / ${_quizTotal} 题，现在用思维导图连成一段话吧！</div>`
+    ? `<div class="tc-recap">前面 A/B/C 三类共答对 <b>${_quizScore}</b> / ${_quizTotal} 题，现在对照下方树形结构图，按四段式写一篇短文吧！</div>`
     : '';
 
   content.innerHTML = `
@@ -403,7 +408,7 @@ function renderWritePhase() {
       ${recap}
       <h2 class="tc-page-title">${_task.title}</h2>
       ${renderRequirements()}
-      ${renderMindMap()}
+      ${renderTreeMap()}
       ${renderWriteArea()}
     </div>`;
 
@@ -414,13 +419,13 @@ function renderWritePhase() {
   textarea.addEventListener('input', () => {
     const len = textarea.value.trim().length;
     countEl.textContent = len;
-    submitBtn.disabled = len < 80; // 至少 80 字才允许提交
+    submitBtn.disabled = len < 120; // 四段式短文，至少 120 字才允许提交
   });
 
   submitBtn.addEventListener('click', async () => {
     const text = textarea.value.trim();
-    if (text.length < 80) {
-      window.__showToast?.('再多写一点吧，至少 80 字哦');
+    if (text.length < 120) {
+      window.__showToast?.('再多写一点吧，至少 120 字哦');
       return;
     }
     await submitForGrading(text);
@@ -479,7 +484,7 @@ async function handleOcrUpload(file) {
 
     const len = textarea.value.trim().length;
     if (countEl) countEl.textContent = len;
-    if (submitBtn) submitBtn.disabled = len < 80;
+    if (submitBtn) submitBtn.disabled = len < 120;
 
     status.className = 'tc-ocr-status tc-ocr-success';
     status.innerHTML = `<ph-check-circle weight="fill" size="16" color="#10B981"></ph-check-circle> 识别完成！可以修改后再提交`;

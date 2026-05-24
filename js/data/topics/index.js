@@ -3,16 +3,19 @@
  * ─────────────────────────────────────────────────────────────
  * 专题训练数据层入口
  * 6 大模块：静物 → 植物 → 动物 → 景物 → 人物 → 事件
- * （文档：感觉训练专题模块开发大纲 v3.0）
+ * （文档：感觉训练专题模块开发大纲 5.23 版）
  *
  * 每个模块包含若干 sub（子内容），按难度递增排列：
- *   静物：稿纸 → 台灯/书包/铅笔盒 → 橘子/西瓜/菠萝
+ *   静物：台灯 → 柳树 → 书包 → 笔袋 → 橘子（待补）
  *
- * 子内容数据格式见 topics/jingwu/gaozhi.js
+ * 子内容数据格式见 topics/jingwu/taideng.js
  * ─────────────────────────────────────────────────────────────
  */
 
-import { GAOZHI } from './jingwu/gaozhi.js';
+import { TAIDENG } from './jingwu/taideng.js';
+import { SHUBAO } from './jingwu/shubao.js';
+import { BIDAI } from './jingwu/bidai.js';
+import { LIUSHU } from './jingwu/liushu.js';
 
 /** 专题模块定义（含子内容） */
 export const TOPICS = [
@@ -24,9 +27,21 @@ export const TOPICS = [
     colorClass: 'macaron-rose',
     textColor: '#C4566E',
     available: true,
+    intro: {
+      videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
+      title: '什么是静物描写？',
+      points: [
+        '静物 = 静止不动的物品（台灯、书包、笔袋、水果……）',
+        '核心方法：感觉三步法（看组成 → 排顺序 → 再感觉）',
+        '感觉工具：五感 15 个基本感觉点全口径扫描',
+        '写作目标：总-分-分-分四段式，平实准确、有序描写',
+      ],
+    },
     subs: [
-      GAOZHI,
-      { id: 'taideng', title: '台灯/书包/铅笔盒', subtitle: '组合结构，功能明确', comingSoon: true },
+      TAIDENG,
+      LIUSHU,
+      SHUBAO,
+      BIDAI,
       { id: 'juzi', title: '橘子/西瓜/菠萝', subtitle: '有层次的水果，引入味觉嗅觉', comingSoon: true },
     ],
   },

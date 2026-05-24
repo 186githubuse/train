@@ -23,7 +23,14 @@ function initNavigation() {
 
   nav.addEventListener('click', e => {
     const btn = e.target.closest('.nav-item[data-view]');
-    if (btn) navigate(btn.dataset.view);
+    if (!btn) return;
+    // 暂未上线的入口：拦截点击，弹 Toast。功能代码全部保留，
+    // 恢复时去掉按钮上的 data-coming-soon 属性即可。
+    if (btn.dataset.comingSoon === '1') {
+      window.__showToast?.('魔法机器即将上线，敬请期待 ✨');
+      return;
+    }
+    navigate(btn.dataset.view);
   });
 }
 

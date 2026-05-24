@@ -31,10 +31,11 @@ function renderHeader(topic) {
 
 function renderSubCard(sub, topic, idx) {
   const locked = !!sub.comingSoon;
-  const t1 = sub.type1?.length || 0;
-  const t2 = sub.type2?.length || 0;
-  const t3 = sub.type3 ? 1 : 0;
-  const totalCount = t1 + t2 + t3;
+  const tA = sub.typeA?.length || 0;
+  const tB = sub.typeB?.length || 0;
+  const tC = sub.typeC?.length || 0;
+  const tD = sub.typeD ? 1 : 0;
+  const choiceCount = tA + tB + tC;
 
   if (locked) {
     return `
@@ -61,8 +62,8 @@ function renderSubCard(sub, topic, idx) {
           <h3 class="sub-card-title">${sub.title}</h3>
           <p class="sub-card-sub sub-card-sub-light">${sub.subtitle || ''}</p>
           <div class="sub-card-meta">
-            <span><ph-list-bullets weight="bold" size="12" color="rgba(255,255,255,0.9)"></ph-list-bullets> ${t1 + t2} 道题</span>
-            ${t3 ? `<span><ph-pencil-simple weight="bold" size="12" color="rgba(255,255,255,0.9)"></ph-pencil-simple> 1 篇练笔</span>` : ''}
+            <span><ph-list-bullets weight="bold" size="12" color="rgba(255,255,255,0.9)"></ph-list-bullets> ${choiceCount} 道选择题</span>
+            ${tD ? `<span><ph-pencil-simple weight="bold" size="12" color="rgba(255,255,255,0.9)"></ph-pencil-simple> 1 篇书写</span>` : ''}
           </div>
         </div>
       </div>
@@ -77,7 +78,7 @@ function renderSubCard(sub, topic, idx) {
 }
 
 export function renderTopicDetail(params = {}) {
-  const { topicId } = params;
+  const { topicId, phase } = params;
   const topic = getTopic(topicId);
 
   if (!topic) {
@@ -92,6 +93,75 @@ export function renderTopicDetail(params = {}) {
   header.innerHTML = renderHeader(topic);
   header.style.display = '';
 
+  // phase === 'list' 时直接显示子内容列表
+  if (phase === 'list') {
+    renderListPhase(topic, topicId, content, header);
+    return;
+  }
+
+  // 默认：介绍页（视频 + 知识点 + 开始按钮）
+  if (topic.intro) {
+    renderIntroPhase(topic, topicId, content, header);
+  } else {
+    // 没有 intro 的模块直接显示列表
+    renderListPhase(topic, topicId, content, header);
+  }
+}
+
+function renderIntroPhase(topic, topicId, content, header) {
+  const points = topic.intro.points.map((p, i) => `
+    <div class="key-point-item" style="animation-delay: ${i * 80}ms">
+      <div class="key-point-index">${i + 1}</div>
+      <div class="key-point-text">${p}</div>
+    </div>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="topic-detail-page">
+      <div class="topic-video-section glass-card rounded-[1.5rem] overflow-hidden mb-4">
+        <video
+          class="topic-intro-video"
+          src="${topic.intro.videoUrl}"
+          controls
+          playsinline
+          preload="metadata"
+        ></video>
+      </div>
+      <div class="key-points-section">
+        <h3 class="section-title">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          ${topic.intro.title}
+        </h3>
+        <div class="key-points-list">
+          ${points}
+        </div>
+      </div>
+      <button class="topic-start-btn ${topic.colorClass}" id="topic-start-btn">
+        <span class="topic-start-btn-text">选择静物开始答题</span>
+        <svg class="topic-start-btn-arrow" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>`;
+
+  header.addEventListener('click', e => {
+    if (e.target.closest('[data-action="go-back"]')) {
+      window.__router.goBack();
+    }
+  });
+
+  document.getElementById('topic-start-btn')?.addEventListener('click', () => {
+    window.__router.navigate('topicDetail', { topicId, phase: 'list' });
+  });
+}
+
+function renderListPhase(topic, topicId, content, header) {
   const cards = topic.subs.map((sub, i) => renderSubCard(sub, topic, i)).join('');
 
   content.innerHTML = `
@@ -100,17 +170,16 @@ export function renderTopicDetail(params = {}) {
         <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.95)"></ph-${topic.icon}>
         <div>
           <h2 class="text-white font-black text-[18px] leading-tight">
-            一共 ${topic.subs.length} 个子内容
+            选择一个静物
           </h2>
           <p class="text-white/80 text-[12px] mt-1 leading-relaxed">
-            由浅入深逐步练习，建议依次完成
+            共 ${topic.subs.length} 个子内容，由浅入深逐步练习
           </p>
         </div>
       </div>
       <div class="sub-card-list">${cards}</div>
     </div>`;
 
-  // 事件绑定
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="go-back"]')) {
       window.__router.goBack();

@@ -93,8 +93,8 @@
           <span>训练营</span>
         </button>
 
-        <!-- 魔法机器 -->
-        <button class="nav-item" data-view="magicMachine" aria-label="魔法机器">
+        <!-- 魔法机器（暂未上线，data-coming-soon="1" 拦截，删掉此属性 + nav-coming-soon class 即可恢复） -->
+        <button class="nav-item nav-coming-soon" data-view="magicMachine" data-coming-soon="1" aria-label="魔法机器（即将上线）">
           <div class="nav-icon-wrap">
             <!-- 机器人图标 -->
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -105,6 +105,7 @@
               <circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/>
               <path d="M9.5 18h5"/>
             </svg>
+            <span class="nav-soon-badge">即将上线</span>
           </div>
           <span>魔法机器</span>
         </button>

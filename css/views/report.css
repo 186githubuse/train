@@ -161,7 +161,12 @@
 .tag-review { background: rgba(251,146,60,0.12); color: #EA580C; }
 
 /* ── 快捷入口（全宽横条） ── */
-.report-quick-actions { margin-top: 16px; }
+.report-quick-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .report-action-btn {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
   padding: 18px 20px; border-radius: 20px; border: none;

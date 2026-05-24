@@ -24,11 +24,15 @@ Flat, feature-grouped layout with no build output directory. Source files are se
 │       ├── courseLogic.js  # Domain logic: 15 sense points, prompts, ability scoring
 │       ├── questions/      # Basic-training quiz bank (split into 10 files)
 │       │   ├── index.js    # Aggregates Q01..Q10, exports QUESTIONS + helpers
-│       │   └── q01.js .. q10.js   # 15 questions per lesson, lessonId matches filename
+│       │   └── q01.js .. q10.js   # 30 questions per lesson (D1×9+D2×9+D3×12 含 S/C/H 学段)，K1-D3-S01 编码
 │       └── topics/         # Topic-training quiz bank
-│           ├── index.js    # 6 topic modules entry
+│           ├── index.js    # 6 topic modules entry (only 静物 enabled)
 │           └── jingwu/
-│               └── gaozhi.js  # Gaozhi (writing-paper) full type1/type2/type3 set
+│               ├── taideng.js  # Desk lamp · typeA/B/C/D
+│               ├── liushu.js   # Willow tree · typeA/B/C/D
+│               ├── shubao.js   # Backpack · typeA/B/C/D
+│               ├── bidai.js    # Pencil case · typeA/B/C/D
+│               └── gaozhi.js   # Writing paper (deprecated · kept as archive, not wired)
 │
 ├── views/                  # One file per route/screen
 │   ├── onboarding.js       # Registration / login (3-step flow)
@@ -73,7 +77,7 @@ Flat, feature-grouped layout with no build output directory. Source files are se
 - Purpose: Pure data and domain logic — no DOM, no side effects
 - Contains: Exported constants and pure functions
 - Key files: `lessons.js`, `courseLogic.js`, `questions/index.js`, `topics/index.js`
-- Note: Quiz bank is split per lesson under `questions/q01.js`..`q10.js`. Each file declares `lessonId` matching its filename. Topics are split under `topics/<module>/<sub>.js`; only `jingwu/gaozhi.js` is wired up so far, the other 5 modules are placeholders.
+- Note: Quiz bank is split per lesson under `questions/q01.js`..`q10.js`. Each file declares `lessonId` matching its filename. Topics are split under `topics/<module>/<sub>.js`; 4 静物 sub-contents (台灯/柳树/书包/笔袋) are wired up via `typeA/B/C/D` schema. The other 5 top-level modules (植物/动物/景物/人物/事件) are placeholders. Old `jingwu/gaozhi.js` (type1/2/3 schema) is kept as archive but not imported.
 
 **`views/`:**
 - Purpose: One module per screen; each exports a single `render*()` function

@@ -182,7 +182,7 @@ function buildQuizHTML() {
   const pct = Math.round((_currentIdx / _questions.length) * 100);
   const elapsed = Date.now() - _startTime;
 
-  const options = ['A', 'B', 'C', 'D'].map(letter => {
+  const options = ['A', 'B', 'C', 'D', 'E', 'F'].map(letter => {
     if (!q.options[letter]) return '';
     let cls = 'ch-option';
     if (_answered) {

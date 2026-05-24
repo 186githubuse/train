@@ -25,11 +25,15 @@ js/
   data/
     lessons.js          # 10 节课定义
     courseLogic.js      # 课程核心教学逻辑
-    questions/          # 基础训练题库（150题拆分到 q01~q10.js）
+    questions/          # 基础训练题库（297题拆分到 q01~q10.js，每课30题）
     topics/             # 专题训练题库
-      index.js          # 6 模块入口（静物→植物→动物→景物→人物→事件）
+      index.js          # 6 模块入口（静物→植物→动物→景物→人物→事件，目前仅静物开放）
       jingwu/           # 静物专题
-        gaozhi.js       # 稿纸完整题库（type1/type2/type3）
+        taideng.js      # 台灯（typeA/B/C/D）
+        liushu.js       # 柳树（typeA/B/C/D）
+        shubao.js       # 书包（typeA/B/C/D）
+        bidai.js        # 笔袋（typeA/B/C/D）
+        gaozhi.js       # 稿纸（已废弃 · 入口未引用，文件保留作存档）
 views/
   trainingCamp.js       # ✅ 训练营（基础 + 专题 Tab）
   lessonDetail.js       # ✅ 课程详情页
@@ -88,38 +92,82 @@ views/
 ## Store 数据结构（store.js）
 ```js
 {
-  schemaVersion: 2,   // 2026-05-14：基础训练课程重排后 bump，旧数据自动清空
-  user: { grade, abilityIndex, name, totalStars },
+  schemaVersion: 4,   // 2026-05-21：四档评级 + 错题本改造（连对3题通过+冷却）
+  user: { grade, abilityIndex, name, totalStars },  // grade 1-12；学段由 store.getStage() 推导
   lessonProgress: {
-    [lessonId]: { passed, stars, xp, totalXp, attemptCount, videoWatched }
+    [lessonId]: { passed, stars, xp, totalXp, attemptCount, videoWatched, roundsUsed }
   },
-  mistakes: [{ id, lessonId, questionId, questionText, userAnswer, correctAnswer, difficulty, timestamp, reviewed }],
+  mistakes: [{ id, lessonId, questionId, questionText, userAnswer, correctAnswer, difficulty, explanation, timestamp, reviewed, rewardClaimed, status, reviewStreak }],
   challengeRecords: [{ id, score, accuracy, duration, timestamp }],
   _session: null  // 当前答题会话，不持久化
 }
 ```
-Schema 版本不匹配时 `_load()` 自动清 localStorage，避免老用户进度错位到新课程编号。
+Schema 版本不匹配时 `_load()` 自动清 localStorage。`store.getStage()` 从 grade 推导：1-6=S，7-9=C，10-12=H。
 
-## 能力指数系统
-- 范围：1.0 ~ 5.0
-- 答对 +0.2，答错 -0.3（含修正系数）
-- 难度分级：< 2.0 → level 1，< 4.0 → level 2，≥ 4.0 → level 3
-- 通关条件：连续答对 3 题（session.consecutiveCorrect >= 3）
+## 答题规则（基础训练，2026-05-21 改版）
+
+- 每轮 **10 题**：D1×3 + D2×3 + D3×4
+- D3 题按学生**学段**抽（S 小学 1-6 / C 初中 7-9 / H 高中 10-12，从年级推导）
+- 答对/答错都显示 explanation 解析
+- 10 题答完按错题数**四档评级**：
+  - 错 ≤ 2 → 优秀（3⭐）
+  - 错 = 3 → 良好（2⭐）
+  - 错 = 4 → 及格（1⭐）
+  - 错 ≥ 5 → 不及格（0⭐，提示回看视频）
+- 题型：single（单选）/ multi（多选）/ judge（判断·2 选项）/ link（连线）
+
+## 错题本规则（2026-05-21 改版）
+
+- 错题按知识点授课顺序排列，分"待改错"和"已通过"两个 Tab
+- 每道错题展示完整选项（正确绿色/错误红色删除线）+ explanation 解析
+- 点"巩固测试" → 先看知识点讲解 → 跳转独立复测页
+- 复测抽同知识点+同难度的 3 道题，连对 3 题 → 错题置灰（status: cleared）+ 奖励 3 星
+- 答错 → 连对计数归零 + 60 秒冷却（倒计时期间不可再次测试）
+- 复测中答错的题不进错题本
+
+## 题号编码（K-D-学段-序号）
+
+- 基础题：`K1-D1-01`（知识点 1·难度 1·第 1 题）
+- D3 题加学段：`K1-D3-S01`（知识点 1·难度 3·小学段·第 1 题）
+- archived 题（status: 'archived'）：题库里有 4 道（缺答案/无选项/leftItems 空），抽题时自动跳过
+- **选项最多支持 6 个（A-F）**，渲染层（quiz / challenge / mistakeBook）按 `q.options[letter]` 存在性渲染，不存在的字母自动跳过
 
 ## CSS 马卡龙色系（对应 colorClass）
 macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / cherry
 
-## 专题训练（2026-05-13/14 新增）
+## 专题训练（2026-05-13 起 · 2026-05-25 改版到 v5.0）
 
-数据：`js/data/topics/index.js` + `js/data/topics/jingwu/gaozhi.js`
+数据：`js/data/topics/index.js` + `js/data/topics/jingwu/{taideng,liushu,shubao,bidai}.js`
 视图：`topicDetail` / `topicQuiz` / `topicCompose`
 
-**题型联动模式（专题核心）**：
-- 题型1（16题）：single/multi/judge，识记感觉点
-- 题型2（7题）：sort 排序题 + 易混辨析（声音/声息、气味/气息）
-- 题型3（1题）：思维导图 + 文本输入 ≥80字 + AI 4 维评分
+**入口流程（2026-05-24 起 · 二段式）**：
+1. **介绍页**（`topicDetail` 默认 phase）：模块介绍视频（占位用 lesson9.mov）+ 知识点四条 + "选择静物开始答题"按钮
+2. **列表页**（`topicDetail` phase=`list`）：4 个静物子内容卡片
+3. 选一个静物 → `topicQuiz` 答题 → `topicCompose` 书写
 
-**扩展方式**：新增台灯/橘子等子内容，只需在 `js/data/topics/<module>/` 写数据文件 + 在 index.js 里导入，三视图零改动。
+**四段式题型（2026-05-24 起 · 替代旧 type1/2/3）**：
+- `typeA` 4-5 题：感觉三步法（看组成 / 排顺序 / 结构规划）
+- `typeB` 15-18 题：五感 15 点（按部位分组的客观特征）
+- `typeC` 4-6 题：连词成句（写作策略 / 自检 / 句子组合）
+- `typeD` 1 题：参照树形结构图按"总-分-分-分"四段式书写（AI 4 维评分）
+
+**当前已实装（2026-05-25）**：静物模块 4 个子内容
+| 子内容 | 题量 | 文件 |
+|---|---|---|
+| 台灯 | A4+B16+C4+D1 = 25 | `taideng.js` |
+| 柳树 | A5+B15+C4+D1 = 25 | `liushu.js` |
+| 书包 | A5+B18+C6+D1 = 30 | `shubao.js` |
+| 笔袋 | A5+B18+C6+D1 = 30 | `bidai.js` |
+
+**答题逻辑（2026-05-24 改版）**：答对直接跳下一题（300ms 闪绿），只有答错才显示正确答案 + 解析。
+
+**评分维度（2026-05-24 改版 · 30/30/30/10）**：组成完整 / 顺序正确 / 感觉点准确 / 语句通顺。书写门槛 ≥ 120 字。不要求修辞。
+
+**树状图**：当前用 `renderTreeMap()` 纯 HTML 渲染（`typeD.treeMap` 节点结构）。计划改为图片版（`typeD.treeMapImage` 字段优先），等客户上传图后切换。
+
+**扩展方式**：新增子内容只需在 `js/data/topics/jingwu/<id>.js` 写 typeA/B/C/D 数据文件 + 在 `index.js` 里 import + 加入 `subs[]`，三视图零改动。
+
+**已废弃**：稿纸（`gaozhi.js`，旧 type1/2/3 格式，文件保留作存档但 index.js 不再 import）。
 
 ## API 配置（js/config.js · 2026-05-14 切换）
 
@@ -139,18 +187,31 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 
 ## 下一步待办
 
-- 专题·静物：台灯 / 橘子（等文档题库）
-- 专题·植物 / 动物 / 景物 / 人物 / 事件（文档待产出）
-- Phase 1 安全合规（API 密钥移后端、DEV_MODE 开关）
-- Phase 2 CloudBase 上云（手机号注册、云端数据）
-- 备案完成后推进正式上线
+- 专题·静物：橘子/西瓜/菠萝（comingSoon · 等文档题库）
+- 专题·植物 / 动物 / 景物 / 人物 / 事件（available:false · 文档待产出）
+- **专题图片**（待客户传 COS）：4 张主图（台灯/柳树/书包/笔袋）+ 4 张树状图 + 9 张局部图。完整提示词清单见 `image-prompts/README.md`。主图传到 `jingwu/<id>.png` 即生效；树状图需要我把代码切到图片渲染模式
+- **K2-D1-04 题目内容缺失**：当前 archived，需要老师补 leftItems / rightItems 后去掉 archived
+- **魔法机器入口临时锁**（2026-05-17）：`index.html` 给 magicMachine 按钮加了 `data-coming-soon="1"` + `nav-coming-soon` class，`js/main.js` 拦截点击弹 Toast，视图代码 / 路由注册 / `views/magicMachine.js` 全部保留。恢复方法：去掉那一处属性 + class 即可
+- **API 密钥后端代理**（正式开放前必做）：comfly + itlsj 两个 key 当前明文在 `js/config.js`，前端可被 F12 抓取。方案：阿里云函数计算 FC 写两个代理函数（chat 代理 + vision 代理），key 只存 FC 环境变量，前端 `baseUrl` 切到 FC 域名。涉及文件：`views/magicMachine.js` / `views/topicCompose.js` / `js/config.js`
+- `scoco.cc` 备案通过后绑到 ECS，切为正式域名
+- 测试通过后做数据库 + 后台（ECS 上装 MySQL + Node.js 后端 API）
 
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
 **杨老师感觉训练写作营**
 
-面向小学生的感觉训练闯关 App，通过 10 节课 + 180 道题帮助学生培养写作感知力（看/听/闻/尝/摸五感）。纯原生 Web 应用，移动端优先，马卡龙液态玻璃风格。核心功能已全部完成，当前处于客户测试阶段，下一步目标是修复已知问题、完善内容、并推进正式上线。
+面向 **1-12 年级**学生的感觉训练闯关 App，通过 10 节课 + 300 道题（含分学段）帮助学生培养写作感知力（看/听/闻/尝/摸五感）。纯原生 Web 应用，移动端优先，马卡龙液态玻璃风格。核心功能已全部完成，当前处于客户测试阶段。
+
+正式地址：
+- **https://train.tybqcloud.com**（阿里云 ECS + nginx，国内快，给客户用）
+
+测试链接（main 自动部署）：
+- https://train-swczlrou.edgeone.cool/（腾讯云 EdgeOne Pages）
+- https://train-opal-six.vercel.app/（Vercel）
+- https://186githubuse.github.io/train/（GitHub Pages）
+
+发版：`git push` 后 SSH 到 ECS 跑 `cd /www/wwwroot/train.tybqcloud.com && git pull`
 
 **Core Value:** 学生能通过闯关答题感受到"用感觉写作文"的方法，并用魔法机器把自己的感觉素材变成一篇作文。
 

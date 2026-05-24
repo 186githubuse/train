@@ -216,7 +216,7 @@ JSON.parse(localStorage.getItem('ganjue_training_state')).lessonProgress
 ## Known Gaps (No Automated Coverage)
 
 - **Ability index algorithm** (`js/store.js` `updateAbility`) — delta calculations with difficulty multipliers and response-time corrections are untested
-- **Question generation** (`js/data/questions/index.js` `generateQuizSet`, `pickRandomQuestions`) — randomness and fallback logic untested
+- **Question generation** (`js/data/questions/index.js` `generateLessonRound`, `generateRetryRound`, `generateChallengeSet`) — randomness, stage filtering, and fallback logic untested
 - **Star/XP deduplication** — `rewardClaimed` flag on mistakes, `isFirstPass` check in `views/quiz.js` `renderResult()` — no regression protection
 - **Router history stack** — `goBack()` behavior with empty history, nested navigation paths
 - **Canvas rendering** — `drawRingChart` and `drawRadarChart` in `views/report.js` — no visual regression tests
@@ -230,7 +230,7 @@ The architecture is well-suited for unit testing the pure logic modules:
 
 **High-value targets:**
 - `js/store.js` — all methods are pure functions on a plain object; easy to unit test with any framework
-- `js/data/questions/index.js` — `generateQuizSet`, `pickRandomQuestions` — deterministic with seeded random
+- `js/data/questions/index.js` — `generateLessonRound`, `generateRetryRound`, `generateChallengeSet` — deterministic with seeded random
 - `js/data/courseLogic.js` — `calcSenseRadarScores`, `getAbilityTitle`
 
 **Suggested setup (no build tool needed):**

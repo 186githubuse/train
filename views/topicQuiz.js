@@ -1,11 +1,12 @@
 /**
  * views/topicQuiz.js
  * ─────────────────────────────────────────────────────────────
- * 专题训练 — 答题视图（题型1 + 题型2）
+ * 专题训练 — 答题视图（A 类 + B 类 + C 类）
  * 特点：
  *   1. 顶部 16:9 固定图片框，答题时始终可见参考图
  *   2. 支持 single / multi / judge / sort 四种题型
- *   3. 按 type1 → type2 顺序过完全部题后跳 topicCompose（题型3）
+ *   3. 按 typeA → typeB → typeC 顺序过完全部题后跳 topicCompose（D 类书写题）
+ *   4. 题目按段落显示分段徽章（A 感觉三步法 / B 五感扫描 / C 连词成句）
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -15,12 +16,19 @@ import { store } from '../js/store.js';
 /* 页面级状态 */
 let _topic = null;
 let _sub = null;
-let _queue = [];          // 合并 type1 + type2 的题目队列
+let _queue = [];          // 合并 typeA + typeB + typeC 的题目队列
+let _segments = [];       // 与 _queue 等长，记录每题所在段落: 'A' | 'B' | 'C'
 let _currentIdx = 0;
 let _selected = new Set(); // 单选/多选用
 let _sortOrder = [];       // 排序题用户当前顺序
 let _answered = false;
 let _totalCorrect = 0;
+
+const SEGMENT_LABEL = {
+  A: 'A · 感觉三步法',
+  B: 'B · 五感扫描',
+  C: 'C · 连词成句',
+};
 
 /* ─── Helpers ─── */
 function isMulti(q) { return q.type === 'multi'; }
@@ -65,9 +73,13 @@ function renderHeader() {
 }
 
 function renderImageBox() {
+  const q = _queue[_currentIdx];
+  const overrideUrl = q?.imageOverride;
+  const imgSrc = overrideUrl || _sub.image;
+  const imgAlt = q?.imageOverrideAlt || _sub.imageAlt || _sub.title;
   return `
-    <div class="tq-image-box" role="img" aria-label="${_sub.imageAlt || _sub.title}">
-      <img src="${_sub.image}" alt="${_sub.imageAlt || _sub.title}" loading="eager">
+    <div class="tq-image-box" role="img" aria-label="${imgAlt}">
+      <img src="${imgSrc}" alt="${imgAlt}" loading="eager">
     </div>`;
 }
 
@@ -98,9 +110,14 @@ function renderChoiceQuestion(q) {
     judge: '判断题',
   }[q.type];
 
+  const segLabel = SEGMENT_LABEL[_segments[_currentIdx]] || '';
+  const badgeText = segLabel
+    ? `${segLabel} · ${typeBadge}${q.dim ? ' · ' + q.dim : ''}`
+    : `${typeBadge}${q.dim ? ' · ' + q.dim : ''}`;
+
   return `
     <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
-      <div class="tq-type-badge">${typeBadge}${q.dim ? ' · ' + q.dim : ''}</div>
+      <div class="tq-type-badge">${badgeText}</div>
       <p class="quiz-question-text">${q.text}</p>
       ${isMulti(q) ? `<p class="quiz-multi-tip">（多选题，请选出所有正确答案）</p>` : ''}
     </div>
@@ -132,9 +149,14 @@ function renderSortQuestion(q) {
 
   const allSelected = _sortOrder.length === keys.length;
 
+  const segLabel = SEGMENT_LABEL[_segments[_currentIdx]] || '';
+  const badgeText = segLabel
+    ? `${segLabel} · 排序题${q.dim ? ' · ' + q.dim : ''}`
+    : `排序题${q.dim ? ' · ' + q.dim : ''}`;
+
   return `
     <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
-      <div class="tq-type-badge">排序题${q.dim ? ' · ' + q.dim : ''}</div>
+      <div class="tq-type-badge">${badgeText}</div>
       <p class="quiz-question-text">${q.text}</p>
       <p class="quiz-multi-tip">（点击下方选项依次加入，顺序会显示在上方）</p>
     </div>
@@ -175,7 +197,7 @@ function renderFeedback(isCorrect, q) {
     : (q.hint ? `<p class="quiz-feedback-hint">${q.hint}</p>` : '');
 
   const isLast = _currentIdx >= _queue.length - 1;
-  const nextLabel = isLast ? '进入写作练笔' : '下一题';
+  const nextLabel = isLast ? '进入 D 类 · 书写成文' : '下一题';
 
   return `
     <div class="quiz-feedback ${cls}">
@@ -221,10 +243,27 @@ function submitAnswer() {
   _answered = true;
   if (isCorrect) _totalCorrect++;
 
-  // 高亮选项
   const content = document.getElementById('app-content');
+
+  if (isCorrect) {
+    // 答对：短暂闪绿选中项，300ms 后自动跳下一题
+    if (isSort(q)) {
+      content.querySelectorAll('.tq-sort-chosen').forEach(el => el.classList.add('tq-sort-correct'));
+    } else {
+      content.querySelectorAll('.quiz-option').forEach(btn => {
+        const letter = btn.dataset.option;
+        if (_selected.has(letter)) btn.classList.add('quiz-option-correct');
+        btn.disabled = true;
+      });
+    }
+    const confirmBtn = document.getElementById('quiz-confirm-btn');
+    if (confirmBtn) confirmBtn.style.display = 'none';
+    setTimeout(goNext, 300);
+    return;
+  }
+
+  // 答错：高亮正确/错误选项 + 显示反馈
   if (isSort(q)) {
-    // 排序题：在已选序列上标色
     content.querySelectorAll('.tq-sort-chosen').forEach((el, i) => {
       const expected = q.correct[i];
       const userKey = _sortOrder[i];
@@ -246,7 +285,7 @@ function submitAnswer() {
     if (confirmBtn) confirmBtn.style.display = 'none';
   }
 
-  // 渲染反馈
+  // 渲染反馈（仅答错时）
   document.getElementById('tq-feedback-area').innerHTML = renderFeedback(isCorrect, q);
 
   document.getElementById('tq-next-btn')?.addEventListener('click', goNext);
@@ -354,8 +393,16 @@ export function renderTopicQuiz(params = {}) {
     return;
   }
 
-  // 重置状态
-  _queue = [...(_sub.type1 || []), ...(_sub.type2 || [])];
+  // 重置状态：按 A → B → C 顺序拼接，并记录每题段落
+  const arrA = _sub.typeA || [];
+  const arrB = _sub.typeB || [];
+  const arrC = _sub.typeC || [];
+  _queue = [...arrA, ...arrB, ...arrC];
+  _segments = [
+    ...arrA.map(() => 'A'),
+    ...arrB.map(() => 'B'),
+    ...arrC.map(() => 'C'),
+  ];
   _currentIdx = 0;
   _selected = new Set();
   _sortOrder = [];

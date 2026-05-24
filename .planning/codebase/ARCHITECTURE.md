@@ -51,8 +51,8 @@ Single-page application built with vanilla ES Modules and no build tooling. A ce
 - Location: `js/data/`
 - Contains:
   - `lessons.js` — 10 `Lesson` objects with metadata, `videoUrl`, `keyPoints`
-  - `questions.js` — 180 questions, exports `generateQuizSet()` and `pickRandomQuestions()`
-  - `topics.js` — 5 topic module stubs (all `comingSoon: true`)
+  - `questions/index.js` — 297 questions split into `q01.js..q10.js`, exports `generateLessonRound()` (10 题/轮) / `generateRetryRound()` (3 题补测) / `generateChallengeSet()`
+  - `topics/index.js` — 6 topic modules. 静物 实装 4 个子内容（台灯/柳树/书包/笔袋，`typeA/B/C/D` schema）; 其他 5 个模块 placeholder. 旧稿纸 `gaozhi.js` 已从入口移除，文件保留作存档
   - `courseLogic.js` — domain logic: `calcSenseRadarScores()`, `getAbilityTitle()`, `SENSE_RADAR_CONFIG`
 - Depends on: Nothing
 - Used by: Views and store
