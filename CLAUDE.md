@@ -211,7 +211,7 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 - https://train-opal-six.vercel.app/（Vercel）
 - https://186githubuse.github.io/train/（GitHub Pages）
 
-发版：`git push` 后 SSH 到 ECS 跑 `cd /www/wwwroot/train.tybqcloud.com && git pull`
+发版：`git push` 后 SSH 到 ECS（39.96.194.18，root，或走阿里云 Workbench / 宝塔终端）跑 `cd /www/wwwroot/train.tybqcloud.com && git pull`。注：2026-05-25 之前是手动上传部署，已改成 git clone（备份保留在 `train.tybqcloud.com.bak.20260525`）。
 
 **Core Value:** 学生能通过闯关答题感受到"用感觉写作文"的方法，并用魔法机器把自己的感觉素材变成一篇作文。
 

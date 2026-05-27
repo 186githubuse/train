@@ -3,19 +3,24 @@
  * ─────────────────────────────────────────────────────────────
  * 专题训练数据层入口
  * 6 大模块：静物 → 植物 → 动物 → 景物 → 人物 → 事件
- * （文档：感觉训练专题模块开发大纲 5.23 版）
- *
- * 每个模块包含若干 sub（子内容），按难度递增排列：
- *   静物：台灯 → 柳树 → 书包 → 笔袋 → 橘子（待补）
+ * （文档：感觉训练专题模块开发大纲 5.27 版）
  *
  * 子内容数据格式见 topics/jingwu/taideng.js
  * ─────────────────────────────────────────────────────────────
  */
 
 import { TAIDENG } from './jingwu/taideng.js';
-import { SHUBAO } from './jingwu/shubao.js';
 import { BIDAI } from './jingwu/bidai.js';
-import { LIUSHU } from './jingwu/liushu.js';
+import { SHUBAO } from './jingwu/shubao.js';
+
+import { LIUSHU } from './zhiwu/liushu.js';
+import { MUDAN } from './zhiwu/mudan.js';
+import { JUZI } from './zhiwu/juzi.js';
+
+import { JUMAO } from './dongwu/jumao.js';
+import { BIXIONG } from './dongwu/bixiong.js';
+import { YINGWU } from './dongwu/yingwu.js';
+import { JINYU } from './dongwu/jinyu.js';
 
 /** 专题模块定义（含子内容） */
 export const TOPICS = [
@@ -31,18 +36,16 @@ export const TOPICS = [
       videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
       title: '什么是静物描写？',
       points: [
-        '静物 = 静止不动的物品（台灯、书包、笔袋、水果……）',
+        '静物 = 静止不动的物品（台灯、笔袋、书包……）',
         '核心方法：感觉三步法（看组成 → 排顺序 → 再感觉）',
         '感觉工具：五感 15 个基本感觉点全口径扫描',
-        '写作目标：总-分-分-分四段式，平实准确、有序描写',
+        '写作目标：总-分-分-分多段式，平实准确、有序描写',
       ],
     },
     subs: [
       TAIDENG,
-      LIUSHU,
-      SHUBAO,
       BIDAI,
-      { id: 'juzi', title: '橘子/西瓜/菠萝', subtitle: '有层次的水果，引入味觉嗅觉', comingSoon: true },
+      SHUBAO,
     ],
   },
   {
@@ -52,8 +55,22 @@ export const TOPICS = [
     icon: 'flower',
     colorClass: 'macaron-mint',
     textColor: '#2D8A5E',
-    available: false,
-    subs: [],
+    available: true,
+    intro: {
+      videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
+      title: '什么是植物描写？',
+      points: [
+        '植物 = 有生命、会生长变化的对象（树木、花卉、水果……）',
+        '核心方法：感觉三步法（看组成 → 排顺序 → 再感觉）',
+        '常用顺序：由下到上 / 由外到内（如树干→枝→叶 或 皮→肉→籽）',
+        '感觉重点：形态、颜色、姿态、动作、植物气息、味觉触感',
+      ],
+    },
+    subs: [
+      LIUSHU,
+      MUDAN,
+      JUZI,
+    ],
   },
   {
     id: 'animal',
@@ -62,8 +79,23 @@ export const TOPICS = [
     icon: 'paw-print',
     colorClass: 'macaron-peach',
     textColor: '#C47840',
-    available: false,
-    subs: [],
+    available: true,
+    intro: {
+      videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
+      title: '什么是动物描写？',
+      points: [
+        '动物 = 会移动、有动作和声音的生命对象',
+        '核心方法：感觉三步法（看组成 → 排顺序 → 再感觉）',
+        '统一顺序：由头到尾（头 → 身体 → 四肢/翅/鳍 → 尾巴）',
+        '感觉重点：外形、毛发/羽毛/鳞片、动作、叫声、品种背景',
+      ],
+    },
+    subs: [
+      JUMAO,
+      BIXIONG,
+      YINGWU,
+      JINYU,
+    ],
   },
   {
     id: 'scenery',

@@ -13,3 +13,9 @@ memory/
 # Temp / cache
 *.log
 .cache/
+
+# API 密钥配置（含 comfly / itlsj / MiniMax key，绝对不能提交）
+js/config.js
+
+# TTS 测试音频样本（生成时临时放置，commit 前清理）
+tmp_tts_samples/

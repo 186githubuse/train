@@ -1,20 +1,20 @@
 /**
- * 静物专题 · 子内容：柳树
+ * 植物专题 · 子内容：柳树
  * ─────────────────────────────────────────────────────────────
- * 依据《感觉训练专题模块开发大纲（静物精简版1.0）-台灯-柳树-书包-笔袋-5.23》
- * 编号体系：TZ-JW-LS-A01 ~ TZ-JW-LS-D01
+ * 依据《感觉训练专题模块开发大纲（静物植物动物综合版2.0）-5.27》
+ * 编号体系：TZ-ZW-LS-A01 ~ TZ-ZW-LS-D01
  * 题量：5(A) + 15(B) + 4(C) + 1(D) = 25 题
+ * 写作结构：5 段式（总起 + 树干 + 柳枝 + 柳叶 + 声音气息整体印象）
  * ─────────────────────────────────────────────────────────────
  */
 
 export const LIUSHU = {
   id: 'liushu',
-  topicId: 'still-life',
+  topicId: 'plant',
   title: '柳树',
-  subtitle: '由下到上 · 树干→柳枝→柳叶 · 引入声音与气息',
+  subtitle: '由下到上 · 树干 → 柳枝 → 柳叶 · 引入声音与气息',
   difficulty: 1,
-  // TODO: 客户提供柳树参考图后，替换为正式 COS URL
-  image: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu.png',
+  image: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu.png',
   imageAlt: '一棵河岸边的高大柳树，棕黑色粗壮树干，葱绿色细长柳枝低垂，绿色细长柳叶',
 
   // ─── A 类：建立感觉框架 · 感觉三步法（共 5 题）───
@@ -59,10 +59,10 @@ export const LIUSHU = {
       id: 'TZ-ZW-LS-A04', type: 'single', dim: '逻辑排序',
       text: '请将描写柳树的完整思维步骤排序：<br>1. 为"树干、柳枝、柳叶"确定"由下到上"的描写顺序。<br>2. 依次感受树干的颜色和形状、柳枝的动作、柳叶的细节，并倾听风吹过的声音。<br>3. 观察发现，柳树由"树干、柳枝、柳叶"三大部分组成。',
       options: {
-        A: '3 → 1 → 2（先发现组成，再排顺序，最后再感觉）',
-        B: '2 → 3 → 1（先感觉，再发现组成，最后排顺序）',
-        C: '1 → 3 → 2（先排顺序，再发现组成，最后再感觉）',
-        D: '3 → 2 → 1（先发现组成，再感觉，最后排顺序）',
+        A: '3 → 1 → 2',
+        B: '2 → 3 → 1',
+        C: '1 → 3 → 2',
+        D: '3 → 2 → 1',
       },
       correct: 'A',
       hint: '感觉三步法的固定顺序：先"看组成"（步骤 3）→ 再"排顺序"（步骤 1）→ 最后"再感觉"（步骤 2）。',
@@ -87,24 +87,23 @@ export const LIUSHU = {
     {
       id: 'TZ-ZW-LS-B01', type: 'single', dim: '树干 · 颜色',
       text: '柳树树干的颜色通常是什么样子的？',
-      options: { A: '棕黑色或深褐色', B: '火红色', C: '纯白色', D: '翠绿色' },
-      correct: 'A',
+      options: { A: '翠绿色', B: '棕黑色或深褐色', C: '火红色', D: '纯白色' },
+      correct: 'B',
       hint: '柳树树皮多为棕黑色或深褐色，这是其客观视觉特征。',
     },
     {
       id: 'TZ-ZW-LS-B02', type: 'single', dim: '树干 · 形状',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-trunk.png',
       text: '从形状上看，公园里河边柳树的树干通常给人什么感觉？',
       options: { A: '低矮细小', B: '粗壮高大、弯曲向上', C: '方方正正', D: '透明无形' },
       correct: 'B',
-      hint: '作为乔木，柳树树干通常粗壮高大，以支撑整个树冠。',
+      hint: '作为乔木，柳树树干通常粗壮高大、自然弯曲向上生长。',
     },
     {
       id: 'TZ-ZW-LS-B03', type: 'single', dim: '树干 · 光滑/粗糙',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-trunk.png',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-trunk.png',
       text: '树干摸上去的触感最有可能是？',
-      options: { A: '柔软有弹性', B: '光滑如玻璃', C: '粗糙、有皴裂的纹路', D: '毛茸茸的' },
-      correct: 'C',
+      options: { A: '光滑如玻璃', B: '粗糙、有皴裂的纹路', C: '毛茸茸的', D: '柔软有弹性' },
+      correct: 'B',
       hint: '树皮表面通常粗糙，有不规则的裂纹和沟壑。',
     },
 
@@ -112,38 +111,39 @@ export const LIUSHU = {
     {
       id: 'TZ-ZW-LS-B04', type: 'single', dim: '柳枝 · 颜色',
       text: '春天柳枝的颜色是？',
-      options: { A: '黑色', B: '彩色', C: '枯黄色', D: '葱绿色或嫩绿色' },
-      correct: 'D',
+      options: { A: '枯黄色', B: '葱绿色或嫩绿色', C: '黑色', D: '彩色' },
+      correct: 'B',
       hint: '新生柳枝是充满生机的葱绿色或嫩绿色。',
     },
     {
       id: 'TZ-ZW-LS-B05', type: 'single', dim: '柳枝 · 形状',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-branch.png',
-      text: '柳枝的形状和生长姿态是怎样的？',
-      options: { A: '又细又长，低垂下来', B: '长成圆球状', C: '缠绕在一起', D: '笔直向上生长' },
-      correct: 'A',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-branch.png',
+      text: '柳枝的形状是怎样的？',
+      options: { A: '笔直向上生长', B: '又细又长，低垂下来', C: '长成圆球状', D: '缠绕在一起' },
+      correct: 'B',
       hint: '垂柳的典型特征就是枝条细长、柔软向下低垂。',
     },
     {
       id: 'TZ-ZW-LS-B06', type: 'single', dim: '柳枝 · 动作',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-branch.png',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-branch.png',
       text: '当清风吹过，柳枝会有什么"动作"？',
-      options: { A: '发出巨大的响声', B: '轻轻摆动、摇曳', C: '从树上掉下来', D: '静止不动' },
-      correct: 'B',
+      options: { A: '静止不动', B: '发出巨大的响声', C: '轻轻摆动、摇曳', D: '从树上掉下来' },
+      correct: 'C',
       hint: '轻柔的枝条在风中摆动摇曳，是柳树动态之美的体现。',
     },
 
     // —— 柳叶（4 题）——
     {
       id: 'TZ-ZW-LS-B07', type: 'single', dim: '柳叶 · 颜色',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-leaf.png',
       text: '柳叶的颜色是怎样的？',
-      options: { A: '五彩斑斓', B: '和树干一样的棕色', C: '绿色（嫩绿、翠绿等）', D: '灰色' },
-      correct: 'C',
+      options: { A: '和树干一样的棕色', B: '绿色（嫩绿、翠绿等）', C: '灰色', D: '五彩斑斓' },
+      correct: 'B',
       hint: '树叶的基本色是绿色，随着季节有深浅变化。',
     },
     {
       id: 'TZ-ZW-LS-B08', type: 'single', dim: '柳叶 · 形状',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-leaf.png',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-leaf.png',
       text: '一片柳叶的具体形状是？',
       options: {
         A: '又圆又大',
@@ -156,7 +156,7 @@ export const LIUSHU = {
     },
     {
       id: 'TZ-ZW-LS-B09', type: 'single', dim: '柳叶 · 边缘',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-leaf.png',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-leaf.png',
       text: '柳叶边缘有什么独特的细节？',
       options: {
         A: '非常光滑，没有锯齿',
@@ -169,8 +169,8 @@ export const LIUSHU = {
     },
     {
       id: 'TZ-ZW-LS-B10', type: 'multi', dim: '柳叶 · 叶脉',
-      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/jingwu/liushu-leaf.png',
-      text: '关于柳叶的叶脉（叶子上的纹路），下列哪些描述是正确的？（可多选）',
+      imageOverride: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/zhiwu/liushu-leaf.png',
+      text: '关于柳叶的叶脉（叶子上的纹路），下列哪些描述是视觉特征？（可多选）',
       options: {
         A: '中间有一条主叶脉，比较清晰。',
         B: '叶脉是淡黄色的。',
@@ -178,15 +178,15 @@ export const LIUSHU = {
         D: '叶脉摸上去是凸起的。',
       },
       correct: ['A', 'B', 'C'],
-      hint: 'A、B、C 是视觉特征，本题重点在视觉描述，不包含 D 的触觉描写。',
+      hint: 'A、B、C 是视觉特征。D 是触觉特征，本题问的是"视觉特征"，故不选。',
     },
 
     // —— 声音、气息与整体（5 题）——
     {
       id: 'TZ-ZW-LS-B11', type: 'single', dim: '耳听 · 声息',
       text: '当风吹过柳树，树叶和枝条相互摩擦，会发出怎样的声音？',
-      options: { A: '叮叮当当的铃声', B: '轰隆隆的雷声', C: '哗啦啦的流水声', D: '沙沙的声息' },
-      correct: 'D',
+      options: { A: '轰隆隆的雷声', B: '哗啦啦的流水声', C: '沙沙的声息', D: '叮叮当当的铃声' },
+      correct: 'C',
       hint: '风吹叶动发出的是一种轻柔、细碎的"沙沙"声，属于"声息"范畴。',
     },
     {
@@ -215,7 +215,7 @@ export const LIUSHU = {
     },
     {
       id: 'TZ-ZW-LS-B14', type: 'single', dim: '柳枝 · 作用',
-      text: '柳树长长的枝条低垂下来，主要能起到什么"作用"或带来什么效果？',
+      text: '柳树长长的枝条低垂下来，主要能起到什么"作用"？',
       options: {
         A: '显得树干更高大。',
         B: '为岸边和水面增添柔美的风景。',
@@ -227,9 +227,9 @@ export const LIUSHU = {
     },
     {
       id: 'TZ-ZW-LS-B15', type: 'single', dim: '感觉点适用',
-      text: '在对柳树进行"再感觉"时，最不可能用到以下哪个感觉点？',
-      options: { A: '口尝-味道', B: '手摸-粗糙', C: '眼看-颜色', D: '耳听-声息' },
-      correct: 'A',
+      text: '如果不考虑"口尝"，在对柳树进行"再感觉"时，最不可能用到以下哪个感觉点？',
+      options: { A: '眼看-颜色', B: '耳听-声息', C: '口尝-味道', D: '手摸-粗糙' },
+      correct: 'C',
       hint: '通常情况下，我们不会去品尝柳树，"口尝"不适用于此场景。',
     },
   ],
@@ -286,17 +286,17 @@ export const LIUSHU = {
     },
   ],
 
-  // ─── D 类：参照树形结构图 · 书写成文（1 大题）───
+  // ─── D 类：参照树形结构图 · 书写成文（1 大题，5 段式）───
   typeD: {
     id: 'TZ-ZW-LS-D01',
-    title: '参照树形结构图，写一篇《柳树》',
+    title: '看图、连词成句、写一篇《柳树》',
     requirements: [
-      '按"总-分-分-分"四段式书写',
-      '第一段总起：写清柳树由哪几部分组成（树干、柳枝、柳叶）',
-      '第二段：描写树干（颜色、形状、触感）',
-      '第三段：描写柳枝（颜色、形状、姿态、动作）',
-      '第四段：描写柳叶 + 风吹枝叶的声息 + 植物清香',
-      '语句通顺、平实准确，不要求修辞',
+      '按 5 段式书写',
+      '第一段总起：写清柳树的组成（树干、柳枝、柳叶）',
+      '第二、三、四段：依次详写树干、柳枝、柳叶',
+      '第五段：写柳树的声音和气息特征及整体印象',
+      '完整包含树形图中的全部感觉点',
+      '语句通顺、平实准确，不编造，不要求修辞',
     ],
 
     treeMap: {
@@ -324,8 +324,7 @@ export const LIUSHU = {
           children: [
             { name: '眼看-颜色：绿色（嫩绿、翠绿）' },
             { name: '眼看-形状：中间宽、两头窄；又细又长' },
-            { name: '眼看-细节：边缘有整齐尖细的锯齿' },
-            { name: '眼看-叶脉：淡黄色叶脉' },
+            { name: '眼看-细节：边缘有整齐尖细的锯齿；有淡黄色的叶脉' },
           ],
         },
         {
@@ -345,8 +344,8 @@ export const LIUSHU = {
     },
 
     rubric: [
-      { dim: '组成完整', weight: 30, desc: '清晰体现"看组成 → 排顺序 → 再感觉"，按四段结构书写' },
-      { dim: '顺序正确', weight: 30, desc: '描写顺序与"由下到上"（树干→柳枝→柳叶）一致' },
+      { dim: '组成完整', weight: 30, desc: '清晰体现"看组成 → 排顺序 → 再感觉"，按 5 段结构书写' },
+      { dim: '顺序正确', weight: 30, desc: '描写顺序与"由下到上"（树干 → 柳枝 → 柳叶）一致' },
       { dim: '感觉点准确', weight: 30, desc: '完整、准确包含树形图中的感觉点（棕黑、粗糙、葱绿、低垂、沙沙声、清香等）' },
       { dim: '语句通顺', weight: 10, desc: '用词准确，句子衔接流畅，无语病' },
     ],
