@@ -12,6 +12,8 @@
 
 import { getSub, getTopic } from '../js/data/topics/index.js';
 import { store } from '../js/store.js';
+import { speak, stopSpeaking } from '../js/tts.js';
+import * as effects from '../js/effects.js';
 
 /* 页面级状态 */
 let _topic = null;
@@ -117,7 +119,12 @@ function renderChoiceQuestion(q) {
 
   return `
     <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
-      <div class="tq-type-badge">${badgeText}</div>
+      <div class="tq-type-badge-row">
+        <div class="tq-type-badge">${badgeText}</div>
+        <button class="tq-speak-btn" data-action="speak-question" aria-label="朗读题目">
+          <ph-speaker-high weight="fill" size="18" color="#7C3AED"></ph-speaker-high>
+        </button>
+      </div>
       <p class="quiz-question-text">${q.text}</p>
       ${isMulti(q) ? `<p class="quiz-multi-tip">（多选题，请选出所有正确答案）</p>` : ''}
     </div>
@@ -156,7 +163,12 @@ function renderSortQuestion(q) {
 
   return `
     <div class="quiz-question-card glass-card rounded-[1.5rem] p-5">
-      <div class="tq-type-badge">${badgeText}</div>
+      <div class="tq-type-badge-row">
+        <div class="tq-type-badge">${badgeText}</div>
+        <button class="tq-speak-btn" data-action="speak-question" aria-label="朗读题目">
+          <ph-speaker-high weight="fill" size="18" color="#7C3AED"></ph-speaker-high>
+        </button>
+      </div>
       <p class="quiz-question-text">${q.text}</p>
       <p class="quiz-multi-tip">（点击下方选项依次加入，顺序会显示在上方）</p>
     </div>
@@ -246,7 +258,8 @@ function submitAnswer() {
   const content = document.getElementById('app-content');
 
   if (isCorrect) {
-    // 答对：短暂闪绿选中项，300ms 后自动跳下一题
+    // 答对：闪绿 + 音效 + 小撒花，300ms 后自动跳下一题
+    effects.answerCorrect();
     if (isSort(q)) {
       content.querySelectorAll('.tq-sort-chosen').forEach(el => el.classList.add('tq-sort-correct'));
     } else {
@@ -262,7 +275,8 @@ function submitAnswer() {
     return;
   }
 
-  // 答错：高亮正确/错误选项 + 显示反馈
+  // 答错：柔咚音效 + 高亮正确/错误选项 + 显示反馈
+  effects.answerWrong();
   if (isSort(q)) {
     content.querySelectorAll('.tq-sort-chosen').forEach((el, i) => {
       const expected = q.correct[i];
@@ -293,8 +307,14 @@ function submitAnswer() {
 
 /* ─── 下一题 or 进入题型3 ─── */
 function goNext() {
+  // 检测段落切换：当前题段落 vs 下一题段落
+  const curSeg = _segments[_currentIdx];
+  const nextSeg = _segments[_currentIdx + 1];
+
   if (_currentIdx >= _queue.length - 1) {
-    // 全部答完 → 跳转题型3
+    // 全部答完 → 大撒花 + 总结语音 + 跳转 D 类
+    effects.allChoicesComplete();
+    speak('做得真棒！现在动手写作文吧～');
     window.__router.navigate('topicCompose', {
       topicId: _topic.id,
       subId: _sub.id,
@@ -303,6 +323,14 @@ function goNext() {
     });
     return;
   }
+
+  // 段落切换 → 阶段撒花 + 阶段语音
+  if (curSeg && nextSeg && curSeg !== nextSeg) {
+    effects.stageComplete();
+    if (curSeg === 'A') speak('感觉三步法学完啦，继续加油！');
+    else if (curSeg === 'B') speak('五感扫描完成啦，最后一段啦！');
+  }
+
   _currentIdx++;
   _selected = new Set();
   _sortOrder = [];
@@ -314,6 +342,12 @@ function goNext() {
 function bindQuestionEvents() {
   const content = document.getElementById('app-content');
   const q = _queue[_currentIdx];
+
+  // 小喇叭按钮：朗读题面（去掉 HTML 标签）
+  content.querySelector('[data-action="speak-question"]')?.addEventListener('click', () => {
+    const plainText = (q.text || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (plainText) speak(plainText);
+  });
 
   if (isSort(q)) {
     // 排序题：点击可选项加入序列；点击 × 移除
@@ -415,9 +449,13 @@ export function renderTopicQuiz(params = {}) {
   header.innerHTML = renderHeader();
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="quit"]')) {
+      stopSpeaking();  // 退出时停掉正在播放的 TTS
       window.__router.goBack();
     }
   });
 
   renderCurrent();
+
+  // 入场语音（首次进入时播报）
+  speak('我们开始吧！');
 }

@@ -212,8 +212,36 @@
   background: rgba(124, 58, 237, 0.1);
   padding: 4px 10px;
   border-radius: 999px;
-  margin-bottom: 10px;
   border: 1px solid rgba(124, 58, 237, 0.18);
+}
+
+/* 题面 badge 行：左 badge + 右小喇叭，垂直居中 */
+.tq-type-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tq-speak-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  background: rgba(124, 58, 237, 0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tq-speak-btn:active {
+  transform: scale(0.92);
+  background: rgba(124, 58, 237, 0.18);
 }
 
 /* ─── 排序题专属 ─── */
@@ -842,6 +870,67 @@
   color: #4B5563;
   margin: 0;
   white-space: pre-wrap;
+}
+
+/* 通过/未通过反馈卡片 */
+.tc-feedback-card {
+  margin-bottom: 12px;
+}
+
+.tc-feedback-hint {
+  font-size: 13.5px;
+  color: #4B5563;
+  line-height: 1.7;
+  margin: 6px 0 0;
+}
+
+/* 老师范文：可折叠 */
+.tc-sample-section {
+  margin-bottom: 12px;
+}
+
+.tc-sample-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F1040;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tc-sample-toggle:active {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.tc-sample-toggle span {
+  flex: 1;
+  text-align: left;
+}
+
+.tc-sample-caret {
+  transition: transform 0.2s ease;
+}
+
+.tc-sample-body {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.tc-sample-text {
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.85;
+  margin: 0;
 }
 
 /* 结果操作按钮 */

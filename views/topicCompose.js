@@ -11,8 +11,10 @@
  */
 
 import { getSub, getTopic } from '../js/data/topics/index.js';
-import { API_CONFIG, VISION_CONFIG } from '../js/config.js?v=20260514';
+import { API_CONFIG, VISION_CONFIG } from '../js/config.js?v=20260528';
 import { store } from '../js/store.js';
+import { speak, stopSpeaking } from '../js/tts.js';
+import * as effects from '../js/effects.js';
 
 let _topic = null;
 let _sub = null;
@@ -267,11 +269,12 @@ function renderImageBox() {
 /* ─── 评分结果渲染 ─── */
 function renderGradingResult(result, text) {
   const total = Math.min(100, Math.max(0, Number(result.total) || 0));
+  const passed = total >= 70;
   const stars = total >= 90 ? 3 : total >= 70 ? 2 : 1;
 
-  // 积分（只在第一次通过时发放）
-  const bonus = 15;
-  store.addStars(bonus);
+  // 积分（仅通过时发放，未通过不发星）
+  const bonus = passed ? 15 : 0;
+  if (passed) store.addStars(bonus);
 
   const scoreBars = Object.entries(result.scores || {}).map(([dim, s]) => {
     const max = dim === '语句通顺' ? 10 : 30;
@@ -302,6 +305,14 @@ function renderGradingResult(result, text) {
     </svg>
   `).join('');
 
+  // 顶部反馈语：通过 / 未通过 不同口吻（永远鼓励，不出现"未通过 / 不及格"等负面词）
+  const headerTitle = passed
+    ? '🎉 太棒啦！你写得真好～'
+    : '💪 继续加油！再学习一下范文吧～';
+  const headerHint = passed
+    ? '想看看老师写的范文吗？也许会让你眼前一亮哦。'
+    : '别担心，先看看老师的范文学一学，再来挑战一次～';
+
   return `
     <div class="topic-compose-result">
       <div class="tc-result-card ${_topic.colorClass}">
@@ -310,11 +321,22 @@ function renderGradingResult(result, text) {
           <span class="tc-result-num">${total}</span>
           <span class="tc-result-unit">分</span>
         </div>
-        <p class="tc-result-encourage">${result.encouragement || '继续加油～'}</p>
+        <p class="tc-result-encourage">${result.encouragement || headerTitle}</p>
+        ${bonus > 0 ? `
         <div class="tc-result-bonus">
           <ph-star weight="fill" size="16" color="rgba(255,255,255,0.95)"></ph-star>
           获得 ${bonus} 颗星星
         </div>
+        ` : ''}
+      </div>
+
+      <!-- 通过/未通过 反馈卡片 -->
+      <div class="tc-feedback-card glass-card rounded-[1.25rem] p-4">
+        <h3 class="tc-section-title">
+          <ph-${passed ? 'trophy' : 'graduation-cap'} weight="fill" size="18" color="${passed ? '#F59E0B' : '#7C3AED'}"></ph-${passed ? 'trophy' : 'graduation-cap'}>
+          ${headerTitle}
+        </h3>
+        <p class="tc-feedback-hint">${headerHint}</p>
       </div>
 
       <div class="tc-scores glass-card rounded-[1.25rem] p-4">
@@ -352,6 +374,20 @@ function renderGradingResult(result, text) {
         </h3>
         <p class="tc-essay-text">${text.replace(/\n/g, '<br>')}</p>
       </div>
+
+      <!-- 老师范文（默认折叠，点按钮展开） -->
+      ${_task.sample ? `
+      <div class="tc-sample-section glass-card rounded-[1.25rem] p-4" id="tc-sample-section">
+        <button class="tc-sample-toggle" id="tc-sample-toggle">
+          <ph-book-open weight="fill" size="18" color="#7C3AED"></ph-book-open>
+          <span>${passed ? '看看老师的范文' : '学习老师的范文'}</span>
+          <ph-caret-down weight="bold" size="16" color="#7C3AED" class="tc-sample-caret"></ph-caret-down>
+        </button>
+        <div class="tc-sample-body" id="tc-sample-body" style="display:none;">
+          <p class="tc-sample-text">${(_task.sample || '').replace(/\n/g, '<br>')}</p>
+        </div>
+      </div>
+      ` : ''}
 
       <div class="tc-result-actions">
         <button class="tc-btn-secondary" id="tc-retry-btn">再写一遍</button>
@@ -503,13 +539,39 @@ async function submitForGrading(text) {
 
   try {
     const result = await gradeEssay(text);
+    const total = Math.min(100, Math.max(0, Number(result.total) || 0));
+    const passed = total >= 70;
+
     const content = document.getElementById('app-content');
     content.innerHTML = renderGradingResult(result, text);
     content.scrollTop = 0;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    document.getElementById('tc-retry-btn')?.addEventListener('click', renderWritePhase);
+    // 触发特效 + 语音播报
+    if (passed) {
+      effects.essayPass();
+      speak('哇，你写得真好！要不要看看老师的范文？');
+    } else {
+      effects.essayRetry();
+      speak('继续加油！先看看老师的范文学一学，再来挑战一次～');
+    }
+
+    // 范文展开切换
+    document.getElementById('tc-sample-toggle')?.addEventListener('click', () => {
+      const body = document.getElementById('tc-sample-body');
+      const caret = document.querySelector('.tc-sample-caret');
+      if (!body) return;
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      if (caret) caret.style.transform = open ? '' : 'rotate(180deg)';
+    });
+
+    document.getElementById('tc-retry-btn')?.addEventListener('click', () => {
+      stopSpeaking();
+      renderWritePhase();
+    });
     document.getElementById('tc-done-btn')?.addEventListener('click', () => {
+      stopSpeaking();
       window.__router.navigate('topicDetail', { topicId: _topic.id });
     });
   } catch (err) {
