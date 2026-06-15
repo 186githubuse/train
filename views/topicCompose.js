@@ -1,178 +1,64 @@
 /**
  * views/topicCompose.js
  * ─────────────────────────────────────────────────────────────
- * 专题训练 — D 类：参照树形结构图，按"总-分-分-分"四段式书写成文
+ * 专题训练 — C 类：连句成文（综合书写大题）
  * 流程：
- *   1. 展示图片 + 树形结构图 + 四段式写作要求
- *   2. 学生在文本框里写一篇短文
- *   3. 提交后调用 AI 按 4 维（组成完整 30 / 顺序正确 30 / 感觉点准确 30 / 语句通顺 10）评分
- *   4. 完成后记录积分 + 回训练营
+ *   1. 展示图片 + 全局五感树形总图（含各单元概述句作脚手架）+ 写作要求
+ *   2. 学生在文本框里写一篇短文（支持拍照 OCR）
+ *   3. 提交后调用 AI 按 4 维（组成完整30/顺序正确30/感觉点准确30/语句通顺10）评分
+ *   4. 完成后记录积分 + 回专题列表
+ *
+ * 兼容两种数据：
+ *   - 新结构：_sub.typeC = { totalTreeMap, essay }
+ *   - 旧结构：_sub.typeD = { title, treeMap{root,branches}, requirements, rubric, sample }
  * ─────────────────────────────────────────────────────────────
  */
 
 import { getSub, getTopic } from '../js/data/topics/index.js';
-import { API_CONFIG, VISION_CONFIG } from '../js/config.js?v=20260528';
 import { store } from '../js/store.js';
 import { speak, stopSpeaking } from '../js/tts.js';
 import * as effects from '../js/effects.js';
+import { gradeEssay, compressImage, fileToBase64, ocrHandwritingFromImage } from '../js/topicAI.js';
 
 let _topic = null;
 let _sub = null;
-let _task = null;
+let _task = null;       // 归一化后的任务对象
 let _quizScore = 0;
 let _quizTotal = 0;
+let _userSegments = { frame: '', units: {} };  // 学生在 B 各单元写的内容
 
-/* ─── AI 评分（comfly OpenAI 兼容格式） ─── */
-async function callLLM(messages, systemPrompt, maxTokens = 800) {
-  const res = await fetch(`${API_CONFIG.baseUrl}/v1/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_CONFIG.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: API_CONFIG.model,
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages,
-      ],
-      // 强制 JSON 输出，提升解析稳定性
-      response_format: { type: 'json_object' },
-    }),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    console.error(`[callLLM] ${res.status} from ${API_CONFIG.baseUrl}`, body);
-    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
-  }
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
-}
-
-/* ─── 图片识别（Gemini 走 itlsj，Anthropic 兼容格式） ─── */
-async function ocrHandwritingFromImage(base64, mimeType) {
-  const sysPrompt = `你是一个识别小学生手写内容的助手。
-任务：把图片中的手写中文内容**忠实转录成文字**。
-要求：
-1. 只输出转录的文字本身，不要加任何解释、标题、引号、Markdown
-2. 保留原文的换行和标点
-3. 如果某个字辨认不出来，用 ◯ 占位
-4. 如果图片里没有可识别的文字，返回：未识别到文字
-5. 不要修改、润色、纠错任何内容`;
-
-  const userPrompt = '请把这张图片里小学生写的内容一字一句转录出来。';
-
-  const res = await fetch(`${VISION_CONFIG.baseUrl}/v1/messages`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': VISION_CONFIG.apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: VISION_CONFIG.model,
-      max_tokens: 1500,
-      system: sysPrompt,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
-          { type: 'text', text: userPrompt },
-        ],
-      }],
-    }),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    console.error(`[ocr] ${res.status}`, body);
-    throw new Error(`OCR API ${res.status}`);
-  }
-  const data = await res.json();
-  return data.content?.[0]?.text || '';
-}
-
-/* 文件转 base64 */
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const parts = e.target.result.split(',');
-      resolve({ base64: parts[1], mimeType: file.type });
+/* ─── 归一化：把 typeC（新）/ typeD（旧）统一成 _task ─── */
+function normalizeTask() {
+  // 新结构
+  if (_sub.schema === 'unit' && _sub.typeC) {
+    const tt = _sub.typeC.totalTreeMap || {};
+    const essay = _sub.typeC.essay || {};
+    const points = (tt.units || []).flatMap(u => u.nodes || []);
+    return {
+      title: essay.title || `写一篇《我的${_sub.title}》`,
+      order: essay.order || tt.order || '',
+      requirements: essay.requirements || [],
+      rubric: essay.rubric || [],
+      sample: essay.sample || '',
+      points,
+      mode: 'total',
+      total: tt,
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-/* 图片压缩：长边 ≤ 1280px，JPEG 0.85（避免大图超过 API 限制） */
-async function compressImage(file) {
-  const maxSize = 1280;
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      let { width, height } = img;
-      if (width > maxSize || height > maxSize) {
-        const ratio = Math.min(maxSize / width, maxSize / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('压缩失败'));
-        resolve(new File([blob], 'compressed.jpg', { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.85);
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-function buildGradingSystemPrompt() {
-  const objName = _sub.title;
-  return `你是一位耐心温柔的小学语文老师，正在批改一位小学生写的描写${objName}的短文。
-
-【整体原则】
-- 鼓励为主，诊断具体。不要笼统说"写得好"，要指出好在哪里。
-- 如果有问题，语气要柔和，用"如果…就更好了"这样的句式。
-- 不要给负面评价（如"很差""很糟糕"），改用"再加点…会更完整"。
-- 本期训练核心是掌握感觉方法与有序描写，不要求使用比喻、拟人等修辞手法，语言应平实、准确、具体。
-
-【评分维度】（总分 100）
-1. 组成完整 (30 分)：全文清晰体现"看组成 → 排顺序 → 再感觉"的逻辑。是否按"总-分-分-分"四段结构书写：第一段总起写组成，后续每段分别描写一个主要部分。
-2. 顺序正确 (30 分)：各部分描写顺序与树形结构图中确定的"由下到上"一致；段落内部对特征的描写有序。
-3. 感觉点准确 (30 分)：是否完整、准确地包含树形结构图中的全部感觉点（如颜色、形状、触感、声音、气息、作用等）。
-4. 语句通顺 (10 分)：用词准确，句子衔接流畅，文意连贯，无语病。
-
-【输出格式】严格按 JSON 返回，不要加任何其他文字：
-{
-  "total": 总分数字,
-  "scores": { "组成完整": 数字, "顺序正确": 数字, "感觉点准确": 数字, "语句通顺": 数字 },
-  "highlights": ["写得好的地方1(具体)", "写得好的地方2"],
-  "suggestions": ["如果..就更好(具体)", "可以再加..."],
-  "encouragement": "一句温暖的鼓励话"
-}`;
-}
-
-async function gradeEssay(text) {
-  const prompt = `这是一位小学生写的描写"${_sub.title}"的短文，请按照上述 4 维标准评分：
-
-【学生作品】
-${text}
-
-请严格按 JSON 格式返回评分结果。`;
-  const raw = await callLLM(
-    [{ role: 'user', content: prompt }],
-    buildGradingSystemPrompt(),
-    900
-  );
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('AI 返回格式异常');
-  return JSON.parse(match[0]);
+  }
+  // 旧结构
+  const t = _sub.typeD;
+  if (!t) return null;
+  const points = (t.treeMap?.branches || []).flatMap(b => (b.children || []).map(c => c.name));
+  return {
+    title: t.title || `写一篇《我的${_sub.title}》`,
+    order: t.order || '',
+    requirements: t.requirements || [],
+    rubric: t.rubric || [],
+    sample: t.sample || '',
+    points,
+    mode: 'legacy',
+    legacy: t.treeMap,
+  };
 }
 
 /* ─── 渲染 ─── */
@@ -188,28 +74,62 @@ function renderHeader() {
       </button>
       <div class="quiz-header-info">
         <ph-pencil-simple weight="fill" size="20" color="#7C3AED"></ph-pencil-simple>
-        <span class="quiz-header-title">${_sub.title} · D 类·书写成文</span>
+        <span class="quiz-header-title">${_sub.title} · C 类·连句成文</span>
       </div>
       <div class="quiz-streak" style="visibility:hidden">.</div>
     </div>`;
 }
 
-function renderTreeMap() {
-  const tm = _task.treeMap;
-  const branches = tm.branches.map(b => {
-    const children = b.children.map(c => `<li class="tc-mm-leaf">${c.name}</li>`).join('');
+/* 全局五感树形总图（显示学生自己写的句子作脚手架，没写过才回退到参考概述） */
+function renderTotalTreeMap(tt) {
+  const branches = (tt.units || []).map((u, i) => {
+    const leaves = (u.nodes || []).map(n => `<li class="tc-mm-leaf">${n}</li>`).join('');
+    const mine = (_userSegments.units || {})[i];
+    const overview = mine
+      ? `<div class="tc-mm-overview tc-mm-overview-mine">✍️ 你写的：${mine}</div>`
+      : (u.overview ? `<div class="tc-mm-overview">📝 参考：${u.overview}</div>` : '');
+    return `
+      <div class="tc-mm-branch" style="--branch-color:${u.color || '#7C3AED'}">
+        <div class="tc-mm-branch-title">${u.name}</div>
+        <ul class="tc-mm-children">${leaves}</ul>
+        ${overview}
+      </div>`;
+  }).join('');
+
+  const headText = _userSegments.frame || tt.overview;
+  const head = headText
+    ? `<div class="tc-mm-overview tc-mm-overview-root">${_userSegments.frame ? '✍️ 你写的开头：' : '📝 参考开头：'}${headText}</div>`
+    : '';
+
+  return `
+    <div class="tc-mindmap">
+      <div class="tc-mm-root">${tt.object || _sub.title}${tt.order ? `（${tt.order}）` : ''}</div>
+      ${head}
+      <div class="tc-mm-branches">${branches}</div>
+    </div>`;
+}
+
+/* 旧结构树形图 */
+function renderLegacyTreeMap(tm) {
+  const branches = (tm.branches || []).map(b => {
+    const children = (b.children || []).map(c => `<li class="tc-mm-leaf">${c.name}</li>`).join('');
     return `
       <div class="tc-mm-branch" style="--branch-color:${b.color}">
         <div class="tc-mm-branch-title">${b.name}</div>
         <ul class="tc-mm-children">${children}</ul>
       </div>`;
   }).join('');
-
   return `
     <div class="tc-mindmap">
       <div class="tc-mm-root">${tm.root}</div>
       <div class="tc-mm-branches">${branches}</div>
     </div>`;
+}
+
+function renderTreeMap() {
+  return _task.mode === 'total'
+    ? renderTotalTreeMap(_task.total)
+    : renderLegacyTreeMap(_task.legacy || { branches: [] });
 }
 
 function renderRequirements() {
@@ -245,7 +165,7 @@ function renderWriteArea() {
       <textarea
         id="tc-essay"
         class="tc-essay-input"
-        placeholder="参照上方树形结构图，按"总-分-分-分"四段式写一篇短文：&#10;第一段总起写组成 → 后面每段分别描写一个部位 → 包含图中所有感觉点&#10;&#10;也可以点上方相机图标拍下手写内容自动识别～"
+        placeholder="参照上方树形总图，把各小节的概括句子连成一篇完整的短文：&#10;第一段总起写组成 → 后面每段分别描写一个部位 → 包含图中所有感觉点&#10;&#10;也可以点上方相机图标拍下手写内容自动识别～"
         rows="12"
         maxlength="800"></textarea>
       <button class="tc-submit-btn ${_topic.colorClass}" id="tc-submit-btn" disabled>
@@ -272,7 +192,6 @@ function renderGradingResult(result, text) {
   const passed = total >= 70;
   const stars = total >= 90 ? 3 : total >= 70 ? 2 : 1;
 
-  // 积分（仅通过时发放，未通过不发星）
   const bonus = passed ? 15 : 0;
   if (passed) store.addStars(bonus);
 
@@ -305,7 +224,6 @@ function renderGradingResult(result, text) {
     </svg>
   `).join('');
 
-  // 顶部反馈语：通过 / 未通过 不同口吻（永远鼓励，不出现"未通过 / 不及格"等负面词）
   const headerTitle = passed
     ? '🎉 太棒啦！你写得真好～'
     : '💪 继续加油！再学习一下范文吧～';
@@ -330,7 +248,6 @@ function renderGradingResult(result, text) {
         ` : ''}
       </div>
 
-      <!-- 通过/未通过 反馈卡片 -->
       <div class="tc-feedback-card glass-card rounded-[1.25rem] p-4">
         <h3 class="tc-section-title">
           <ph-${passed ? 'trophy' : 'graduation-cap'} weight="fill" size="18" color="${passed ? '#F59E0B' : '#7C3AED'}"></ph-${passed ? 'trophy' : 'graduation-cap'}>
@@ -375,7 +292,6 @@ function renderGradingResult(result, text) {
         <p class="tc-essay-text">${text.replace(/\n/g, '<br>')}</p>
       </div>
 
-      <!-- 老师范文（默认折叠，点按钮展开） -->
       ${_task.sample ? `
       <div class="tc-sample-section glass-card rounded-[1.25rem] p-4" id="tc-sample-section">
         <button class="tc-sample-toggle" id="tc-sample-toggle">
@@ -405,12 +321,15 @@ function renderGradingResult(result, text) {
 
 /* ─── 入口 ─── */
 export function renderTopicCompose(params = {}) {
-  const { topicId, subId, score = 0, total = 0 } = params;
+  const { topicId, subId, score = 0, total = 0, userSegments } = params;
   _topic = getTopic(topicId);
   _sub = getSub(topicId, subId);
-  _task = _sub?.typeD;
+  _task = _sub ? normalizeTask() : null;
   _quizScore = Number(score) || 0;
   _quizTotal = Number(total) || 0;
+  _userSegments = userSegments && typeof userSegments === 'object'
+    ? { frame: userSegments.frame || '', units: userSegments.units || {} }
+    : { frame: '', units: {} };
 
   if (!_topic || !_sub || !_task) {
     window.__showToast?.('未找到练笔任务');
@@ -425,6 +344,7 @@ export function renderTopicCompose(params = {}) {
   header.innerHTML = renderHeader();
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="back"]')) {
+      stopSpeaking();
       window.__router.navigate('topicDetail', { topicId });
     }
   });
@@ -435,7 +355,7 @@ export function renderTopicCompose(params = {}) {
 function renderWritePhase() {
   const content = document.getElementById('app-content');
   const recap = _quizTotal > 0
-    ? `<div class="tc-recap">前面 A/B/C 三类共答对 <b>${_quizScore}</b> / ${_quizTotal} 题，现在对照下方树形结构图，按四段式写一篇短文吧！</div>`
+    ? `<div class="tc-recap">前面选择题共答对 <b>${_quizScore}</b> / ${_quizTotal} 题，下方是你在每个小节<b>自己写过的句子</b>，把它们连起来、加上衔接，就是一篇完整的短文啦！</div>`
     : '';
 
   content.innerHTML = `
@@ -455,7 +375,7 @@ function renderWritePhase() {
   textarea.addEventListener('input', () => {
     const len = textarea.value.trim().length;
     countEl.textContent = len;
-    submitBtn.disabled = len < 120; // 四段式短文，至少 120 字才允许提交
+    submitBtn.disabled = len < 120;
   });
 
   submitBtn.addEventListener('click', async () => {
@@ -467,7 +387,6 @@ function renderWritePhase() {
     await submitForGrading(text);
   });
 
-  // ─── 拍照 / 相册：触发 file input 点击 ───
   document.getElementById('tc-btn-camera')?.addEventListener('click', () => {
     document.getElementById('tc-file-camera')?.click();
   });
@@ -478,7 +397,7 @@ function renderWritePhase() {
   document.getElementById('tc-file-camera')?.addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (file) handleOcrUpload(file);
-    e.target.value = ''; // 允许重复选择同一文件
+    e.target.value = '';
   });
   document.getElementById('tc-file-gallery')?.addEventListener('change', e => {
     const file = e.target.files?.[0];
@@ -487,7 +406,7 @@ function renderWritePhase() {
   });
 }
 
-/* ─── OCR 流程：压缩 → 转 base64 → 调 Gemini → 写入文本框 ─── */
+/* ─── OCR 流程 ─── */
 async function handleOcrUpload(file) {
   const status = document.getElementById('tc-ocr-status');
   const textarea = document.getElementById('tc-essay');
@@ -514,7 +433,6 @@ async function handleOcrUpload(file) {
       return;
     }
 
-    // 把识别结果填入文本框（如已有内容，附加在末尾用换行分隔）
     const existing = textarea.value.trim();
     textarea.value = existing ? `${existing}\n${text}` : text;
 
@@ -538,7 +456,11 @@ async function submitForGrading(text) {
   submitBtn.innerHTML = `<span class="tc-loading-dot"></span><span class="tc-loading-dot"></span><span class="tc-loading-dot"></span> AI 正在认真评分...`;
 
   try {
-    const result = await gradeEssay(text);
+    const result = await gradeEssay(text, {
+      objName: _sub.title,
+      order: _task.order,
+      points: _task.points,
+    });
     const total = Math.min(100, Math.max(0, Number(result.total) || 0));
     const passed = total >= 70;
 
@@ -547,7 +469,6 @@ async function submitForGrading(text) {
     content.scrollTop = 0;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 触发特效 + 语音播报
     if (passed) {
       effects.essayPass();
       speak('哇，你写得真好！要不要看看老师的范文？');
@@ -556,7 +477,6 @@ async function submitForGrading(text) {
       speak('继续加油！先看看老师的范文学一学，再来挑战一次～');
     }
 
-    // 范文展开切换
     document.getElementById('tc-sample-toggle')?.addEventListener('click', () => {
       const body = document.getElementById('tc-sample-body');
       const caret = document.querySelector('.tc-sample-caret');

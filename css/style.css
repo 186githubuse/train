@@ -745,8 +745,133 @@ body {
 }
 
 @media (min-width: 1024px) {
-  body { padding: 40px 24px 60px; }
-  #app-shell { width: 460px; }
+  /* ===== PC 桌面布局：左侧竖向导航栏 + 右侧 820px 内容卡片 =====
+     仅 ≥1024px 生效；移动端 / 平板（<1024）完全保持原样。
+     #bottom-nav 保留 id 与 .nav-item class，仅靠 CSS 变成左侧侧边栏，
+     导航 JS（main.js 事件委托 + router.js .active 同步）零改动。 */
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 24px;
+  }
+
+  /* app-shell 改为 横向 flex：导航在外、内容卡片在内 */
+  #app-shell {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    min-height: auto;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    background: transparent;
+    display: flex;
+    align-items: stretch;
+    gap: 22px;
+  }
+
+  /* ---- 左侧竖向导航栏（由 #bottom-nav 变形而来）---- */
+  #bottom-nav {
+    position: relative;
+    bottom: auto; left: auto; right: auto;
+    order: -1;            /* DOM 里 nav 在 #app 之后，桌面靠 order 提到左侧 */
+    width: 196px;
+    flex-shrink: 0;
+    align-self: stretch;
+    border-top: none;
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 30px;
+    background: rgba(255,255,255,0.62);
+    backdrop-filter: blur(20px);
+    box-shadow:
+      0 24px 70px rgba(139,92,246,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    padding: 22px 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 导航栏顶部品牌位 */
+  #bottom-nav::before {
+    content: "感觉训练营";
+    display: block;
+    font-size: 15px;
+    font-weight: 800;
+    color: #6D28D9;
+    letter-spacing: 0.02em;
+    padding: 6px 12px 18px;
+    border-bottom: 1px solid rgba(167,139,250,0.18);
+    margin-bottom: 12px;
+  }
+  /* 内部按钮容器：从横向 around 改为竖向堆叠 */
+  #bottom-nav > div {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 6px;
+    padding: 0 !important;
+  }
+
+  /* nav-item：图标 + 文字 横向一行 */
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 16px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .nav-item span:last-child { white-space: nowrap; }
+  .nav-item .nav-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .nav-item .nav-icon-wrap svg { width: 21px; height: 21px; }
+  .nav-item.active {
+    background: rgba(167,139,250,0.16);
+  }
+  /* 侧栏里"即将上线"角标隐藏（魔法机器入口本就置灰，dim 状态已表意）；
+     恢复魔法机器时这条会随 nav-coming-soon class 一起失效 */
+  .nav-item.nav-coming-soon .nav-soon-badge { display: none; }
+
+  /* ---- 右侧内容卡片 ---- */
+  #app {
+    width: 820px;
+    min-height: calc(100vh - 80px);
+    height: calc(100vh - 80px);
+    border-radius: 32px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.30);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.72);
+    box-shadow:
+      0 24px 70px rgba(139,92,246,0.16),
+      0 8px 28px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  #app-header { border-radius: 32px 32px 0 0; }
+  #app-content {
+    height: 100%;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-bottom: 32px;  /* 桌面无底部栏，去掉为底栏预留的 pb-32 */
+  }
+
+  /* 背景光晕球放大，铺满桌面背景 */
+  .bg-orb-1 { width: 420px; height: 420px; }
+  .bg-orb-2 { width: 340px; height: 340px; }
+  .bg-orb-3 { width: 280px; height: 280px; }
+}
+
+/* 超宽屏：略微再放大内容卡片上限 */
+@media (min-width: 1440px) {
+  #app { width: 880px; }
 }
 
 /* ===== Tab 切换栏 ===== */
@@ -805,4 +930,100 @@ body {
   padding: 3px 8px;
   backdrop-filter: blur(6px);
   white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PC 桌面互动增强（仅真鼠标设备 + ≥1024px）
+   —— 克制的悬停反馈 + 平滑切换过渡，不抢眼，以做题为主
+   触屏设备 (hover: none) 完全不受影响
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) and (hover: hover) {
+
+  /* ---- 选项悬停：轻微浮起 + 描边高亮 + 阴影加深 ---- */
+  .quiz-option:not(.quiz-option-disabled):not(.quiz-option-correct):not(.quiz-option-wrong):hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.40);
+    box-shadow: 0 8px 22px rgba(139, 92, 246, 0.14);
+  }
+
+  /* ---- 排序题可选项悬停 ---- */
+  .tq-sort-item:not(:disabled):hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.40);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.12);
+  }
+
+  /* ---- 卡片类悬停（课程卡 / 子内容卡 / 专题卡）---- */
+  .lesson-card-unlocked:hover,
+  .sub-card-unlocked:hover,
+  .topic-card-clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.18);
+  }
+
+  /* ---- 主按钮悬停：轻微上浮 ---- */
+  .topic-start-btn:hover,
+  .quiz-next-btn:hover,
+  .tc-submit-btn:not(:disabled):hover,
+  .tc-btn-primary:hover,
+  .quiz-confirm-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+  }
+  .tc-btn-secondary:hover { transform: translateY(-2px); }
+
+  /* ---- 侧边栏导航项悬停 ---- */
+  #bottom-nav .nav-item:not(.active):not(.nav-coming-soon):hover {
+    background: rgba(167, 139, 250, 0.09);
+    color: #7C3AED;
+  }
+  #bottom-nav .nav-item:not(.active):not(.nav-coming-soon):hover .nav-icon-wrap {
+    background: rgba(167, 139, 250, 0.14);
+    transform: translateY(-1px);
+  }
+
+  /* ---- 小工具按钮（朗读 / 相机 / 相册）悬停 ---- */
+  .tq-speak-btn:hover,
+  .tc-tool-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(124, 58, 237, 0.14);
+  }
+
+  /* ---- 折叠面板（参考答案 / 范文）标题悬停 ---- */
+  .tc-sample-toggle:hover { background: rgba(124, 58, 237, 0.05); }
+}
+
+/* ---- 切题 / 切页 平滑淡入（全端通用，但很轻微）---- */
+#app-content > .topic-quiz-page,
+#app-content > .topic-compose-page,
+#app-content > .quiz-page {
+  animation: tqFadeIn 0.32s ease both;
+}
+@keyframes tqFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 反馈区淡入（答错时的解析卡 / 书写评分卡）*/
+#tq-feedback-area > *,
+#tq-seg-result > * {
+  animation: tqFadeIn 0.28s ease both;
+}
+
+/* 进度条平滑增长已由基础样式（.quiz-progress-fill transition）处理，此处不再重复 */
+
+/* 尊重"减少动态效果"系统偏好：关掉位移动画，避免眩晕 */
+@media (prefers-reduced-motion: reduce) {
+  #app-content > .topic-quiz-page,
+  #app-content > .topic-compose-page,
+  #app-content > .quiz-page,
+  #tq-feedback-area > *,
+  #tq-seg-result > * {
+    animation: none;
+  }
+  .quiz-option:hover,
+  .lesson-card-unlocked:hover,
+  .sub-card-unlocked:hover,
+  .topic-card-clickable:hover,
+  .tq-sort-item:hover { transform: none; }
 }

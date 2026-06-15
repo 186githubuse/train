@@ -8,6 +8,19 @@
 
 import { getTopic } from '../js/data/topics/index.js';
 
+/** 统计选择题数量 + 是否有书写大题（兼容新单元结构 / 旧平铺结构） */
+function countQuestions(sub) {
+  if (sub.schema === 'unit') {
+    const a = sub.typeA?.questions?.length || 0;
+    const b = (sub.typeB?.units || []).reduce((n, u) => n + (u.questions?.length || 0), 0);
+    return { choiceCount: a + b, tD: sub.typeC ? 1 : 0 };
+  }
+  const a = sub.typeA?.length || 0;
+  const b = sub.typeB?.length || 0;
+  const c = sub.typeC?.length || 0;
+  return { choiceCount: a + b + c, tD: sub.typeD ? 1 : 0 };
+}
+
 function renderHeader(topic) {
   return `
     <div class="lesson-detail-header">
@@ -31,11 +44,7 @@ function renderHeader(topic) {
 
 function renderSubCard(sub, topic, idx) {
   const locked = !!sub.comingSoon;
-  const tA = sub.typeA?.length || 0;
-  const tB = sub.typeB?.length || 0;
-  const tC = sub.typeC?.length || 0;
-  const tD = sub.typeD ? 1 : 0;
-  const choiceCount = tA + tB + tC;
+  const { choiceCount, tD } = countQuestions(sub);
 
   if (locked) {
     return `

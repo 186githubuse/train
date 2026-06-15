@@ -145,27 +145,35 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 2. **列表页**（`topicDetail` phase=`list`）：4 个静物子内容卡片
 3. 选一个静物 → `topicQuiz` 答题 → `topicCompose` 书写
 
-**四段式题型（2026-05-24 起 · 替代旧 type1/2/3）**：
-- `typeA` 4-5 题：感觉三步法（看组成 / 排顺序 / 结构规划）
-- `typeB` 15-18 题：五感 15 点（按部位分组的客观特征）
-- `typeC` 4-6 题：连词成句（写作策略 / 自检 / 句子组合）
-- `typeD` 1 题：参照树形结构图按"总-分-分-分"四段式书写（AI 4 维评分）
+**题型结构（⚠️ 两套并存）**：
 
-**当前已实装（2026-05-25）**：静物模块 4 个子内容
-| 子内容 | 题量 | 文件 |
+*静物 3 个（2026-06-12 起 · 单元模块化 `schema:'unit'`，611 文档）* —— 「边学边写」：
+- `typeA = { questions[], write }`：感觉三步法选择题 + 1 道"一句话概括组成"书写题。`write.treeMap` 是「组成框架树形图」(部件按观察顺序排列，如台灯 ① 底座 ② 灯杆 ③ 灯罩 ④ 灯泡)，作为学生写组成句的脚手架
+- `typeB = { units[] }`：每单元 `{ questions[], treeMap{title,nodes[]}, write }`，单元选择题→单元树形图→单元分段书写
+- `typeC = { totalTreeMap, essay }`：全局树形总图（每单元的 `overview` 是参考概述）+ 1 篇综合大作文。**学生在 A/B 各步写的内容会通过路由参数 `userSegments` 传到 topicCompose**，总图里优先显示「✍️ 你写的」(绿框)，没写过才回退到「📝 参考」(橙框) —— 让 C 类是「连自己写的句子」而不是抄范文
+- `write` 结构：`{ id, prompt, requirement, points[], reference, treeMap? }`
+
+*植物/动物（旧 · 平铺四段式，未改）*：
+- `typeA/typeB/typeC` 均为**数组**，`typeD` 为书写大题（树形图 `{root,branches[]}`）
+
+**当前已实装（2026-06-12）**：静物 3 + 植物 3 + 动物 4 = 10 个子内容
+| 分类 | 子内容 | 结构 |
 |---|---|---|
-| 台灯 | A4+B16+C4+D1 = 25 | `taideng.js` |
-| 柳树 | A5+B15+C4+D1 = 25 | `liushu.js` |
-| 书包 | A5+B18+C6+D1 = 30 | `shubao.js` |
-| 笔袋 | A5+B18+C6+D1 = 30 | `bidai.js` |
+| 静物 jingwu/ | 台灯(18选)/笔袋(20选)/书包(20选) | 单元模块化 |
+| 植物 zhiwu/ | 柳树/白牡丹/橘子 | 旧四段式 |
+| 动物 dongwu/ | 橘猫/比熊/虎皮鹦鹉/金鱼 | 旧四段式 |
 
-**答题逻辑（2026-05-24 改版）**：答对直接跳下一题（300ms 闪绿），只有答错才显示正确答案 + 解析。
+静物每个另含 1 道 A 类书写 + 4 道单元书写 + 1 篇 C 类大作文。书包 SB-19 文档答案"BF"系笔误，已修正为 B。
 
-**评分维度（2026-05-24 改版 · 30/30/30/10）**：组成完整 / 顺序正确 / 感觉点准确 / 语句通顺。书写门槛 ≥ 120 字。不要求修辞。
+**答题逻辑**：答对直接跳下一题（300ms 闪绿），答错才显示正确答案 + 解析。静物的书写步调 `gradeSegment()` 轻量 AI 评分（≥70 通过 +3 星，AI 失败兜底出参考答案不卡流程）。
 
-**树状图**：当前用 `renderTreeMap()` 纯 HTML 渲染（`typeD.treeMap` 节点结构）。计划改为图片版（`typeD.treeMapImage` 字段优先），等客户上传图后切换。
+**评分维度（30/30/30/10）**：组成完整 / 顺序正确 / 感觉点准确 / 语句通顺。C 类/旧 typeD 大作文书写门槛 ≥ 120 字。不要求修辞。
 
-**扩展方式**：新增子内容只需在 `js/data/topics/jingwu/<id>.js` 写 typeA/B/C/D 数据文件 + 在 `index.js` 里 import + 加入 `subs[]`，三视图零改动。
+**AI 工具**：`js/topicAI.js`（共享模块，topicQuiz + topicCompose 共用）—— `callLLM` / `gradeSegment` / `gradeEssay` / OCR 三件套。
+
+**树状图**：`renderTreeMap()` 纯 HTML 渲染。静物用 `typeB.units[].treeMap.nodes[]`（单元图）+ `typeC.totalTreeMap.units[]`（总图，含 overview 脚手架，`.tc-mm-overview` 样式）；旧结构用 `typeD.treeMap.branches[]`。
+
+**扩展方式**：静物新增子内容 = 在 `jingwu/<id>.js` 写 `schema:'unit'` 数据 + `index.js` import 加入 `subs[]`，三视图零改动。
 
 **已废弃**：稿纸（`gaozhi.js`，旧 type1/2/3 格式，文件保留作存档但 index.js 不再 import）。
 
@@ -202,6 +210,23 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 **杨老师感觉训练写作营**
 
 面向 **1-12 年级**学生的感觉训练闯关 App，通过 10 节课 + 300 道题（含分学段）帮助学生培养写作感知力（看/听/闻/尝/摸五感）。纯原生 Web 应用，移动端优先，马卡龙液态玻璃风格。核心功能已全部完成，当前处于客户测试阶段。
+
+### 产品全景与本 app 的位置（2026-06-15 客户对齐）
+
+```
+杨红作文（整个产品）
+├── 感觉训练   ← 当前 app 做的就是这一个模块
+│     ├── 基础训练（10 课 · 学三步法 + 五感方法论）
+│     └── 专题训练（静物/植物/动物/景物/人物/事件 6 个）
+├── 思维训练   （未做）
+├── 综合训练   （未做）
+└── 同步作文   （未做）
+杨红阅读理解   （独立产品线 · 未做）
+```
+
+- 当前 app 内部"训练营"页 ≈ **感觉训练模块**，里面的「基础训练 / 专题训练」两个 Tab 是它的两部分
+- 命名上「训练营」偏泛，将来加思维 / 综合 / 同步会有冲突；做多模块框架的事**等那些模块要上时再做**，现在不动
+- 客户讨论了重命名 / 模块首页 / 多模块壳 三个改造层级；未确认 → 维持现状
 
 正式地址：
 - **https://train.tybqcloud.com**（阿里云 ECS + nginx，国内快，给客户用）
@@ -307,8 +332,10 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 ## Import Organization
 ## CSS Conventions
 - Default: full-width mobile layout
-- `@media (min-width: 768px)`: center `#app-shell` at `420px` width with card shadow
-- `@media (min-width: 1024px)`: widen to `460px`
+- `@media (min-width: 768px)`: center `#app-shell` at `420px` card with shadow
+- `@media (min-width: 1024px)`: PC 桌面布局 — `#app-shell` 改为横向 flex，左侧 196px 竖向侧边栏(`#bottom-nav` 变形而来)+ 右侧 820px 内容卡片，背景光晕球放大。`<nav>` 在 DOM 里是 `#app` 兄弟节点，桌面用 `order: -1` 排到左侧。导航 JS 零改动。详见 [memory] feature_pc_layout
+- `@media (min-width: 1024px)` 答题页：`.topic-quiz-page` 用 CSS Grid 两栏(340px 图 + 1fr 内容)，图片框 sticky 固定 + aspect-ratio 4:3，做题时图常驻视野不滚走
+- `@media (min-width: 1024px) and (hover: hover)`：选项 / 卡片 / 按钮的克制悬停反馈(浮起 + 描边 + 阴影)，淡入切页过渡，`prefers-reduced-motion` 兜底
 ## State Management Pattern
 ## Error Handling
 ## Comments

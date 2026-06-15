@@ -538,6 +538,34 @@
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
+/* 单元概述脚手架（连句成段时的参考短句） */
+.tc-mm-overview {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #6B5F52;
+  background: rgba(255, 248, 235, 0.85);
+  border: 1px dashed rgba(196, 154, 108, 0.35);
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.tc-mm-overview-root {
+  margin: 8px 0 4px;
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #5B4B8A;
+  font-weight: 600;
+}
+
+/* 学生自己写的句子（绿色，区别于参考橙色） */
+.tc-mm-overview-mine {
+  color: #2D7A4E;
+  background: rgba(228, 248, 236, 0.9);
+  border: 1px solid rgba(45, 122, 78, 0.28);
+  font-weight: 600;
+}
+
 /* ─── 写作区 ─── */
 .tc-write-area {
   background: rgba(255, 255, 255, 0.8);
@@ -1023,4 +1051,39 @@
 .topic-start-btn:active {
   transform: translateY(2px);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PC 桌面（≥1024px）答题页双栏布局
+   —— 图在左（缩小 + sticky 固定），题目+选项在右，以题为主、克制
+   移动端 / 平板（<1024）保持原来的"图在上、题在下"单栏
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .topic-quiz-page {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: start;
+    padding: 16px 0 32px;
+  }
+
+  /* 图片：占左列，sticky 固定在顶部；用 4:3 让它在左列更舒展、不压扁 */
+  .topic-quiz-page > .tq-image-box {
+    grid-column: 1;
+    grid-row: 1 / span 99;
+    align-self: start;
+    position: sticky;
+    top: 8px;
+    margin-bottom: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  /* 其余内容（进度条 / 题干 / 选项 / 反馈 / 书写区）全部进右列 */
+  .topic-quiz-page > *:not(.tq-image-box) {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  /* 右列首个元素（进度条）不要顶太多空隙 */
+  .topic-quiz-page > .quiz-progress-wrap { margin-top: 2px; }
 }
