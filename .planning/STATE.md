@@ -23,5 +23,13 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Active Work
 None — project initialized, ready to plan Phase 1.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260619-4q1 | 根据 0619 最新 612 DOCX 替换/补齐专题训练模块化题库，植物三项按最新题替换，新对象用占位图 | 2026-06-18 | f3e1027 | [260619-4q1-users-mac-documents-demo-0619-6-0-612-do](./quick/260619-4q1-users-mac-documents-demo-0619-6-0-612-do/) |
+
+Last activity: 2026-06-18 - Completed quick task 260619-4q1: update modular topic bank from 612 DOCX.
+
 ## Decisions Log
 (empty — populated during execution)
