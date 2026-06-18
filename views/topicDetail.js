@@ -150,7 +150,7 @@ function renderIntroPhase(topic, topicId, content, header) {
         </div>
       </div>
       <button class="topic-start-btn ${topic.colorClass}" id="topic-start-btn">
-        <span class="topic-start-btn-text">选择静物开始答题</span>
+        <span class="topic-start-btn-text">选择${topic.title.replace('训练', '')}开始答题</span>
         <svg class="topic-start-btn-arrow" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5"
              stroke-linecap="round" stroke-linejoin="round">
@@ -179,7 +179,7 @@ function renderListPhase(topic, topicId, content, header) {
         <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.95)"></ph-${topic.icon}>
         <div>
           <h2 class="text-white font-black text-[18px] leading-tight">
-            选择一个静物
+            选择一个${topic.title.replace('训练', '')}
           </h2>
           <p class="text-white/80 text-[12px] mt-1 leading-relaxed">
             共 ${topic.subs.length} 个子内容，由浅入深逐步练习

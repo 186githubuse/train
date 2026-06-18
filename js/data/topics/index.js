@@ -21,6 +21,10 @@ import { JUMAO } from './dongwu/jumao.js';
 import { BIXIONG } from './dongwu/bixiong.js';
 import { YINGWU } from './dongwu/yingwu.js';
 import { JINYU } from './dongwu/jinyu.js';
+import { MIFENG } from './dongwu/mifeng.js';
+
+import { ZHUANGYUANQIAO } from './jingwu/zhuangyuanqiao.js';
+import { GONGYUANHUPAN } from './scenery/gongyuanhupan.js';
 
 /** 专题模块定义（含子内容） */
 export const TOPICS = [
@@ -94,6 +98,7 @@ export const TOPICS = [
       BIXIONG,
       YINGWU,
       JINYU,
+      MIFENG,
     ],
   },
   {
@@ -103,8 +108,21 @@ export const TOPICS = [
     icon: 'mountains',
     colorClass: 'macaron-sky',
     textColor: '#3A7FAA',
-    available: false,
-    subs: [],
+    available: true,
+    intro: {
+      videoUrl: 'https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/lesson9.mov',
+      title: '什么是景物描写？',
+      points: [
+        '景物 = 由多个可感知对象组成的综合场景',
+        '核心方法：先选取景物单元，再按顺序逐一感觉',
+        '常用顺序：由近到远 / 由上到下 / 按游览路线',
+        '感觉重点：颜色、形状、声音、动作、气息和整体画面',
+      ],
+    },
+    subs: [
+      ZHUANGYUANQIAO,
+      GONGYUANHUPAN,
+    ],
   },
   {
     id: 'person',
