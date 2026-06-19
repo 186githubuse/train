@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────
  * 来源：0619 最新《感觉训练专题模块开发大纲（新6.0简版）612》DOCX 提取文本
  * 结构：单元模块化（schema: 'unit'）
- * 说明：无正式图片的对象使用临时占位图，后续上传 COS 后替换 image 即可。
+ * 图片：正式主图使用腾讯云 COS；局部题按 imageOverride 切换细节图。
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -14,8 +14,8 @@ export const MIFENG = {
   "title": "蜜蜂",
   "subtitle": "昆虫结构 · 头胸腹 · 采蜜传粉",
   "difficulty": 3,
-  "image": "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22900%22%20viewBox%3D%220%200%201200%20900%22%3E%0A%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23FFF4C7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFFFFF%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%3Crect%20width%3D%221200%22%20height%3D%22900%22%20rx%3D%2272%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22250%22%20cy%3D%22210%22%20r%3D%22130%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.55%22/%3E%0A%20%20%3Ccircle%20cx%3D%22940%22%20cy%3D%22690%22%20r%3D%22170%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22410%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2272%22%20font-weight%3D%22700%22%20fill%3D%22%236B7280%22%3E%E8%9C%9C%E8%9C%82%3C/text%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22500%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2236%22%20fill%3D%22%239CA3AF%22%3E%E4%B8%B4%E6%97%B6%E5%8D%A0%E4%BD%8D%E5%9B%BE%20%C2%B7%20%E5%BE%85%E4%B8%8A%E4%BC%A0%E6%AD%A3%E5%BC%8F%E5%9B%BE%E7%89%87%3C/text%3E%0A%3C/svg%3E",
-  "imageAlt": "蜜蜂专题临时占位图，待上传正式图片",
+  "image": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng.png",
+  "imageAlt": "一只正在花朵上采蜜的蜜蜂，椭圆形复眼、细长触角、透明薄膜翅膀、六条足和黄黑条纹腹部清晰可见",
   "typeA": {
     "questions": [
       {
@@ -116,7 +116,9 @@ export const MIFENG = {
               "D": "方形小眼"
             },
             "correct": "B",
-            "hint": "蜜蜂头部两侧长着椭圆形复眼。"
+            "hint": "蜜蜂头部两侧长着椭圆形复眼。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-head.png",
+            "imageOverrideAlt": "蜜蜂头部特写，椭圆形复眼和细长触角清晰可见"
           },
           {
             "id": "TZ-KC-06",
@@ -130,7 +132,9 @@ export const MIFENG = {
               "D": "抓握花瓣"
             },
             "correct": "B",
-            "hint": "触角的主要作用是感知气味、温度，帮助蜜蜂定位花源。"
+            "hint": "触角的主要作用是感知气味、温度，帮助蜜蜂定位花源。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-head.png",
+            "imageOverrideAlt": "蜜蜂头部触角特写，展示触角感知气味和温度的部位"
           },
           {
             "id": "TZ-KC-07",
@@ -144,7 +148,9 @@ export const MIFENG = {
               "D": "持续低垂"
             },
             "correct": "B",
-            "hint": "蜜蜂寻觅花源时，头部会左右转动探查。"
+            "hint": "蜜蜂寻觅花源时，头部会左右转动探查。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-head.png",
+            "imageOverrideAlt": "蜜蜂头部朝向花蕊的特写，表现寻找花朵时头部动作"
           },
           {
             "id": "TZ-KC-08",
@@ -172,7 +178,9 @@ export const MIFENG = {
               "D": "口器旁边"
             },
             "correct": "B",
-            "hint": "椭圆形复眼生长在头部两侧，是头部重要组成部分。"
+            "hint": "椭圆形复眼生长在头部两侧，是头部重要组成部分。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-head.png",
+            "imageOverrideAlt": "蜜蜂头部两侧复眼特写"
           },
           {
             "id": "TZ-KC-10",
@@ -186,7 +194,9 @@ export const MIFENG = {
               "D": "定位花源"
             },
             "correct": "C",
-            "hint": "飞行依靠胸部翅膀，不属于触角的作用。"
+            "hint": "飞行依靠胸部翅膀，不属于触角的作用。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-head.png",
+            "imageOverrideAlt": "蜜蜂头部触角特写"
           }
         ],
         "treeMap": {
@@ -230,7 +240,9 @@ export const MIFENG = {
               "D": "无完整翅膀"
             },
             "correct": "B",
-            "hint": "蜜蜂胸部长有两对透明的薄膜翅膀。"
+            "hint": "蜜蜂胸部长有两对透明的薄膜翅膀。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂胸部特写，透明薄膜翅膀清晰可见"
           },
           {
             "id": "TZ-KC-12",
@@ -244,7 +256,9 @@ export const MIFENG = {
               "D": "八条"
             },
             "correct": "C",
-            "hint": "蜜蜂胸部分布六条足，是胸部主要组成部分。"
+            "hint": "蜜蜂胸部分布六条足，是胸部主要组成部分。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂胸部和六条足特写"
           },
           {
             "id": "TZ-KC-13",
@@ -258,7 +272,9 @@ export const MIFENG = {
               "D": "完全无声"
             },
             "correct": "B",
-            "hint": "翅膀高速振动，会持续发出嗡嗡的声响。"
+            "hint": "翅膀高速振动，会持续发出嗡嗡的声响。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂翅膀振动飞行特写"
           },
           {
             "id": "TZ-KC-14",
@@ -272,7 +288,9 @@ export const MIFENG = {
               "D": "湿滑发黏"
             },
             "correct": "B",
-            "hint": "胸部覆盖绒毛，触感柔软顺滑。"
+            "hint": "胸部覆盖绒毛，触感柔软顺滑。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂胸部绒毛特写"
           },
           {
             "id": "TZ-KC-15",
@@ -286,7 +304,9 @@ export const MIFENG = {
               "D": "蜷缩收起"
             },
             "correct": "B",
-            "hint": "停留时，足部可以牢牢抓握花瓣。"
+            "hint": "停留时，足部可以牢牢抓握花瓣。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂足部抓握花瓣特写"
           },
           {
             "id": "TZ-KC-16",
@@ -300,7 +320,9 @@ export const MIFENG = {
               "D": "单边活动"
             },
             "correct": "B",
-            "hint": "飞行时翅膀保持高速连续振动。"
+            "hint": "飞行时翅膀保持高速连续振动。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-wing.png",
+            "imageOverrideAlt": "蜜蜂透明翅膀特写"
           }
         ],
         "treeMap": {
@@ -346,7 +368,9 @@ export const MIFENG = {
               "D": "卷曲成团"
             },
             "correct": "B",
-            "hint": "蜜蜂腹部整体为细长椭圆形。"
+            "hint": "蜜蜂腹部整体为细长椭圆形。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-abdomen.png",
+            "imageOverrideAlt": "蜜蜂腹部特写，细长椭圆形和黄黑条纹清晰可见"
           },
           {
             "id": "TZ-KC-18",
@@ -360,7 +384,9 @@ export const MIFENG = {
               "D": "全黄色斑点"
             },
             "correct": "B",
-            "hint": "腹部分布黄黑相间的条纹。"
+            "hint": "腹部分布黄黑相间的条纹。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-abdomen.png",
+            "imageOverrideAlt": "蜜蜂腹部黄黑相间条纹特写"
           },
           {
             "id": "TZ-KC-19",
@@ -374,7 +400,9 @@ export const MIFENG = {
               "D": "粗壮足"
             },
             "correct": "B",
-            "hint": "腹部末端带有细小尖刺，是腹部组成部分。"
+            "hint": "腹部末端带有细小尖刺，是腹部组成部分。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-abdomen.png",
+            "imageOverrideAlt": "蜜蜂腹部末端细小尖刺特写"
           },
           {
             "id": "TZ-KC-20",
@@ -388,7 +416,9 @@ export const MIFENG = {
               "D": "采集花蜜"
             },
             "correct": "B",
-            "hint": "遭遇危险时，蜜蜂会竖起蜇刺保护自己。"
+            "hint": "遭遇危险时，蜜蜂会竖起蜇刺保护自己。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-abdomen.png",
+            "imageOverrideAlt": "蜜蜂腹部尖刺特写"
           },
           {
             "id": "TZ-KC-21",
@@ -402,7 +432,9 @@ export const MIFENG = {
               "D": "深浅一致"
             },
             "correct": "B",
-            "hint": "黄黑相间的条纹，视觉上对比十分鲜明。"
+            "hint": "黄黑相间的条纹，视觉上对比十分鲜明。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/dongwu/mifeng-abdomen.png",
+            "imageOverrideAlt": "蜜蜂腹部黄黑条纹视觉效果特写"
           }
         ],
         "treeMap": {

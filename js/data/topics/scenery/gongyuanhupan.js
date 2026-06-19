@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────
  * 来源：0619 最新《感觉训练专题模块开发大纲（新6.0简版）612》DOCX 提取文本
  * 结构：单元模块化（schema: 'unit'）
- * 说明：无正式图片的对象使用临时占位图，后续上传 COS 后替换 image 即可。
+ * 图片：正式主图使用腾讯云 COS；局部题按 imageOverride 切换细节图。
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -14,8 +14,8 @@ export const GONGYUANHUPAN = {
   "title": "公园湖畔",
   "subtitle": "湖面 · 石拱桥 · 金鱼 · 垂柳 · 白牡丹 · 蜜蜂",
   "difficulty": 4,
-  "image": "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22900%22%20viewBox%3D%220%200%201200%20900%22%3E%0A%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23DCFCE7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFFFFF%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%3Crect%20width%3D%221200%22%20height%3D%22900%22%20rx%3D%2272%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22250%22%20cy%3D%22210%22%20r%3D%22130%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.55%22/%3E%0A%20%20%3Ccircle%20cx%3D%22940%22%20cy%3D%22690%22%20r%3D%22170%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22410%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2272%22%20font-weight%3D%22700%22%20fill%3D%22%236B7280%22%3E%E5%85%AC%E5%9B%AD%E6%B9%96%E7%95%94%3C/text%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22500%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2236%22%20fill%3D%22%239CA3AF%22%3E%E4%B8%B4%E6%97%B6%E5%8D%A0%E4%BD%8D%E5%9B%BE%20%C2%B7%20%E5%BE%85%E4%B8%8A%E4%BC%A0%E6%AD%A3%E5%BC%8F%E5%9B%BE%E7%89%87%3C/text%3E%0A%3C/svg%3E",
-  "imageAlt": "公园湖畔综合景物专题临时占位图，待上传正式图片",
+  "image": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan.png",
+  "imageAlt": "春天公园湖畔，碧绿湖面、浅米白石拱桥、金鱼、垂柳、白牡丹和蜜蜂组成丰富景色",
   "typeA": {
     "questions": [
       {
@@ -122,7 +122,9 @@ export const GONGYUANHUPAN = {
               "D": "湖面静止不动"
             },
             "correct": "C",
-            "hint": "微风之下，阳光照射在湖面波纹上，会泛起闪闪银光。"
+            "hint": "微风之下，阳光照射在湖面波纹上，会泛起闪闪银光。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-lake.png",
+            "imageOverrideAlt": "湖面微风波纹和阳光银色闪光特写"
           }
         ],
         "treeMap": {
@@ -160,7 +162,9 @@ export const GONGYUANHUPAN = {
               "D": "不规则造型"
             },
             "correct": "A",
-            "hint": "湖上的石拱桥整体外形为拱形。"
+            "hint": "湖上的石拱桥整体外形为拱形。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-bridge.png",
+            "imageOverrideAlt": "公园湖面上的浅米白色石拱桥局部"
           },
           {
             "id": "TZ-JW-YH-08",
@@ -174,7 +178,9 @@ export const GONGYUANHUPAN = {
               "D": "数量十分稀少"
             },
             "correct": "B",
-            "hint": "石桥栏杆上的石狮子形态各不相同，雕刻工艺十分精美。"
+            "hint": "石桥栏杆上的石狮子形态各不相同，雕刻工艺十分精美。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-bridge.png",
+            "imageOverrideAlt": "石拱桥栏杆上的石狮子特写"
           },
           {
             "id": "TZ-JW-YH-09",
@@ -188,7 +194,9 @@ export const GONGYUANHUPAN = {
               "D": "大声交谈喧闹"
             },
             "correct": "C",
-            "hint": "来往行人会在桥上驻足，拍摄湖畔景色。"
+            "hint": "来往行人会在桥上驻足，拍摄湖畔景色。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-bridge.png",
+            "imageOverrideAlt": "公园湖畔石拱桥和远景行人特写"
           }
         ],
         "treeMap": {
@@ -348,7 +356,9 @@ export const GONGYUANHUPAN = {
               "D": "花瓣宽大，纯白色"
             },
             "correct": "D",
-            "hint": "白牡丹长着大大的花瓣，整体为纯白色。"
+            "hint": "白牡丹长着大大的花瓣，整体为纯白色。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-flower-bee.png",
+            "imageOverrideAlt": "湖畔白牡丹花瓣特写"
           },
           {
             "id": "TZ-JW-YH-16",
@@ -362,7 +372,9 @@ export const GONGYUANHUPAN = {
               "D": "腐烂气味"
             },
             "correct": "B",
-            "hint": "白牡丹会散发出清淡的花香。"
+            "hint": "白牡丹会散发出清淡的花香。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-flower-bee.png",
+            "imageOverrideAlt": "湖畔白牡丹与蜜蜂组合特写"
           }
         ],
         "treeMap": {
@@ -400,7 +412,9 @@ export const GONGYUANHUPAN = {
               "D": "花间起舞，辛勤采蜜"
             },
             "correct": "D",
-            "hint": "蜜蜂在花丛中飞舞，辛勤采集花蜜。"
+            "hint": "蜜蜂在花丛中飞舞，辛勤采集花蜜。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-flower-bee.png",
+            "imageOverrideAlt": "白牡丹花间蜜蜂采蜜特写"
           },
           {
             "id": "TZ-JW-YH-18",
@@ -414,7 +428,9 @@ export const GONGYUANHUPAN = {
               "D": "汪汪声"
             },
             "correct": "B",
-            "hint": "蜜蜂翅膀高速振动，会发出嗡嗡的声响。"
+            "hint": "蜜蜂翅膀高速振动，会发出嗡嗡的声响。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/gongyuanhupan-flower-bee.png",
+            "imageOverrideAlt": "白牡丹花间蜜蜂飞行特写"
           },
           {
             "id": "TZ-JW-YH-19",

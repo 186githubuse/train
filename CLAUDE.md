@@ -27,13 +27,16 @@ js/
     courseLogic.js      # 课程核心教学逻辑
     questions/          # 基础训练题库（297题拆分到 q01~q10.js，每课30题）
     topics/             # 专题训练题库
-      index.js          # 6 模块入口（静物→植物→动物→景物→人物→事件，目前仅静物开放）
-      jingwu/           # 静物专题
-        taideng.js      # 台灯（typeA/B/C/D）
-        liushu.js       # 柳树（typeA/B/C/D）
-        shubao.js       # 书包（typeA/B/C/D）
-        bidai.js        # 笔袋（typeA/B/C/D）
+      index.js          # 6 模块入口（静物→植物→动物→景物→人物→事件；静物/植物/动物/景物已开放）
+      jingwu/           # 静物专题 + 状元桥数据（topicId='scenery'）
+        taideng.js      # 台灯（schema:'unit'）
+        shubao.js       # 书包（schema:'unit'）
+        bidai.js        # 笔袋（schema:'unit'）
+        zhuangyuanqiao.js # 状元桥（schema:'unit'，景物模块）
         gaozhi.js       # 稿纸（已废弃 · 入口未引用，文件保留作存档）
+      zhiwu/            # 植物专题：柳树 / 白牡丹 / 橘子（schema:'unit'）
+      dongwu/           # 动物专题：橘猫 / 比熊 / 虎皮鹦鹉 / 金鱼 / 蜜蜂（schema:'unit'）
+      scenery/          # 景物专题：公园湖畔（schema:'unit'）
 views/
   trainingCamp.js       # ✅ 训练营（基础 + 专题 Tab）
   lessonDetail.js       # ✅ 课程详情页
@@ -135,45 +138,42 @@ Schema 版本不匹配时 `_load()` 自动清 localStorage。`store.getStage()` 
 ## CSS 马卡龙色系（对应 colorClass）
 macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / cherry
 
-## 专题训练（2026-05-13 起 · 2026-05-25 改版到 v5.0）
+## 专题训练（2026-05-13 起 · 2026-06-18 按 0619/612 文档统一模块化）
 
-数据：`js/data/topics/index.js` + `js/data/topics/jingwu/{taideng,liushu,shubao,bidai}.js`
+数据：`js/data/topics/index.js` + `js/data/topics/{jingwu,zhiwu,dongwu,scenery}/**.js`
 视图：`topicDetail` / `topicQuiz` / `topicCompose`
 
 **入口流程（2026-05-24 起 · 二段式）**：
-1. **介绍页**（`topicDetail` 默认 phase）：模块介绍视频（占位用 lesson9.mov）+ 知识点四条 + "选择静物开始答题"按钮
-2. **列表页**（`topicDetail` phase=`list`）：4 个静物子内容卡片
-3. 选一个静物 → `topicQuiz` 答题 → `topicCompose` 书写
+1. **介绍页**（`topicDetail` 默认 phase）：模块介绍视频（占位用 lesson9.mov）+ 知识点 + `选择${topic.title.replace('训练','')}开始答题` 按钮
+2. **列表页**（`topicDetail` phase=`list`）：当前专题下的子内容卡片
+3. 选一个子内容 → `topicQuiz` 答题/分段书写 → `topicCompose` 综合书写
 
-**题型结构（⚠️ 两套并存）**：
-
-*静物 3 个（2026-06-12 起 · 单元模块化 `schema:'unit'`，611 文档）* —— 「边学边写」：
-- `typeA = { questions[], write }`：感觉三步法选择题 + 1 道"一句话概括组成"书写题。`write.treeMap` 是「组成框架树形图」(部件按观察顺序排列，如台灯 ① 底座 ② 灯杆 ③ 灯罩 ④ 灯泡)，作为学生写组成句的脚手架
-- `typeB = { units[] }`：每单元 `{ questions[], treeMap{title,nodes[]}, write }`，单元选择题→单元树形图→单元分段书写
-- `typeC = { totalTreeMap, essay }`：全局树形总图（每单元的 `overview` 是参考概述）+ 1 篇综合大作文。**学生在 A/B 各步写的内容会通过路由参数 `userSegments` 传到 topicCompose**，总图里优先显示「✍️ 你写的」(绿框)，没写过才回退到「📝 参考」(橙框) —— 让 C 类是「连自己写的句子」而不是抄范文
+**统一题型结构（schema:'unit'）**：
+- 所有已开放子内容都使用单元模块化「边学边写」结构，不再区分“静物新结构 / 植物动物旧结构”。
+- `typeA = { questions[], write }`：感觉三步法选择题 + 1 道“概括组成”书写题。`write.treeMap` 是组成框架脚手架。
+- `typeB = { units[] }`：每单元 `{ questions[], treeMap{title,nodes[]}, write }`，单元选择题 → 单元树形图 → 单元分段书写。
+- `typeC = { totalTreeMap, essay }`：全局树形总图 + 1 篇综合书写。学生在 A/B 各步写的内容会通过路由参数 `userSegments` 传到 `topicCompose`，总图里优先显示「✍️ 你写的」，没写过才回退到参考概述。
 - `write` 结构：`{ id, prompt, requirement, points[], reference, treeMap? }`
 
-*植物/动物（旧 · 平铺四段式，未改）*：
-- `typeA/typeB/typeC` 均为**数组**，`typeD` 为书写大题（树形图 `{root,branches[]}`）
-
-**当前已实装（2026-06-12）**：静物 3 + 植物 3 + 动物 4 = 10 个子内容
+**当前已实装（2026-06-18）**：静物 3 + 植物 3 + 动物 5 + 景物 2 = 13 个子内容，288 道选择题（不含 A/B/C 书写任务）
 | 分类 | 子内容 | 结构 |
 |---|---|---|
-| 静物 jingwu/ | 台灯(18选)/笔袋(20选)/书包(20选) | 单元模块化 |
-| 植物 zhiwu/ | 柳树/白牡丹/橘子 | 旧四段式 |
-| 动物 dongwu/ | 橘猫/比熊/虎皮鹦鹉/金鱼 | 旧四段式 |
+| 静物 jingwu/ | 台灯 / 笔袋 / 书包 | 单元模块化 |
+| 植物 zhiwu/ | 柳树 / 白牡丹 / 橘子 | 单元模块化 |
+| 动物 dongwu/ | 橘猫 / 比熊犬·小V / 虎皮鹦鹉 / 金鱼 / 蜜蜂 | 单元模块化 |
+| 景物 scenery/ + jingwu/ | 公园湖畔 / 状元桥 | 单元模块化 |
 
-静物每个另含 1 道 A 类书写 + 4 道单元书写 + 1 篇 C 类大作文。书包 SB-19 文档答案"BF"系笔误，已修正为 B。
+**图片状态**：旧 10 个对象沿用 COS 主图；蜜蜂 / 状元桥 / 公园湖畔正式主图已上传 COS 并接入。8 张新增局部图已通过 `imageOverride` 接到相关选择题：蜜蜂头部/翅膀/腹部，状元桥护栏/桥洞，公园湖畔湖面/石拱桥/白牡丹蜜蜂。提示词保存在 `image-prompts/README.md`。
 
-**答题逻辑**：答对直接跳下一题（300ms 闪绿），答错才显示正确答案 + 解析。静物的书写步调 `gradeSegment()` 轻量 AI 评分（≥70 通过 +3 星，AI 失败兜底出参考答案不卡流程）。
+**答题逻辑**：答对直接跳下一题（300ms 闪绿），答错才显示正确答案 + 解析。书写步调 `gradeSegment()` 轻量 AI 评分（≥70 通过 +3 星，AI 失败兜底出参考答案不卡流程）。
 
-**评分维度（30/30/30/10）**：组成完整 / 顺序正确 / 感觉点准确 / 语句通顺。C 类/旧 typeD 大作文书写门槛 ≥ 120 字。不要求修辞。
+**评分维度（30/30/30/10）**：组成完整 / 顺序正确 / 感觉点准确 / 语句通顺。C 类综合书写门槛 ≥ 120 字。不要求修辞。
 
 **AI 工具**：`js/topicAI.js`（共享模块，topicQuiz + topicCompose 共用）—— `callLLM` / `gradeSegment` / `gradeEssay` / OCR 三件套。
 
-**树状图**：`renderTreeMap()` 纯 HTML 渲染。静物用 `typeB.units[].treeMap.nodes[]`（单元图）+ `typeC.totalTreeMap.units[]`（总图，含 overview 脚手架，`.tc-mm-overview` 样式）；旧结构用 `typeD.treeMap.branches[]`。
+**树状图**：`renderTreeMap()` 纯 HTML 渲染。新结构使用 `typeB.units[].treeMap.nodes[]`（单元图）+ `typeC.totalTreeMap.units[]`（总图，含 overview 脚手架，`.tc-mm-overview` 样式）。`topicCompose` 仍保留旧 `typeD` fallback。
 
-**扩展方式**：静物新增子内容 = 在 `jingwu/<id>.js` 写 `schema:'unit'` 数据 + `index.js` import 加入 `subs[]`，三视图零改动。
+**扩展方式**：新增子内容 = 写 `schema:'unit'` 数据文件 + 在 `index.js` import 并加入对应 `subs[]`；三视图通常无需改动。
 
 **已废弃**：稿纸（`gaozhi.js`，旧 type1/2/3 格式，文件保留作存档但 index.js 不再 import）。
 
@@ -195,9 +195,9 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 
 ## 下一步待办
 
-- 专题·静物：橘子/西瓜/菠萝（comingSoon · 等文档题库）
-- 专题·植物 / 动物 / 景物 / 人物 / 事件（available:false · 文档待产出）
-- **专题图片**（待客户传 COS）：4 张主图（台灯/柳树/书包/笔袋）+ 4 张树状图 + 9 张局部图。完整提示词清单见 `image-prompts/README.md`。主图传到 `jingwu/<id>.png` 即生效；树状图需要我把代码切到图片渲染模式
+- 专题·静物：西瓜/菠萝等后续对象（comingSoon · 等文档题库）
+- 专题·人物 / 事件（available:false · 文档待产出）
+- 专题后续图片维护：图片提示词见 `image-prompts/README.md`；如重新生成主图或局部图，上传到 COS 对应路径后更新数据文件中的 `image` / `imageOverride`。
 - **K2-D1-04 题目内容缺失**：当前 archived，需要老师补 leftItems / rightItems 后去掉 archived
 - **魔法机器入口临时锁**（2026-05-17）：`index.html` 给 magicMachine 按钮加了 `data-coming-soon="1"` + `nav-coming-soon` class，`js/main.js` 拦截点击弹 Toast，视图代码 / 路由注册 / `views/magicMachine.js` 全部保留。恢复方法：去掉那一处属性 + class 即可
 - **API 密钥后端代理**（正式开放前必做）：comfly + itlsj 两个 key 当前明文在 `js/config.js`，前端可被 F12 抓取。方案：阿里云函数计算 FC 写两个代理函数（chat 代理 + vision 代理），key 只存 FC 环境变量，前端 `baseUrl` 切到 FC 域名。涉及文件：`views/magicMachine.js` / `views/topicCompose.js` / `js/config.js`
@@ -333,7 +333,7 @@ macaron-rose / lavender / mint / peach / sky / lemon / coral / lilac / teal / ch
 ## CSS Conventions
 - Default: full-width mobile layout
 - `@media (min-width: 768px)`: center `#app-shell` at `420px` card with shadow
-- `@media (min-width: 1024px)`: PC 桌面布局 — `#app-shell` 改为横向 flex，左侧 196px 竖向侧边栏(`#bottom-nav` 变形而来)+ 右侧 820px 内容卡片，背景光晕球放大。`<nav>` 在 DOM 里是 `#app` 兄弟节点，桌面用 `order: -1` 排到左侧。导航 JS 零改动。详见 [memory] feature_pc_layout
+- `@media (min-width: 1024px)`: **PC 桌面布局 v2.0（2026-06-15）** — `#app-shell` 改为横向 flex，左侧 196px 竖向侧边栏(`#bottom-nav` 变形而来)+ 右侧 820px 内容卡片（onboarding页面自动扩宽到1000px），背景光晕球放大。`<nav>` 在 DOM 里是 `#app` 兄弟节点，桌面用 `order: -1` 排到左侧。导航 JS 零改动。**训练营页面：基础训练2列网格布局（移除竖向闯关地图）、专题训练3列网格。onboarding页面：欢迎页IP+特性左右布局、表单页左右布局。马卡龙色系饱和度降低15-20%。** 详见 [memory] feature_pc_layout_v2
 - `@media (min-width: 1024px)` 答题页：`.topic-quiz-page` 用 CSS Grid 两栏(340px 图 + 1fr 内容)，图片框 sticky 固定 + aspect-ratio 4:3，做题时图常驻视野不滚走
 - `@media (min-width: 1024px) and (hover: hover)`：选项 / 卡片 / 按钮的克制悬停反馈(浮起 + 描边 + 阴影)，淡入切页过渡，`prefers-reduced-motion` 兜底
 ## State Management Pattern

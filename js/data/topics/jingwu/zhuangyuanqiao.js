@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────
  * 来源：0619 最新《感觉训练专题模块开发大纲（新6.0简版）612》DOCX 提取文本
  * 结构：单元模块化（schema: 'unit'）
- * 说明：无正式图片的对象使用临时占位图，后续上传 COS 后替换 image 即可。
+ * 图片：正式主图使用腾讯云 COS；局部题按 imageOverride 切换细节图。
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -14,8 +14,8 @@ export const ZHUANGYUANQIAO = {
   "title": "状元桥",
   "subtitle": "桥面 · 护栏 · 桥身 · 桥洞",
   "difficulty": 3,
-  "image": "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22900%22%20viewBox%3D%220%200%201200%20900%22%3E%0A%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23DCEBFF%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFFFFF%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%3Crect%20width%3D%221200%22%20height%3D%22900%22%20rx%3D%2272%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22250%22%20cy%3D%22210%22%20r%3D%22130%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.55%22/%3E%0A%20%20%3Ccircle%20cx%3D%22940%22%20cy%3D%22690%22%20r%3D%22170%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22410%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2272%22%20font-weight%3D%22700%22%20fill%3D%22%236B7280%22%3E%E7%8A%B6%E5%85%83%E6%A1%A5%3C/text%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%22500%22%20text-anchor%3D%22middle%22%20font-family%3D%22PingFang%20SC%2C%20Microsoft%20YaHei%2C%20sans-serif%22%20font-size%3D%2236%22%20fill%3D%22%239CA3AF%22%3E%E4%B8%B4%E6%97%B6%E5%8D%A0%E4%BD%8D%E5%9B%BE%20%C2%B7%20%E5%BE%85%E4%B8%8A%E4%BC%A0%E6%AD%A3%E5%BC%8F%E5%9B%BE%E7%89%87%3C/text%3E%0A%3C/svg%3E",
-  "imageAlt": "文瀛湖状元桥专题临时占位图，待上传正式图片",
+  "image": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao.png",
+  "imageAlt": "一座浅米白色单孔石拱桥，桥面有台阶，两侧石质护栏带小石狮，桥身下方有椭圆形拱状桥洞",
   "typeA": {
     "questions": [
       {
@@ -182,7 +182,9 @@ export const ZHUANGYUANQIAO = {
               "D": "栏柱顶端"
             },
             "correct": "D",
-            "hint": "石狮子统一雕刻、安置在每根栏柱的顶端。"
+            "hint": "石狮子统一雕刻、安置在每根栏柱的顶端。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-rail.png",
+            "imageOverrideAlt": "状元桥护栏与栏柱石狮子特写"
           },
           {
             "id": "TZ-JW-ZY-12",
@@ -196,7 +198,9 @@ export const ZHUANGYUANQIAO = {
               "D": "分段断裂"
             },
             "correct": "A",
-            "hint": "桥梁两侧护栏长长的，规整大气。"
+            "hint": "桥梁两侧护栏长长的，规整大气。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-rail.png",
+            "imageOverrideAlt": "状元桥长长石质护栏特写"
           },
           {
             "id": "TZ-JW-ZY-14",
@@ -210,7 +214,9 @@ export const ZHUANGYUANQIAO = {
               "D": "雕刻精致、造型生动"
             },
             "correct": "D",
-            "hint": "石狮子雕刻工艺细致，造型生动，是桥梁主要看点。"
+            "hint": "石狮子雕刻工艺细致，造型生动，是桥梁主要看点。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-rail.png",
+            "imageOverrideAlt": "状元桥栏柱石狮子雕刻特写"
           },
           {
             "id": "TZ-JW-ZY-15",
@@ -224,7 +230,9 @@ export const ZHUANGYUANQIAO = {
               "D": "大面积凹凸扎手"
             },
             "correct": "A",
-            "hint": "石雕纹路清晰，石材本身坚硬稳固。"
+            "hint": "石雕纹路清晰，石材本身坚硬稳固。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-rail.png",
+            "imageOverrideAlt": "状元桥石狮雕刻表面纹路特写"
           }
         ],
         "treeMap": {
@@ -332,7 +340,9 @@ export const ZHUANGYUANQIAO = {
               "D": "细长条状"
             },
             "correct": "C",
-            "hint": "单孔拱桥的桥洞呈现椭圆形拱状。"
+            "hint": "单孔拱桥的桥洞呈现椭圆形拱状。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-arch.png",
+            "imageOverrideAlt": "状元桥单孔石拱桥洞特写"
           },
           {
             "id": "TZ-JW-ZY-24",
@@ -346,7 +356,9 @@ export const ZHUANGYUANQIAO = {
               "D": "积蓄湖水，调节水域水位"
             },
             "correct": "B",
-            "hint": "桥梁修建在湖面之上，核心作用是连接两岸，方便行人往来通行。"
+            "hint": "桥梁修建在湖面之上，核心作用是连接两岸，方便行人往来通行。",
+            "imageOverride": "https://yanglaoshi-videos-1308089417.cos.ap-beijing.myqcloud.com/scenery/zhuangyuanqiao-arch.png",
+            "imageOverrideAlt": "状元桥桥身和桥洞连接两岸的特写"
           }
         ],
         "treeMap": {
