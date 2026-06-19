@@ -6,7 +6,7 @@
  *   1. 初始化路由系统
  *   2. 管理底部导航栏（通过 router 跳转）
  *   3. 注册全局工具函数（Toast 等）
- *   4. 页面加载后默认渲染"训练营"视图
+ *   4. 页面加载后默认渲染"模块首页"视图
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -73,11 +73,12 @@ window.__showToast = showToast;
 function initApp() {
   initNavigation();
 
-  // 新用户先走引导，老用户直接进训练营
+  // 新用户先走引导，老用户先进模块首页。
+  // 如需回退旧流程，把 moduleHome 改回 trainingCamp 即可。
   if (store.isNewUser()) {
     navigate('onboarding', {}, false);
   } else {
-    navigate('trainingCamp', {}, false);
+    navigate('moduleHome', {}, false);
   }
 
   console.log('%c感觉训练系统 v1.0.0 已启动 🌸', 'color:#A78BFA;font-weight:bold;font-size:14px;');

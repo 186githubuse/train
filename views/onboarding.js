@@ -7,7 +7,7 @@
  *   Step 1：欢迎页
  *   Step 2：注册 Tab / 登录 Tab
  *   Step 3（注册）：选择年级
- *   → 完成后保存到 store，跳转训练营
+ *   → 完成后保存到 store，跳转模块首页
  *
  * 上线改造说明：
  *   所有账号数据目前存 localStorage（store）。
@@ -168,7 +168,7 @@ function buildStep2HTML() {
     </div>
 
     <button class="ob-primary-btn ob-form-btn" id="ob-form-submit">
-      ${isReg ? '下一步，选年级' : '登录进入训练营'}
+      ${isReg ? '下一步，选年级' : '登录进入模块首页'}
     </button>
   </div>
 
@@ -200,7 +200,7 @@ function buildStep3HTML() {
 
   <button class="ob-primary-btn ${_grade === null ? 'ob-btn-disabled' : ''}"
           id="ob-finish" ${_grade === null ? 'disabled' : ''}>
-    进入训练营
+    进入模块首页
   </button>
 
   <div class="ob-dots">
@@ -269,13 +269,14 @@ function _doLogin(phone, password) {
   return { ok: true };
 }
 
-// ── 完成引导，进入训练营 ──
+// ── 完成引导，进入模块首页 ──
 
 function _enterApp(name) {
   const nav = document.getElementById('bottom-nav');
   if (nav) nav.style.display = '';
   window.__showToast(`欢迎你，${name}！训练开始咯 🌸`);
-  window.__router.navigate('trainingCamp', {}, false);
+  // 如需回退旧流程，把 moduleHome 改回 trainingCamp 即可。
+  window.__router.navigate('moduleHome', {}, false);
 }
 
 // ── 渲染 & 事件 ──────────────────────────────────────────────

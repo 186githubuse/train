@@ -18,8 +18,9 @@
    好处：初始加载快，后续按需加载
 ═══════════════════════════════════════════════════ */
 const VIEW_MAP = {
-  // ── 新手引导 ────────────────────────────────────
+  // ── 新手引导 / 模块首页 ─────────────────────────
   onboarding:    () => import('../views/onboarding.js').then(m => m.renderOnboarding),
+  moduleHome:    () => import('../views/moduleHome.js').then(m => m.renderModuleHome),
 
   // ── 底部导航栏视图 ──────────────────────────────
   trainingCamp:  () => import('../views/trainingCamp.js').then(m => m.renderTrainingCamp),
@@ -76,7 +77,7 @@ async function navigate(viewName, params = {}, pushHistory = true) {
 
   // 非训练营视图：清空顶部 header（训练进度只在训练营显示）
   // lessonDetail / quiz 会自己写入 header，不能隐藏
-  const viewsWithHeader = ['trainingCamp', 'lessonDetail', 'quiz', 'topicDetail', 'topicQuiz', 'topicCompose'];
+  const viewsWithHeader = ['moduleHome', 'trainingCamp', 'lessonDetail', 'quiz', 'topicDetail', 'topicQuiz', 'topicCompose'];
   const header = document.getElementById('app-header');
   if (header) {
     if (viewsWithHeader.includes(viewName)) {
@@ -106,11 +107,11 @@ async function navigate(viewName, params = {}, pushHistory = true) {
 
 /**
  * 返回上一个视图
- * 若无历史则返回训练营首页
+ * 若无历史则返回模块首页
  */
 async function goBack() {
   if (_history.length === 0) {
-    navigate('trainingCamp', {}, false);
+    navigate('moduleHome', {}, false);
     return;
   }
   const prev = _history.pop();
