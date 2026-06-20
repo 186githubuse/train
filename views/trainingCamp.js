@@ -269,6 +269,9 @@ function renderTopics() {
   return `
     <div class="topic-entry-page">
       <div class="topic-breadcrumb" aria-label="当前位置">
+        <button class="topic-back-home-btn" data-action="back-module-home" aria-label="返回模块首页">
+          <ph-arrow-left weight="bold" size="23" color="#6B7280"></ph-arrow-left>
+        </button>
         <span>感觉训练</span>
         <ph-caret-right weight="bold" size="12" color="rgba(107,95,199,0.55)"></ph-caret-right>
         <strong>选择专题</strong>
@@ -381,6 +384,9 @@ export function renderTrainingCamp() {
   /* 根据 Tab 渲染内容 */
   if (_activeTab === 'topic') {
     content.innerHTML = renderTopics();
+    content.querySelector('[data-action="back-module-home"]')?.addEventListener('click', () => {
+      window.__router.navigate('moduleHome');
+    });
     /* 专题卡点击：可用的进入详情页 */
     content.querySelectorAll('.topic-card-clickable').forEach(card => {
       card.addEventListener('click', () => {
