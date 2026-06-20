@@ -21,7 +21,12 @@ function countQuestions(sub) {
   return { choiceCount: a + b + c, tD: sub.typeD ? 1 : 0 };
 }
 
+function getTopicLabel(topic) {
+  return topic.title.replace('训练', '');
+}
+
 function renderHeader(topic) {
+  const label = getTopicLabel(topic);
   return `
     <div class="lesson-detail-header">
       <button class="back-btn" data-action="go-back" aria-label="返回">
@@ -33,6 +38,11 @@ function renderHeader(topic) {
       </button>
       <div class="lesson-detail-title">
         <div>
+          <div class="topic-detail-crumb">
+            <span>感觉训练</span>
+            <ph-caret-right weight="bold" size="11" color="rgba(156,163,175,0.78)"></ph-caret-right>
+            <span>${label}</span>
+          </div>
           <h1 class="text-[18px] font-black text-gray-800 leading-tight">
             ${topic.title}
           </h1>
@@ -118,6 +128,7 @@ export function renderTopicDetail(params = {}) {
 }
 
 function renderIntroPhase(topic, topicId, content, header) {
+  const label = getTopicLabel(topic);
   const points = topic.intro.points.map((p, i) => `
     <div class="key-point-item" style="animation-delay: ${i * 80}ms">
       <div class="key-point-index">${i + 1}</div>
@@ -150,7 +161,7 @@ function renderIntroPhase(topic, topicId, content, header) {
         </div>
       </div>
       <button class="topic-start-btn ${topic.colorClass}" id="topic-start-btn">
-        <span class="topic-start-btn-text">选择${topic.title.replace('训练', '')}开始答题</span>
+        <span class="topic-start-btn-text">选择${label}开始答题</span>
         <svg class="topic-start-btn-arrow" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5"
              stroke-linecap="round" stroke-linejoin="round">
@@ -171,6 +182,7 @@ function renderIntroPhase(topic, topicId, content, header) {
 }
 
 function renderListPhase(topic, topicId, content, header) {
+  const label = getTopicLabel(topic);
   const cards = topic.subs.map((sub, i) => renderSubCard(sub, topic, i)).join('');
 
   content.innerHTML = `
@@ -179,7 +191,7 @@ function renderListPhase(topic, topicId, content, header) {
         <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.95)"></ph-${topic.icon}>
         <div>
           <h2 class="text-white font-black text-[18px] leading-tight">
-            选择一个${topic.title.replace('训练', '')}
+            选择一个${label}
           </h2>
           <p class="text-white/80 text-[12px] mt-1 leading-relaxed">
             共 ${topic.subs.length} 个子内容，由浅入深逐步练习

@@ -183,37 +183,79 @@ function renderLockedCard(lesson, index) {
     </div>`;
 }
 
+function getTopicLabel(topic) {
+  return topic.title.replace('训练', '');
+}
+
+function getTopicPreviewItems(topic) {
+  return (topic.subs || [])
+    .filter(sub => !sub.comingSoon)
+    .slice(0, 3)
+    .map(sub => ({
+      title: sub.title,
+      image: sub.image,
+      imageAlt: sub.imageAlt || sub.title,
+    }));
+}
+
 /**
  * 渲染专题训练内容
  */
 function renderTopics() {
   const cards = TOPICS.map(topic => {
     const clickable = topic.available;
+    const label = getTopicLabel(topic);
+    const previewItems = getTopicPreviewItems(topic);
+    const safePreviewItems = previewItems.length ? previewItems : [{ title: label, image: '', imageAlt: label }];
     const attrs = clickable
       ? `role="button" tabindex="0" data-topic-id="${topic.id}"`
       : 'aria-disabled="true"';
     const badge = clickable
       ? `<span class="topic-available-badge">${topic.subs.filter(s => !s.comingSoon).length} 个子内容</span>`
-      : '<span class="topic-coming-badge">即将上线</span>';
+      : '<span class="topic-coming-badge">敬请期待</span>';
     const clsExtra = clickable ? 'topic-card-clickable' : 'topic-card-locked';
+    const preview = clickable
+      ? `
+        <div class="topic-preview" aria-label="${label}对象预览">
+          ${safePreviewItems.map(item => `
+            <div class="topic-preview-item">
+              <div class="topic-preview-thumb">
+                ${item.image ? `<img src="${item.image}" alt="${item.imageAlt}" loading="lazy">` : `<ph-sparkle weight="fill" size="16" color="rgba(255,255,255,0.9)"></ph-sparkle>`}
+              </div>
+              <span>${item.title}</span>
+            </div>
+          `).join('')}
+        </div>`
+      : `
+        <div class="topic-preview topic-preview-locked" aria-hidden="true">
+          <div class="topic-preview-item">
+            <div class="topic-preview-thumb topic-preview-thumb-placeholder">
+              <ph-lock-key weight="fill" size="16" color="rgba(255,255,255,0.75)"></ph-lock-key>
+            </div>
+            <span>内容筹备中</span>
+          </div>
+        </div>`;
 
     return `
       <div class="topic-card ${topic.colorClass} ${clsExtra} rounded-[2rem] p-5"
            ${attrs}
-           aria-label="${topic.title}${clickable ? '' : '，即将上线'}">
-        <div class="flex items-center justify-between mb-3">
-          <ph-${topic.icon} weight="fill" size="36" color="rgba(255,255,255,0.9)"></ph-${topic.icon}>
+           aria-label="${label}${clickable ? '' : '，敬请期待'}">
+        <div class="topic-card-top">
+          <div class="topic-card-icon-badge">
+            <ph-${topic.icon} weight="fill" size="28" color="rgba(255,255,255,0.95)"></ph-${topic.icon}>
+          </div>
           ${badge}
         </div>
         <h3 class="text-white font-black text-[18px] leading-snug drop-shadow-sm">
-          ${topic.title}
+          ${label}
         </h3>
         <p class="text-white/75 text-[12px] mt-1 leading-relaxed">
           ${topic.subtitle}
         </p>
+        ${preview}
         ${clickable ? `
-          <div class="mt-3 flex items-center justify-end text-white/90 text-[12px] font-semibold gap-1">
-            <span>进入</span>
+          <div class="topic-card-enter">
+            <span>进入专题</span>
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2.5"
                  stroke-linecap="round" stroke-linejoin="round">
@@ -224,7 +266,15 @@ function renderTopics() {
       </div>`;
   }).join('');
 
-  return `<div class="topic-grid">${cards}</div>`;
+  return `
+    <div class="topic-entry-page">
+      <div class="topic-breadcrumb" aria-label="当前位置">
+        <span>感觉训练</span>
+        <ph-caret-right weight="bold" size="12" color="rgba(107,95,199,0.55)"></ph-caret-right>
+        <strong>选择专题</strong>
+      </div>
+      <div class="topic-grid">${cards}</div>
+    </div>`;
 }
 
 /**
