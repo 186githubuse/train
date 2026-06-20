@@ -20,7 +20,7 @@
 }
 
 .topic-breadcrumb {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 6px;
   margin: 0 0 14px;
@@ -62,7 +62,7 @@
 }
 
 .topic-preview {
-  display: grid;
+  display: none;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
   margin-top: 14px;
@@ -138,7 +138,7 @@
 }
 
 .topic-detail-crumb {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 4px;
   margin-bottom: 2px;
@@ -1198,6 +1198,18 @@
 @media (min-width: 1024px) {
   .topic-entry-page {
     padding: 22px 0 32px;
+  }
+
+  .topic-breadcrumb {
+    display: inline-flex;
+  }
+
+  .topic-detail-crumb {
+    display: flex;
+  }
+
+  .topic-preview {
+    display: grid;
   }
 
   .topic-grid {
