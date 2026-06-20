@@ -172,7 +172,7 @@ function renderIntroPhase(topic, topicId, content, header) {
 
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="go-back"]')) {
-      window.__router.goBack();
+      window.__router.navigate('trainingCamp', { tab: 'topic' });
     }
   });
 
@@ -203,7 +203,7 @@ function renderListPhase(topic, topicId, content, header) {
 
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="go-back"]')) {
-      window.__router.goBack();
+      window.__router.navigate('trainingCamp', { tab: 'topic' });
     }
   });
 

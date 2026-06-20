@@ -180,8 +180,8 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  min-height: 142px;
-  padding: 17px;
+  min-height: 118px;
+  padding: 16px;
   border: 0;
   border-radius: 24px;
   overflow: hidden;
@@ -202,7 +202,7 @@
 }
 
 .mh-module-hero {
-  min-height: 228px;
+  min-height: 188px;
   box-shadow:
     0 12px 36px rgba(0, 0, 0, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.62);
@@ -253,17 +253,17 @@
 
 .mh-module-title {
   display: block;
-  margin-top: 12px;
+  margin-top: 10px;
   color: #fff;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.2;
   font-weight: 900;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .mh-module-hero .mh-module-title {
-  margin-top: 15px;
-  font-size: 25px;
+  margin-top: 13px;
+  font-size: 23px;
 }
 
 .mh-module-desc {
@@ -280,7 +280,7 @@
   gap: 7px;
   flex-wrap: wrap;
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 12px;
 }
 
 .mh-module-tags span {
@@ -297,7 +297,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-top: 14px;
+  margin-top: 12px;
   padding: 9px 20px;
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.92);

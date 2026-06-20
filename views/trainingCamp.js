@@ -187,17 +187,6 @@ function getTopicLabel(topic) {
   return topic.title.replace('训练', '');
 }
 
-function getTopicPreviewItems(topic) {
-  return (topic.subs || [])
-    .filter(sub => !sub.comingSoon)
-    .slice(0, 3)
-    .map(sub => ({
-      title: sub.title,
-      image: sub.image,
-      imageAlt: sub.imageAlt || sub.title,
-    }));
-}
-
 /**
  * 渲染专题训练内容
  */
@@ -205,8 +194,6 @@ function renderTopics() {
   const cards = TOPICS.map(topic => {
     const clickable = topic.available;
     const label = getTopicLabel(topic);
-    const previewItems = getTopicPreviewItems(topic);
-    const safePreviewItems = previewItems.length ? previewItems : [{ title: label, image: '', imageAlt: label }];
     const attrs = clickable
       ? `role="button" tabindex="0" data-topic-id="${topic.id}"`
       : 'aria-disabled="true"';
@@ -214,27 +201,6 @@ function renderTopics() {
       ? `<span class="topic-available-badge">${topic.subs.filter(s => !s.comingSoon).length} 个子内容</span>`
       : '<span class="topic-coming-badge">敬请期待</span>';
     const clsExtra = clickable ? 'topic-card-clickable' : 'topic-card-locked';
-    const preview = clickable
-      ? `
-        <div class="topic-preview" aria-label="${label}对象预览">
-          ${safePreviewItems.map(item => `
-            <div class="topic-preview-item">
-              <div class="topic-preview-thumb">
-                ${item.image ? `<img src="${item.image}" alt="${item.imageAlt}" loading="lazy">` : `<ph-sparkle weight="fill" size="16" color="rgba(255,255,255,0.9)"></ph-sparkle>`}
-              </div>
-              <span>${item.title}</span>
-            </div>
-          `).join('')}
-        </div>`
-      : `
-        <div class="topic-preview topic-preview-locked" aria-hidden="true">
-          <div class="topic-preview-item">
-            <div class="topic-preview-thumb topic-preview-thumb-placeholder">
-              <ph-lock-key weight="fill" size="16" color="rgba(255,255,255,0.75)"></ph-lock-key>
-            </div>
-            <span>内容筹备中</span>
-          </div>
-        </div>`;
 
     return `
       <div class="topic-card ${topic.colorClass} ${clsExtra} rounded-[2rem] p-5"
@@ -252,7 +218,6 @@ function renderTopics() {
         <p class="text-white/75 text-[12px] mt-1 leading-relaxed">
           ${topic.subtitle}
         </p>
-        ${preview}
         ${clickable ? `
           <div class="topic-card-enter">
             <span>进入专题</span>
@@ -268,14 +233,6 @@ function renderTopics() {
 
   return `
     <div class="topic-entry-page">
-      <div class="topic-breadcrumb" aria-label="当前位置">
-        <button class="topic-back-home-btn" data-action="back-module-home" aria-label="返回模块首页">
-          <ph-arrow-left weight="bold" size="23" color="#6B7280"></ph-arrow-left>
-        </button>
-        <span>感觉训练</span>
-        <ph-caret-right weight="bold" size="12" color="rgba(107,95,199,0.55)"></ph-caret-right>
-        <strong>选择专题</strong>
-      </div>
       <div class="topic-grid">${cards}</div>
     </div>`;
 }
@@ -304,8 +261,11 @@ function renderHeader() {
 
   return `
     <!-- 欢迎语 -->
-    <div class="flex items-center justify-between mb-4">
-      <div>
+    <div class="tc-header-row">
+      <button class="tc-back-home-btn" data-action="back-module-home" aria-label="返回模块首页">
+        <ph-arrow-left weight="bold" size="22" color="#6B7280"></ph-arrow-left>
+      </button>
+      <div class="tc-header-copy">
         <p class="text-[13px] text-gray-400 font-medium">欢迎回来 👋</p>
         <h1 class="text-[22px] font-black text-gray-800 leading-tight mt-0.5">
           训练营
@@ -363,12 +323,21 @@ function renderHeader() {
  * 渲染训练营视图
  * 将 Header 注入 #app-header，将关卡地图注入 #app-content
  */
-export function renderTrainingCamp() {
+export function renderTrainingCamp(params = {}) {
+  if (params.tab === 'topic' || params.tab === 'basic') {
+    _activeTab = params.tab;
+  }
+
   const header  = document.getElementById('app-header');
   const content = document.getElementById('app-content');
 
   /* 注入 Header */
   header.innerHTML = renderHeader();
+
+  /* 返回模块首页（桌面端显示，移动端 CSS 隐藏） */
+  header.querySelector('[data-action="back-module-home"]')?.addEventListener('click', () => {
+    window.__router.navigate('moduleHome');
+  });
 
   /* 头像点击 → 用户信息弹窗 */
   document.getElementById('tc-avatar-btn')?.addEventListener('click', showProfilePanel);
@@ -384,9 +353,6 @@ export function renderTrainingCamp() {
   /* 根据 Tab 渲染内容 */
   if (_activeTab === 'topic') {
     content.innerHTML = renderTopics();
-    content.querySelector('[data-action="back-module-home"]')?.addEventListener('click', () => {
-      window.__router.navigate('moduleHome');
-    });
     /* 专题卡点击：可用的进入详情页 */
     content.querySelectorAll('.topic-card-clickable').forEach(card => {
       card.addEventListener('click', () => {

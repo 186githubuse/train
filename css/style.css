@@ -73,36 +73,36 @@ body {
   50%       { transform: translateY(-22px) scale(1.06); }
 }
 
-/* ===== 4. 马卡龙渐变色系（保留用于关卡大卡片） ===== */
+/* ===== 4. 马卡龙渐变色系（柔和版，降低饱和度，适合大屏显示） ===== */
 .macaron-rose {
-  background: linear-gradient(140deg, #FFB7C5 0%, #FF8FAE 55%, #FF6E9A 100%);
+  background: linear-gradient(140deg, #FFC5D1 0%, #FFAAC2 55%, #FF8FB0 100%);
 }
 .macaron-lavender {
-  background: linear-gradient(140deg, #CAB8FF 0%, #A99CFF 55%, #8B7EFF 100%);
+  background: linear-gradient(140deg, #D5C8FF 0%, #B9AAFF 55%, #A091FF 100%);
 }
 .macaron-mint {
-  background: linear-gradient(140deg, #A6F0C4 0%, #78E4A5 55%, #52D888 100%);
+  background: linear-gradient(140deg, #B8F3D1 0%, #8FE9B5 55%, #6EDE9D 100%);
 }
 .macaron-peach {
-  background: linear-gradient(140deg, #FFD4A6 0%, #FFB876 55%, #FF9E50 100%);
+  background: linear-gradient(140deg, #FFDDB8 0%, #FFC78F 55%, #FFB370 100%);
 }
 .macaron-sky {
-  background: linear-gradient(140deg, #A6D8FF 0%, #76BEFF 55%, #50A8FF 100%);
+  background: linear-gradient(140deg, #B8E0FF 0%, #8FCDFF 55%, #70BAFF 100%);
 }
 .macaron-lemon {
-  background: linear-gradient(140deg, #FFF6A6 0%, #FFEC76 55%, #FFE050 100%);
+  background: linear-gradient(140deg, #FFF8B8 0%, #FFF08F 55%, #FFEA70 100%);
 }
 .macaron-coral {
-  background: linear-gradient(140deg, #FFB8A8 0%, #FF8F78 55%, #FF6E58 100%);
+  background: linear-gradient(140deg, #FFC5B8 0%, #FFAA9D 55%, #FF8F7E 100%);
 }
 .macaron-lilac {
-  background: linear-gradient(140deg, #DFA8FF 0%, #C478FF 55%, #AA54FF 100%);
+  background: linear-gradient(140deg, #E6B8FF 0%, #D08FFF 55%, #BD70FF 100%);
 }
 .macaron-teal {
-  background: linear-gradient(140deg, #A6EEFA 0%, #76DCED 55%, #50C8D8 100%);
+  background: linear-gradient(140deg, #B8F3FA 0%, #8FE9F0 55%, #70DEEA 100%);
 }
 .macaron-cherry {
-  background: linear-gradient(140deg, #FFB8D6 0%, #FF78AA 55%, #FF5095 100%);
+  background: linear-gradient(140deg, #FFB8DA 0%, #FF8FC8 55%, #FF70B5 100%);
 }
 
 /* ===== 5. 液态玻璃卡片 ===== */
@@ -385,14 +385,14 @@ body {
 /* ===== 17. 总进度卡片 ===== */
 .overall-progress-card {
   background: linear-gradient(135deg,
-    rgba(167, 139, 250, 0.78) 0%,
-    rgba(236, 72, 153, 0.68) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.50);
+    rgba(167, 139, 250, 0.68) 0%,
+    rgba(236, 72, 153, 0.58) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.60);
   box-shadow:
-    0 8px 30px rgba(139, 92, 246, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 10px 36px rgba(139, 92, 246, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.50);
 }
 
 /* ===== 18. iOS 26 液态玻璃图标（通用）===== */
@@ -744,6 +744,21 @@ body {
   .bg-orb-3 { width: 140px; height: 140px; }
 }
 
+/* ===== iPad 中等屏适配（768px-1023px）===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* 专题网格：2列保持，但增大间距 */
+  .topic-grid {
+    gap: 16px;
+    padding: 20px 0 100px;
+  }
+
+  /* 基础训练保持竖向地图，但居中显示 */
+  .lesson-map {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
 @media (min-width: 1024px) {
   /* ===== PC 桌面布局：左侧竖向导航栏 + 右侧 820px 内容卡片 =====
      仅 ≥1024px 生效；移动端 / 平板（<1024）完全保持原样。
@@ -867,6 +882,80 @@ body {
   .bg-orb-1 { width: 420px; height: 420px; }
   .bg-orb-2 { width: 340px; height: 340px; }
   .bg-orb-3 { width: 280px; height: 280px; }
+
+  /* ===== PC 横屏布局优化：基础训练 2 列网格 + 专题训练 3 列网格 ===== */
+
+  /* 基础训练：2列网格布局 */
+  .lesson-map {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 24px 0 32px;
+  }
+
+  /* 移除移动端的锯齿偏移和路径连接符 */
+  .lesson-card-wrap {
+    margin: 0 !important;
+  }
+  .lesson-card-wrap.mr-6,
+  .lesson-card-wrap.ml-6 {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+  }
+  .path-connector {
+    display: none;
+  }
+
+  /* 放大卡片内容 */
+  .lesson-card-unlocked,
+  .lesson-card-locked {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .lesson-card-unlocked h3,
+  .lesson-card-locked h3 {
+    font-size: 19px;
+  }
+
+  .lesson-card-unlocked p,
+  .lesson-card-locked p {
+    font-size: 13px;
+  }
+
+  /* 增强阴影深度 */
+  .lesson-card-unlocked {
+    box-shadow:
+      0 12px 42px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+
+  /* 按钮放大 */
+  .btn-start {
+    padding: 9px 22px;
+    font-size: 13px;
+  }
+
+  /* 专题训练：3列网格 */
+  .topic-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding: 24px 0 32px;
+  }
+
+  /* 放大专题卡片 */
+  .topic-card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .topic-card h3 {
+    font-size: 19px;
+  }
+
+  .topic-card p {
+    font-size: 13px;
+  }
 }
 
 /* 超宽屏：略微再放大内容卡片上限 */
@@ -908,9 +997,15 @@ body {
 /* ===== 专题训练网格 ===== */
 .topic-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   padding: 16px 16px 100px;
+}
+
+@media (min-width: 768px) {
+  .topic-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .topic-card {

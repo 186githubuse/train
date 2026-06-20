@@ -22,26 +22,39 @@
 .topic-breadcrumb {
   display: none;
   align-items: center;
-  gap: 16px;
-  margin: 0 0 20px;
-  padding: 18px 20px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.52);
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(18px);
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
   color: rgba(107, 95, 199, 0.72);
-  font-size: 15px;
-  font-weight: 800;
-  box-shadow: 0 8px 28px rgba(139, 92, 246, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.08);
 }
 
-.topic-back-home-btn {
-  width: 54px;
-  height: 54px;
+.tc-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tc-header-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.tc-back-home-btn {
   display: inline-flex;
+  width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  border-radius: 19px;
+  border-radius: 17px;
   border: 1px solid rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 6px 18px rgba(139, 92, 246, 0.10);
@@ -50,13 +63,13 @@
   transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.topic-back-home-btn:hover {
+.tc-back-home-btn:hover {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 24px rgba(139, 92, 246, 0.14);
 }
 
-.topic-back-home-btn:active {
+.tc-back-home-btn:active {
   transform: translateY(0) scale(0.96);
 }
 
@@ -189,6 +202,10 @@
 }
 
 .topic-available-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.45);
@@ -1221,6 +1238,10 @@
    移动端 / 平板（<1024）保持原来的"图在上、题在下"单栏
    ═══════════════════════════════════════════════════════════════ */
 @media (min-width: 1024px) {
+  .tc-back-home-btn {
+    display: inline-flex;
+  }
+
   .topic-entry-page {
     padding: 22px 0 32px;
   }
