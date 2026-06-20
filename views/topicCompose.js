@@ -345,7 +345,7 @@ export function renderTopicCompose(params = {}) {
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="back"]')) {
       stopSpeaking();
-      window.__router.navigate('topicDetail', { topicId });
+      window.__router.navigate('topicDetail', { topicId, phase: 'list' });
     }
   });
 
@@ -492,7 +492,7 @@ async function submitForGrading(text) {
     });
     document.getElementById('tc-done-btn')?.addEventListener('click', () => {
       stopSpeaking();
-      window.__router.navigate('topicDetail', { topicId: _topic.id });
+      window.__router.navigate('topicDetail', { topicId: _topic.id, phase: 'list' });
     });
   } catch (err) {
     console.error('[topicCompose] grading failed', err);

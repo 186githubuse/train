@@ -737,7 +737,7 @@ export function renderTopicQuiz(params = {}) {
   header.addEventListener('click', e => {
     if (e.target.closest('[data-action="quit"]')) {
       stopSpeaking();
-      window.__router.goBack();
+      window.__router.navigate('topicDetail', { topicId: _topic.id, phase: 'list' });
     }
   });
 
