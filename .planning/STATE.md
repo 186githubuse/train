@@ -33,8 +33,9 @@ None — project initialized, ready to plan Phase 1.
 | 260620-fil | 专题选择页横版强化、竖版保持轻量 | 2026-06-20 | 87f3405 | [260620-fil-1024px-topicdetail-css-css-js](./quick/260620-fil-1024px-topicdetail-css-css-js/) |
 | 260620-fqs | 横版专题选择页新增返回模块首页按钮 | 2026-06-20 | 1bfd0f6 | [260620-fqs-trainingcamp-topic-entry-mockup-moduleho](./quick/260620-fqs-trainingcamp-topic-entry-mockup-moduleho/) |
 | 260629-gkb | 创建《后台数据库 V1 实施方案》文档，包含 V1 功能范围、暂不做内容、数据库表结构、API 接口、前端 localStorage 兼容同步策略、后台页面结构、ECS 部署方案和开发顺序。 | 2026-06-29 | e375955 | [260629-gkb-v1-v1-api-localstorage-ecs](./quick/260629-gkb-v1-v1-api-localstorage-ecs/) |
+| 260629-jgo | 实现后台数据库 V1 第一阶段：新增 Node.js 后端骨架、MySQL schema、环境变量示例、健康检查接口和基础 README。 | 2026-06-29 | 3a4811a | [260629-jgo-v1-docs-backend-database-v1-implementati](./quick/260629-jgo-v1-docs-backend-database-v1-implementati/) |
 
-Last activity: 2026-06-29 - Completed quick task 260629-gkb: 创建《后台数据库 V1 实施方案》文档。
+Last activity: 2026-06-29 - Completed quick task 260629-jgo: 实现后台数据库 V1 第一阶段。
 
 ## Decisions Log
 (empty — populated during execution)
