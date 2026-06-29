@@ -26,11 +26,12 @@ async function checkDatabase() {
 
   try {
     const activePool = getPool();
-    await activePool.query('SELECT 1 AS ok');
+    const [rows] = await activePool.query('SELECT DATABASE() AS databaseName');
 
     return {
       status: 'up',
       detail: 'connection_ok',
+      databaseName: rows[0] ? rows[0].databaseName : env.mysql.database,
     };
   } catch (error) {
     return {
