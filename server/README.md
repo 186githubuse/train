@@ -26,8 +26,14 @@ Explicit non-goals for this stage:
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 16+ for the current backend code
 - MySQL 8 (optional for schema application; not required for syntax verification)
+
+### Current ECS note
+
+The existing `train.tybqcloud.com` ECS is CentOS 7 / glibc 2.17. NodeSource RPM packages for Node.js 20 require `glibc >= 2.28`, so they cannot be installed safely on this host.
+
+For this ECS, use **Node.js 16.20.2 via nvm** as a transition deployment target. Do not upgrade system `glibc` to force Node.js 20; that can break the server. Long term, migrate the backend to a newer OS such as Alibaba Cloud Linux 3, Ubuntu 22.04+, Debian 12, or another host that supports Node.js 20+ cleanly.
 
 ## Setup
 
